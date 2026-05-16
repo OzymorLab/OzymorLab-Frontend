@@ -1,320 +1,221 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { UploadCloud, CheckCircle2, AlertTriangle, FileText, Activity, BrainCircuit, Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import {
+  Shield, Brain, Eye, BarChart3, Users, Zap,
+  ChevronRight, ArrowRight, FileText, GitBranch, Layers,
+  CheckCircle2, Star, Sparkles
+} from "lucide-react";
 
-const API_BASE = "http://localhost:8000/api/v1";
-
-// Types
-interface Submission {
-  id: string;
-  student_id: string;
-  file_name: string;
-  status: string;
-  created_at: string;
-}
-
-interface GradeDetail {
-  grade: number;
-  max_grade: number;
-  confidence: number;
-  step_grades: Array<{
-    step_num: number;
-    awarded: number;
-    max: number;
-    justification: string;
-    is_correct: boolean;
-    step_type: string;
-  }>;
-  latency_ms: number;
-  model_used: string;
-}
-
-export default function DashboardPage() {
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
-  const [selectedSub, setSelectedSub] = useState<Submission | null>(null);
-  const [gradeDetail, setGradeDetail] = useState<GradeDetail | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-
-  // Fetch Submissions on load
-  const fetchSubmissions = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/submissions`);
-      const json = await res.json();
-      if (json.data) {
-        setSubmissions(json.data);
-      }
-    } catch (e) {
-      console.error("Failed to fetch submissions", e);
-    }
-  };
-
-  useEffect(() => {
-    fetchSubmissions();
-    const interval = setInterval(fetchSubmissions, 5000); // Poll every 5s
-    return () => clearInterval(interval);
-  }, []);
-
-  // Fetch Grade Detail when a row is clicked
-  useEffect(() => {
-    if (selectedSub && selectedSub.status === "GRADED") {
-      fetch(`${API_BASE}/submissions/${selectedSub.id}/grade`)
-        .then(res => res.json())
-        .then(json => {
-          if (json.data) setGradeDetail(json.data);
-        })
-        .catch(e => console.error("Grade fetch failed", e));
-    } else {
-      setGradeDetail(null);
-    }
-  }, [selectedSub]);
-
-  // Handle File Upload
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    // Hardcoding a task_id and student_id for MVP
-    formData.append("task_id", "00000000-0000-0000-0000-000000000000"); // Assuming standard test task
-    formData.append("student_id", "STUDENT-" + Math.floor(Math.random() * 1000));
-
-    try {
-      await fetch(`${API_BASE}/submissions`, {
-        method: "POST",
-        body: formData,
-      });
-      fetchSubmissions();
-    } catch (e) {
-      console.error("Upload failed", e);
-    } finally {
-      setIsUploading(false);
-      e.target.value = ''; // Reset
-    }
-  };
+export default function LandingPage() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   return (
-    <>
-      <div className="flex-between mb-6">
-        <div>
-          <h1 className="text-[22px] font-medium text-text-primary">Live Evaluation Engine</h1>
-          <p className="text-[13px] text-text-tertiary mt-1">Real-time asynchronous assessment queue</p>
-        </div>
-        <div className="filter-row">
-          <div className="filter-chip active">All Students</div>
-          <div className="filter-chip">Needs Review</div>
-          <div className="filter-chip">Processing</div>
-        </div>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-label">Total Processed</div>
-          <div className="stat-value">{submissions.filter(s => s.status === 'GRADED').length}</div>
-          <div className="stat-delta positive">Live updating</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">In Queue</div>
-          <div className="stat-value">{submissions.filter(s => s.status !== 'GRADED').length}</div>
-          <div className="stat-delta warning">Processing...</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">Avg System Latency</div>
-          <div className="stat-value">1.4s</div>
-          <div className="stat-delta">per PDF submission</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">Drift Alerts</div>
-          <div className="stat-value">0</div>
-          <div className="stat-delta positive">No rubric drift</div>
-        </div>
-      </div>
-
-      <div className="dashboard-grid">
-        {/* Left Col: Main Data Table */}
-        <div className="card flex flex-col">
-          <div className="card-header">
-            <div className="card-title">
-              <FileText className="card-title-icon" />
-              Submission Queue
-            </div>
-            <button className="btn btn-icon-only text-text-tertiary"><Search size={14}/></button>
+    <div className={`landing-page ${mounted ? "is-visible" : ""}`}>
+      {/* ── Navigation ── */}
+      <nav className="landing-nav">
+        <div className="landing-nav-inner">
+          <div className="landing-logo">
+            <div className="logo-mark">Ex</div>
           </div>
-          
-          <div className="overflow-x-auto flex-1">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Student ID</th>
-                  <th>Filename</th>
-                  <th>Status</th>
-                  <th>Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                {submissions.map((sub) => (
-                  <tr key={sub.id} onClick={() => setSelectedSub(sub)}>
-                    <td className="col-primary font-mono text-[12px]">{sub.student_id}</td>
-                    <td className="text-[12px] max-w-[150px] truncate">{sub.file_name}</td>
-                    <td>
-                      {sub.status === "GRADED" && <span className="pill pill-success"><div className="pill-dot"/>Graded</span>}
-                      {sub.status === "FAILED" && <span className="pill pill-danger"><div className="pill-dot"/>Failed</span>}
-                      {sub.status !== "GRADED" && sub.status !== "FAILED" && <span className="pill pill-info"><div className="pill-dot"/>{sub.status}</span>}
-                    </td>
-                    <td className="text-[11px]">{new Date(sub.created_at).toLocaleTimeString()}</td>
-                  </tr>
-                ))}
-                {submissions.length === 0 && (
-                  <tr><td colSpan={4} className="text-center py-8 text-text-tertiary">No submissions found. Drop a PDF to begin!</td></tr>
-                )}
-              </tbody>
-            </table>
+          <div className="landing-nav-links">
+            <a href="#features">Features</a>
+            <a href="#pipelines">Architecture</a>
+            <a href="#stats">Impact</a>
+          </div>
+          <div className="landing-nav-actions">
+            <Link href="/login" className="btn">Sign In</Link>
+            <Link href="/login?tab=signup" className="btn btn-brand">Get Started <ArrowRight size={14} /></Link>
           </div>
         </div>
+      </nav>
 
-        {/* Right Rail */}
-        <div className="right-rail">
-          {/* Upload Zone */}
-          <div className="relative">
-            <input 
-              type="file" 
-              accept=".pdf,.jpg,.jpeg,.png"
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
-              onChange={handleUpload}
-              disabled={isUploading}
-            />
-            <div className={`upload-zone ${isUploading ? 'bg-surface-secondary' : ''}`}>
-              {isUploading ? (
-                <>
-                  <Activity className="upload-icon mx-auto animate-pulse" />
-                  <div className="upload-title">Uploading to S3...</div>
-                </>
-              ) : (
-                <>
-                  <UploadCloud className="upload-icon mx-auto" />
-                  <div className="upload-title">Drop answer sheets here</div>
-                  <div className="upload-subtitle">or <em>browse files</em> (PDF, JPG)</div>
-                </>
-              )}
-            </div>
+      {/* ── Hero ── */}
+      <section className="hero-section">
+        <div className="hero-badge">
+          <Sparkles size={14} />
+          AI-Powered Multimodal Evaluation
+        </div>
+        <h1 className="hero-title">
+          The Future of<br />
+          <span className="hero-gradient">Board Examination</span><br />
+          Assessment
+        </h1>
+        <p className="hero-subtitle">
+          Rubric-grounded, explainable, component-wise evaluation infrastructure
+          for CBSE, ICSE, State Boards, and Competitive Examinations.
+          Built for millions of answer sheets.
+        </p>
+        <div className="hero-actions">
+          <Link href="/login?tab=signup" className="btn btn-brand btn-lg">
+            Start Evaluating <ArrowRight size={16} />
+          </Link>
+          <Link href="#features" className="btn btn-lg">
+            See How It Works <ChevronRight size={16} />
+          </Link>
+        </div>
+
+        {/* Animated pipeline visualization */}
+        <div className="hero-pipeline">
+          <div className="pipeline-node pipeline-node-1">
+            <FileText size={20} />
+            <span>Answer Sheet</span>
           </div>
-
-          {/* Reliability Signals */}
-          <div className="card">
-            <div className="card-header">
-              <div className="card-title">
-                <Activity className="card-title-icon" />
-                Live Engine Status
-              </div>
-            </div>
-            <div className="flex flex-col">
-              <div className="signal-item">
-                <CheckCircle2 className="signal-icon success" />
-                <div>
-                  <div className="signal-title">FastAPI Backend Connected</div>
-                  <div className="signal-subtitle">Polling localhost:8000 successfully.</div>
-                </div>
-              </div>
-              <div className="signal-item">
-                <CheckCircle2 className="signal-icon success" />
-                <div>
-                  <div className="signal-title">Gemini Vision Connected</div>
-                  <div className="signal-subtitle">OCR / LLM inference online.</div>
-                </div>
-              </div>
-              <div className="signal-item">
-                <BrainCircuit className="signal-icon info" />
-                <div>
-                  <div className="signal-title">Dynamic KB Active</div>
-                  <div className="signal-subtitle">Evaluation adapting to injected rulesets.</div>
-                </div>
-              </div>
-            </div>
+          <div className="pipeline-arrow">→</div>
+          <div className="pipeline-node pipeline-node-2">
+            <Layers size={20} />
+            <span>Decompose</span>
+          </div>
+          <div className="pipeline-arrow">→</div>
+          <div className="pipeline-branch">
+            <div className="branch-item branch-text">Text</div>
+            <div className="branch-item branch-diagram">Diagram</div>
+            <div className="branch-item branch-labels">Labels</div>
+            <div className="branch-item branch-reasoning">Reasoning</div>
+          </div>
+          <div className="pipeline-arrow">→</div>
+          <div className="pipeline-node pipeline-node-4">
+            <BarChart3 size={20} />
+            <span>Final Grade</span>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Slide-over Detail Panel */}
-      {selectedSub && (
-        <div className="slide-overlay" onClick={() => setSelectedSub(null)}>
-          <div className="slide-panel animate-slide-r" onClick={(e) => e.stopPropagation()}>
-            <div className="slide-header">
-              <div className="slide-title">Evaluation Details</div>
-              <button className="slide-close" onClick={() => setSelectedSub(null)}>×</button>
-            </div>
-            
-            <div className="slide-body">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="avatar avatar-lg avatar-purple">{selectedSub.student_id.slice(-2)}</div>
-                <div>
-                  <div className="text-[16px] font-medium text-text-primary">{selectedSub.student_id}</div>
-                  <div className="font-mono text-[12px] text-text-tertiary">{selectedSub.id}</div>
-                </div>
-              </div>
+      {/* ── Features Grid ── */}
+      <section className="landing-section" id="features">
+        <div className="section-header">
+          <div className="section-badge">Core Capabilities</div>
+          <h2 className="section-title">Why Edexia?</h2>
+          <p className="section-subtitle">
+            Each answer is decomposed into independent evaluation components and
+            evaluated in parallel — exactly like a trained human examiner.
+          </p>
+        </div>
 
-              {selectedSub.status !== "GRADED" ? (
-                <div className="py-8 text-center text-text-tertiary flex flex-col items-center">
-                  <Activity className="animate-pulse mb-3" size={32} />
-                  <span>Evaluation in progress...</span>
-                  <span className="text-[11px] mt-1">OCR → Step Segmentation → LLM Grading</span>
-                </div>
-              ) : !gradeDetail ? (
-                <div className="py-8 text-center text-text-tertiary">Loading grade data...</div>
-              ) : (
-                <>
-                  <div className="score-display">
-                    <div className="score-num">{gradeDetail.grade}</div>
-                    <div className="score-max">/ {gradeDetail.max_grade}</div>
-                  </div>
-                  
-                  <div className="divider"></div>
-
-                  <div className="slide-section">
-                    <div className="slide-section-label">STEP TRACES & JUSTIFICATION</div>
-                    
-                    <div className="step-list">
-                      {gradeDetail.step_grades.map((step, idx) => (
-                        <div key={idx} className="step-card">
-                          <div className="step-card-top">
-                            <div className="step-name">Step {step.step_num}</div>
-                            <div className="step-marks">{step.awarded} / {step.max}</div>
-                          </div>
-                          <div className="step-justification">
-                            {step.justification}
-                          </div>
-                          <div className={`step-meta ${step.is_correct ? 'ok' : 'error'}`}>
-                            {step.is_correct ? <CheckCircle2 className="step-meta-icon" /> : <AlertTriangle className="step-meta-icon" />}
-                            {step.is_correct ? "Validated Correct" : "Error Detected in Reasoning"}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="slide-section">
-                    <div className="slide-section-label">METADATA</div>
-                    <div className="meta-row">
-                      <span className="meta-key">Engine Latency</span>
-                      <span className="meta-val">{gradeDetail.latency_ms}ms</span>
-                    </div>
-                    <div className="meta-row">
-                      <span className="meta-key">AI Confidence</span>
-                      <span className="meta-val">{(gradeDetail.confidence * 100).toFixed(1)}%</span>
-                    </div>
-                    <div className="meta-row">
-                      <span className="meta-key">LLM Core</span>
-                      <span className="meta-val truncate max-w-[150px]">{gradeDetail.model_used}</span>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
+        <div className="features-grid">
+          <div className="feature-card">
+            <div className="feature-icon"><Brain size={24} /></div>
+            <h3>Question Decomposition</h3>
+            <p>LLM-powered engine breaks each question into text, diagram, labels, and reasoning components before evaluation begins.</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon"><Eye size={24} /></div>
+            <h3>Diagram Intelligence (DEIS)</h3>
+            <p>Detects, validates, and scores diagrams using structural graph isomorphism. Labels are matched with fuzzy OCR tolerance.</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon"><Shield size={24} /></div>
+            <h3>Confidence Gating</h3>
+            <p>Low-confidence results are automatically flagged for mandatory human review. Teachers remain the final decision-makers.</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon"><GitBranch size={24} /></div>
+            <h3>Parallel Pipelines</h3>
+            <p>Text, diagram, label, and reasoning pipelines run independently. Scores are fused using mathematical distribution convolution.</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon"><Zap size={24} /></div>
+            <h3>Bring Your Own Key</h3>
+            <p>Teachers can use their own Gemini API key for grading. Full control over AI usage and billing.</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon"><Users size={24} /></div>
+            <h3>Human-in-the-Loop</h3>
+            <p>Built as evaluator-assistance infrastructure, not replacement. Moderation dashboards for review, approve, and override.</p>
           </div>
         </div>
-      )}
-    </>
+      </section>
+
+      {/* ── Pipeline Architecture ── */}
+      <section className="landing-section landing-section-alt" id="pipelines">
+        <div className="section-header">
+          <div className="section-badge">Architecture</div>
+          <h2 className="section-title">Component-Wise Evaluation</h2>
+          <p className="section-subtitle">
+            Real board examination answers are multimodal. A single answer may contain
+            text, diagrams, formulas, labels, and reasoning steps. We evaluate each independently.
+          </p>
+        </div>
+
+        <div className="pipeline-cards">
+          <div className="pipeline-card">
+            <div className="pipeline-card-icon text-pipeline">T</div>
+            <h4>Text Pipeline</h4>
+            <p>Explanations, definitions, theoretical reasoning, concept correctness</p>
+            <div className="pipeline-card-tech">SymPy + LLM Grading</div>
+          </div>
+          <div className="pipeline-card">
+            <div className="pipeline-card-icon diagram-pipeline">D</div>
+            <h4>Diagram Pipeline</h4>
+            <p>Structural correctness, relevance, completeness via DEIS cluster</p>
+            <div className="pipeline-card-tech">YOLOv8 + Graph Isomorphism</div>
+          </div>
+          <div className="pipeline-card">
+            <div className="pipeline-card-icon label-pipeline">L</div>
+            <h4>Label Pipeline</h4>
+            <p>Handwritten label validation with fuzzy OCR matching against rubric terminology</p>
+            <div className="pipeline-card-tech">thefuzz + Token Sort Ratio</div>
+          </div>
+          <div className="pipeline-card">
+            <div className="pipeline-card-icon reasoning-pipeline">R</div>
+            <h4>Reasoning Pipeline</h4>
+            <p>Stepwise logic, derivation flow, procedural correctness, presentation quality</p>
+            <div className="pipeline-card-tech">SymPy Validation + LLM Flow Analysis</div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Stats ── */}
+      <section className="landing-section" id="stats">
+        <div className="section-header">
+          <div className="section-badge">Impact</div>
+          <h2 className="section-title">Designed for Scale</h2>
+        </div>
+
+        <div className="stats-banner">
+          <div className="stat-block">
+            <div className="stat-number">4</div>
+            <div className="stat-desc">Parallel Pipelines</div>
+          </div>
+          <div className="stat-block">
+            <div className="stat-number">22</div>
+            <div className="stat-desc">Secured API Endpoints</div>
+          </div>
+          <div className="stat-block">
+            <div className="stat-number">0.6</div>
+            <div className="stat-desc">Confidence Threshold</div>
+          </div>
+          <div className="stat-block">
+            <div className="stat-number">∞</div>
+            <div className="stat-desc">Answer Sheets Supported</div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <section className="cta-section">
+        <h2>Ready to Transform Evaluation?</h2>
+        <p>Join the next generation of AI-assisted board examination assessment.</p>
+        <Link href="/login?tab=signup" className="btn btn-brand btn-lg">
+          Create Your Account <ArrowRight size={16} />
+        </Link>
+      </section>
+
+      {/* ── Footer ── */}
+      <footer className="landing-footer">
+        <div className="landing-footer-inner">
+          <div className="landing-logo">
+            <div className="logo-mark">Ex</div>
+            <span className="logo-name">Edexia AIOS</span>
+          </div>
+          <p className="footer-copy">
+            AI-Powered Multimodal Evaluation Infrastructure for Board Examination Systems.
+            Built with Gemini, FastAPI, and Next.js.
+          </p>
+        </div>
+      </footer>
+    </div>
   );
 }
