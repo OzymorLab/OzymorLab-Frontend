@@ -1,10 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import {
   LayoutDashboard, Users, Settings, BookOpen, LogOut, Key,
-  Bell, Search, Shield
+  Bell, Search, Shield, GraduationCap, FileText
 } from "lucide-react";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import Link from "next/link";
@@ -12,6 +12,7 @@ import Link from "next/link";
 function DashboardShell({ children }: { children: React.ReactNode }) {
   const { user, isLoading, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -48,9 +49,13 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
 
         <nav className="sidebar-nav">
           <div className="nav-section-label">EVALUATION</div>
-          <Link href="/dashboard" className="nav-item active">
+          <Link href="/dashboard" className={`nav-item ${pathname === "/dashboard" ? "active" : ""}`}>
             <LayoutDashboard className="nav-item-icon" />
             Dashboard
+          </Link>
+          <Link href="/dashboard/exams" className={`nav-item ${pathname === "/dashboard/exams" ? "active" : ""}`}>
+            <GraduationCap className="nav-item-icon" />
+            Exams Setup
           </Link>
           <Link href="/dashboard" className="nav-item">
             <BookOpen className="nav-item-icon" />
