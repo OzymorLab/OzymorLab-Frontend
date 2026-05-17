@@ -18,7 +18,7 @@ export default function LandingPage() {
       <nav className="landing-nav">
         <div className="landing-nav-inner">
           <div className="landing-logo">
-            <div className="logo-mark">Ex</div>
+            <div className="logo-mark">Edexia</div>
           </div>
           <div className="landing-nav-links">
             <a href="#features">Features</a>
