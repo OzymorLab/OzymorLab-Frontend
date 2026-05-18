@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { UploadCloud, CheckCircle2, AlertTriangle, FileText, Activity, BrainCircuit, Search } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
-const API_BASE = "http://localhost:8000/api/v1";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
 interface Submission {
   id: string;

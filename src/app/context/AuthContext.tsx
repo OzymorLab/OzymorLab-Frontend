@@ -1,8 +1,9 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { supabase } from "../../lib/supabaseClient";
 
-const API_BASE = "http://localhost:8000/api/v1";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
 interface User {
   id: string;
@@ -20,6 +21,7 @@ interface AuthState {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signup: (email: string, password: string, fullName: string, role: string) => Promise<{ success: boolean; error?: string }>;
+  loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   fetchWithAuth: (url: string, options?: RequestInit) => Promise<Response>;
   setGeminiKey: (key: string) => Promise<{ success: boolean; error?: string }>;
@@ -41,100 +43,211 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Restore session from localStorage on mount
+  // Restore session from Supabase on mount
   useEffect(() => {
-    const storedToken = localStorage.getItem("edexia_token");
-    const storedRefresh = localStorage.getItem("edexia_refresh");
-    if (storedToken) {
-      setToken(storedToken);
-      setRefreshToken(storedRefresh);
-      // Validate token by fetching profile
-      fetch(`${API_BASE}/auth/me`, {
-        headers: { Authorization: `Bearer ${storedToken}` },
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error("Invalid token");
-          return res.json();
+    // 1. Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setToken(session.access_token);
+        setRefreshToken(session.refresh_token || null);
+        
+        // Validate token and sync profile with Edexia backend
+        fetch(`${API_BASE}/auth/me`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
         })
-        .then((json) => {
-          setUser(json.data);
-          setIsLoading(false);
-        })
-        .catch(() => {
-          localStorage.removeItem("edexia_token");
-          localStorage.removeItem("edexia_refresh");
-          setToken(null);
-          setRefreshToken(null);
-          setIsLoading(false);
-        });
-    } else {
+          .then((res) => {
+            if (!res.ok) throw new Error("Invalid session");
+            return res.json();
+          })
+          .then((json) => {
+            setUser(json.data);
+            setIsLoading(false);
+          })
+          .catch(() => {
+            // Fallback to local session metadata if backend is offline/unreachable
+            setUser({
+              id: session.user.id,
+              email: session.user.email || "",
+              full_name: session.user.user_metadata?.full_name || "Supabase User",
+              role: session.user.user_metadata?.role || "teacher",
+              has_gemini_key: false,
+              is_active: true,
+            });
+            setIsLoading(false);
+          });
+      } else {
+        setIsLoading(false);
+      }
+    });
+
+    // 2. Subscribe to auth state updates
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session) {
+        setToken(session.access_token);
+        setRefreshToken(session.refresh_token || null);
+        
+        try {
+          const res = await fetch(`${API_BASE}/auth/me`, {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          });
+          if (res.ok) {
+            const json = await res.json();
+            setUser(json.data);
+          } else {
+            setUser({
+              id: session.user.id,
+              email: session.user.email || "",
+              full_name: session.user.user_metadata?.full_name || "Supabase User",
+              role: session.user.user_metadata?.role || "teacher",
+              has_gemini_key: false,
+              is_active: true,
+            });
+          }
+        } catch { /* ignore */ }
+      } else {
+        setUser(null);
+        setToken(null);
+        setRefreshToken(null);
+      }
       setIsLoading(false);
-    }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
-      const res = await fetch(`${API_BASE}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
-      const json = await res.json();
-      if (!res.ok) return { success: false, error: json.detail || "Login failed" };
+      if (error) return { success: false, error: error.message };
 
-      const tokens = json.data;
-      setToken(tokens.access_token);
-      setRefreshToken(tokens.refresh_token);
-      localStorage.setItem("edexia_token", tokens.access_token);
-      localStorage.setItem("edexia_refresh", tokens.refresh_token);
+      const session = data.session;
+      if (session) {
+        setToken(session.access_token);
+        setRefreshToken(session.refresh_token || null);
 
-      // Fetch user profile
-      const profileRes = await fetch(`${API_BASE}/auth/me`, {
-        headers: { Authorization: `Bearer ${tokens.access_token}` },
-      });
-      const profileJson = await profileRes.json();
-      setUser(profileJson.data);
-
+        // Fetch profile / trigger sync on backend
+        try {
+          const profileRes = await fetch(`${API_BASE}/auth/me`, {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          });
+          const profileJson = await profileRes.json();
+          if (profileRes.ok && profileJson.data) {
+            setUser(profileJson.data);
+          } else {
+            setUser({
+              id: session.user.id,
+              email: session.user.email || "",
+              full_name: session.user.user_metadata?.full_name || "Supabase User",
+              role: session.user.user_metadata?.role || "teacher",
+              has_gemini_key: false,
+              is_active: true,
+            });
+          }
+        } catch {
+          setUser({
+            id: session.user.id,
+            email: session.user.email || "",
+            full_name: session.user.user_metadata?.full_name || "Supabase User",
+            role: session.user.user_metadata?.role || "teacher",
+            has_gemini_key: false,
+            is_active: true,
+          });
+        }
+      }
       return { success: true };
     } catch {
-      return { success: false, error: "Network error. Is the backend running?" };
+      return { success: false, error: "Network error. Is Supabase configured correctly?" };
     }
   };
 
   const signup = async (email: string, password: string, fullName: string, role: string) => {
     try {
-      const res = await fetch(`${API_BASE}/auth/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, full_name: fullName, role }),
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            role: role.toLowerCase(),
+          },
+        },
       });
-      const json = await res.json();
-      if (!res.ok) return { success: false, error: json.detail || "Signup failed" };
+      if (error) return { success: false, error: error.message };
 
-      const { tokens, user: userData } = json.data;
-      setToken(tokens.access_token);
-      setRefreshToken(tokens.refresh_token);
-      setUser(userData);
-      localStorage.setItem("edexia_token", tokens.access_token);
-      localStorage.setItem("edexia_refresh", tokens.refresh_token);
+      const session = data.session;
+      if (session) {
+        setToken(session.access_token);
+        setRefreshToken(session.refresh_token || null);
 
+        // Fetch profile / trigger sync on backend
+        try {
+          const profileRes = await fetch(`${API_BASE}/auth/me`, {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          });
+          const profileJson = await profileRes.json();
+          if (profileRes.ok && profileJson.data) {
+            setUser(profileJson.data);
+          } else {
+            setUser({
+              id: session.user.id,
+              email: session.user.email || "",
+              full_name: fullName,
+              role: role.toLowerCase(),
+              has_gemini_key: false,
+              is_active: true,
+            });
+          }
+        } catch {
+          setUser({
+            id: session.user.id,
+            email: session.user.email || "",
+            full_name: fullName,
+            role: role.toLowerCase(),
+            has_gemini_key: false,
+            is_active: true,
+          });
+        }
+      }
       return { success: true };
     } catch {
-      return { success: false, error: "Network error. Is the backend running?" };
+      return { success: false, error: "Network error. Is Supabase configured correctly?" };
     }
   };
 
-  const logout = () => {
+  const loginWithGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: typeof window !== "undefined" ? window.location.origin + "/dashboard" : undefined,
+        },
+      });
+      if (error) return { success: false, error: error.message };
+      return { success: true };
+    } catch {
+      return { success: false, error: "Network error. Is Supabase configured correctly?" };
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch { /* ignore */ }
     setUser(null);
     setToken(null);
     setRefreshToken(null);
-    localStorage.removeItem("edexia_token");
-    localStorage.removeItem("edexia_refresh");
   };
 
   const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     const headers = new Headers(options.headers || {});
-    if (token) headers.set("Authorization", `Bearer ${token}`);
+    // Always load token from active Supabase session
+    const activeToken = token;
+    if (activeToken) headers.set("Authorization", `Bearer ${activeToken}`);
     return fetch(url, { ...options, headers });
   };
 
@@ -179,7 +292,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, refreshToken, isLoading, login, signup, logout, fetchWithAuth, setGeminiKey, removeGeminiKey, refreshUser }}>
+    <AuthContext.Provider value={{ user, token, refreshToken, isLoading, login, signup, loginWithGoogle, logout, fetchWithAuth, setGeminiKey, removeGeminiKey, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
