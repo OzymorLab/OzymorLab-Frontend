@@ -12,7 +12,7 @@ const API_BASE = "http://localhost:8000/api/v1";
 
 interface RubricStep {
   step_num: number;
-  description: str;
+  description: string;
   marks: number;
   step_type: string;
   component_type: string;
