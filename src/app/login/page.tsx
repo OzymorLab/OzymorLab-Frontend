@@ -142,10 +142,43 @@ function LoginPageContent() {
 
           {/* Error/Success Messages */}
           {error && (
-            <div className="auth-message auth-error">
-              <AlertCircle size={16} /> {error}
+            <div className="auth-message auth-error" style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "14px" }}>
+              <div style={{ display: "flex", alignItems: "start", gap: "8px" }}>
+                <AlertCircle size={16} style={{ flexShrink: 0, marginTop: "2px" }} />
+                <span className="font-semibold" style={{ fontSize: "13px" }}>{error}</span>
+              </div>
+              
+              {(error.includes("provider is not enabled") || error.includes("Unsupported provider")) && (
+                <div style={{ 
+                  marginTop: "8px", 
+                  backgroundColor: "var(--surface-secondary)", 
+                  border: "1px solid var(--border-subtle)", 
+                  padding: "12px", 
+                  borderRadius: "var(--radius-md)", 
+                  color: "var(--text-secondary)", 
+                  fontSize: "12px",
+                  lineHeight: "1.6",
+                  textAlign: "left"
+                }}>
+                  <strong style={{ color: "var(--text-primary)", fontSize: "12.5px", display: "block", borderBottom: "0.5px solid var(--border-subtle)", paddingBottom: "6px", marginBottom: "6px" }}>
+                    ⚙️ Supabase Integration Configuration Required
+                  </strong>
+                  <p style={{ marginBottom: "8px" }}>
+                    The Google OAuth provider is not yet enabled in your Supabase project. To configure it:
+                  </p>
+                  <ol style={{ paddingLeft: "14px", margin: "0", display: "flex", flexDirection: "column", gap: "6px", listStyleType: "decimal" }}>
+                    <li>Open the <a href="https://supabase.com/dashboard" target="_blank" rel="noreferrer" style={{ color: "var(--brand-600)", textDecoration: "underline", fontWeight: 500 }}>Supabase Console</a>.</li>
+                    <li>Select your project and navigate to <strong>Authentication &gt; Providers</strong>.</li>
+                    <li>Find <strong>Google</strong> in the provider list.</li>
+                    <li>Toggle <strong>Enable Google Provider</strong> to enabled.</li>
+                    <li>Paste your Google Developer Console <strong>Client ID</strong> and <strong>Client Secret</strong>.</li>
+                    <li>Click <strong>Save</strong> and retry signing in.</li>
+                  </ol>
+                </div>
+              )}
             </div>
           )}
+
           {success && (
             <div className="auth-message auth-success">
               <CheckCircle2 size={16} /> {success}

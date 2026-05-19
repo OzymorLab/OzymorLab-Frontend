@@ -90,39 +90,38 @@
 }
 
 /* ── Dark mode overrides ── */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --surface-primary:   #161616;
-    --surface-secondary: #1e1e1e;
-    --surface-tertiary:  #242424;
-    --surface-page:      #111111;
+:root.dark, :root[data-theme="dark"] {
+  --surface-primary:   #161616;
+  --surface-secondary: #1e1e1e;
+  --surface-tertiary:  #242424;
+  --surface-page:      #111111;
 
-    --text-primary:   #e8e8e6;
-    --text-secondary: #888780;
-    --text-tertiary:  #5F5E5A;
-    --text-disabled:  #3a3a38;
+  --text-primary:   #e8e8e6;
+  --text-secondary: #888780;
+  --text-tertiary:  #5F5E5A;
+  --text-disabled:  #3a3a38;
 
-    --border-subtle:  rgba(255,255,255,0.06);
-    --border-default: rgba(255,255,255,0.12);
-    --border-strong:  rgba(255,255,255,0.20);
+  --border-subtle:  rgba(255,255,255,0.06);
+  --border-default: rgba(255,255,255,0.12);
+  --border-strong:  rgba(255,255,255,0.20);
 
-    --color-success-bg:   #173404;
-    --color-success-text: #C0DD97;
-    --color-warning-bg:   #412402;
-    --color-warning-text: #FAC775;
-    --color-danger-bg:    #501313;
-    --color-danger-text:  #F7C1C1;
-    --color-info-bg:      #042C53;
-    --color-info-text:    #B5D4F4;
+  --color-success-bg:   #173404;
+  --color-success-text: #C0DD97;
+  --color-warning-bg:   #412402;
+  --color-warning-text: #FAC775;
+  --color-danger-bg:    #501313;
+  --color-danger-text:  #F7C1C1;
+  --color-info-bg:      #042C53;
+  --color-info-text:    #B5D4F4;
 
-    --brand-50:  #26215C;
-    --brand-100: #3C3489;
-    --brand-200: #534AB7;
-    --brand-600: #7F77DD;
-    --brand-800: #AFA9EC;
-    --brand-900: #CECBF6;
-  }
+  --brand-50:  #26215C;
+  --brand-100: #3C3489;
+  --brand-200: #534AB7;
+  --brand-600: #7F77DD;
+  --brand-800: #AFA9EC;
+  --brand-900: #CECBF6;
 }
+
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -2013,4 +2012,94 @@ select.input-field {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ── Premium Radar HUD styles ── */
+.radar-container {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, rgba(83, 74, 183, 0.04) 0%, transparent 75%);
+  overflow: hidden;
+}
+.radar-grid {
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: 1px dashed var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.radar-grid-inner {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 1px dashed var(--border-subtle);
+}
+.radar-sweep {
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(127, 119, 221, 0.16) 0deg, transparent 120deg, transparent 360deg);
+  animation: radar-sweep-rotate 3.5s linear infinite;
+  transform-origin: center;
+}
+.radar-cross-h {
+  position: absolute;
+  width: 150px;
+  height: 1px;
+  background: var(--border-subtle);
+}
+.radar-cross-v {
+  position: absolute;
+  width: 1px;
+  height: 150px;
+  background: var(--border-subtle);
+}
+.radar-blip {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  animation: radar-blip-glow 1.8s infinite ease-in-out;
+}
+.radar-blip-backend {
+  top: 42px;
+  left: 110px;
+  background: var(--color-success-border);
+  box-shadow: 0 0 8px var(--color-success-border);
+}
+.radar-blip-llm {
+  top: 105px;
+  left: 185px;
+  background: var(--brand-600);
+  box-shadow: 0 0 8px var(--brand-600);
+  animation-delay: 0.6s;
+}
+.radar-blip-kb {
+  top: 120px;
+  left: 105px;
+  background: var(--color-info-border);
+  box-shadow: 0 0 8px var(--color-info-border);
+  animation-delay: 1.2s;
+}
+
+@keyframes radar-sweep-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes radar-blip-glow {
+  0%, 100% { opacity: 0.4; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.25); }
+}
+.animate-spin-slow {
+  animation: spin 10s linear infinite;
+}
+
 

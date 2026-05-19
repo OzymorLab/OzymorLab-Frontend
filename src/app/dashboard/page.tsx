@@ -161,28 +161,55 @@ export default function DashboardPage() {
           </div>
 
           <div className="card">
-            <div className="card-header"><div className="card-title"><Activity className="card-title-icon" /> Live Engine Status</div></div>
-            <div className="flex flex-col">
-              <div className="signal-item">
-                <CheckCircle2 className="signal-icon success" />
-                <div>
-                  <div className="signal-title">FastAPI Backend Connected</div>
-                  <div className="signal-subtitle">Polling localhost:8000 successfully.</div>
-                </div>
+            <div className="card-header">
+              <div className="card-title"><Activity className="card-title-icon text-brand-600" /> Evaluation Command Center</div>
+            </div>
+            
+            {/* Pulsing Conic Radar HUD */}
+            <div className="radar-container bg-surface-secondary">
+              <div className="radar-cross-h"></div>
+              <div className="radar-cross-v"></div>
+              <div className="radar-grid">
+                <div className="radar-grid-inner"></div>
               </div>
-              <div className="signal-item">
-                <CheckCircle2 className="signal-icon success" />
-                <div>
-                  <div className="signal-title">Gemini Vision Connected</div>
-                  <div className="signal-subtitle">OCR / LLM inference online.</div>
-                </div>
+              <div className="radar-sweep"></div>
+              
+              {/* Animated Blips */}
+              <div className="radar-blip radar-blip-backend" title="FastAPI Engine Active"></div>
+              <div className="radar-blip radar-blip-llm" title="Gemini Multi-Modal Active"></div>
+              <div className="radar-blip radar-blip-kb" title="Dynamic Ruleset Sync Active"></div>
+            </div>
+
+            <div className="flex flex-col p-4 gap-3 bg-surface-primary">
+              <div className="flex justify-between items-center text-[12px] border-b border-border-subtle pb-2">
+                <span className="text-text-tertiary flex items-center gap-1.5 font-medium">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-border opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-success-border"></span>
+                  </span>
+                  FastAPI CORE
+                </span>
+                <span className="font-mono text-text-secondary">Connected (1.4s)</span>
               </div>
-              <div className="signal-item">
-                <BrainCircuit className="signal-icon info" />
-                <div>
-                  <div className="signal-title">Dynamic KB Active</div>
-                  <div className="signal-subtitle">Evaluation adapting to injected rulesets.</div>
-                </div>
+              <div className="flex justify-between items-center text-[12px] border-b border-border-subtle pb-2">
+                <span className="text-text-tertiary flex items-center gap-1.5 font-medium">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-600 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-600"></span>
+                  </span>
+                  GEMINI VISION
+                </span>
+                <span className="font-mono text-text-secondary">BYOK Online</span>
+              </div>
+              <div className="flex justify-between items-center text-[12px]">
+                <span className="text-text-tertiary flex items-center gap-1.5 font-medium">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-info-border opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-info-border"></span>
+                  </span>
+                  DYNAMIC RULES
+                </span>
+                <span className="font-mono text-text-secondary">Sync Complete</span>
               </div>
             </div>
           </div>
