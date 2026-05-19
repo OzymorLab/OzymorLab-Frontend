@@ -253,43 +253,100 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setGeminiKey = async (key: string) => {
     try {
+      console.log("✏️ setGeminiKey triggered. Sending key to:", `${API_BASE}/auth/gemini-key`);
       const res = await fetchWithAuth(`${API_BASE}/auth/gemini-key`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ gemini_api_key: key }),
       });
-      const json = await res.json();
-      if (!res.ok) return { success: false, error: json.detail || "Failed to save key" };
+      
+      console.log("➡️ Response status code:", res.status, res.statusText);
+      
+      let responseBody = "";
+      try {
+        responseBody = await res.text();
+        console.log("➡️ Raw response body:", responseBody);
+      } catch (bodyErr) {
+        console.error("❌ Failed to parse raw response body as text:", bodyErr);
+      }
+
+      if (!res.ok) {
+        let detail = "Failed to save key";
+        try {
+          const parsed = JSON.parse(responseBody);
+          detail = parsed.detail || detail;
+        } catch {
+          detail = `Server Error (Status ${res.status}): ${responseBody.slice(0, 150) || "Empty Response"}`;
+        }
+        console.error("❌ setGeminiKey API failure detail:", detail);
+        return { success: false, error: detail };
+      }
+
       setUser((prev) => prev ? { ...prev, has_gemini_key: true } : prev);
+      console.log("✅ Gemini API key updated successfully in frontend state");
       return { success: true };
-    } catch {
-      return { success: false, error: "Network error" };
+    } catch (err: any) {
+      console.error("❌ hard network failure inside setGeminiKey fetch block:", err);
+      return { 
+        success: false, 
+        error: `Network error: ${err.message || "Failed to reach backend"}. Please check your browser DevTools Console for CORS preflight blocks or connection drops.` 
+      };
     }
   };
 
   const removeGeminiKey = async () => {
     try {
+      console.log("🗑️ removeGeminiKey triggered. Sending DELETE to:", `${API_BASE}/auth/gemini-key`);
       const res = await fetchWithAuth(`${API_BASE}/auth/gemini-key`, {
         method: "DELETE",
       });
-      if (!res.ok) return { success: false, error: "Failed to remove key" };
+      
+      console.log("➡️ Response status code:", res.status);
+      let responseBody = "";
+      try {
+        responseBody = await res.text();
+        console.log("➡️ Raw response body:", responseBody);
+      } catch { /* ignore */ }
+
+      if (!res.ok) {
+        console.error("❌ Failed to remove Gemini key:", responseBody);
+        return { success: false, error: "Failed to remove key" };
+      }
       setUser((prev) => prev ? { ...prev, has_gemini_key: false } : prev);
+      console.log("✅ Gemini API key deleted successfully in frontend state");
       return { success: true };
-    } catch {
-      return { success: false, error: "Network error" };
+    } catch (err: any) {
+      console.error("❌ hard network failure inside removeGeminiKey fetch block:", err);
+      return { success: false, error: `Network error: ${err.message}` };
     }
   };
 
   const refreshUser = async () => {
-    if (!token) return;
+    if (!token) {
+      console.log("ℹ️ refreshUser skipped: No active token found in auth state");
+      return;
+    }
     try {
+      console.log("🔄 refreshUser triggered. Fetching from:", `${API_BASE}/auth/me`);
       const res = await fetch(`${API_BASE}/auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const json = await res.json();
-      if (res.ok) setUser(json.data);
-    } catch { /* ignore */ }
+      console.log("➡️ refreshUser response status:", res.status);
+      const text = await res.text();
+      console.log("➡️ refreshUser raw response:", text);
+      
+      if (res.ok) {
+        const json = JSON.parse(text);
+        setUser(json.data);
+        console.log("✅ User profile synced successfully from local backend database:", json.data);
+      } else {
+        console.error("❌ refreshUser endpoint returned failure status code:", res.status, text);
+      }
+    } catch (err) {
+      console.error("❌ hard network failure inside refreshUser fetch block:", err);
+    }
   };
+
 
   return (
     <AuthContext.Provider value={{ user, token, refreshToken, isLoading, login, signup, loginWithGoogle, logout, fetchWithAuth, setGeminiKey, removeGeminiKey, refreshUser }}>
