@@ -5,7 +5,7 @@ import { Users, Search, Award, TrendingUp, BookOpen, User, Star, ArrowRight } fr
 import { useAuth } from "../../context/AuthContext";
 import Link from "next/link";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.com/api/v1";
 
 interface Submission {
   id: string;

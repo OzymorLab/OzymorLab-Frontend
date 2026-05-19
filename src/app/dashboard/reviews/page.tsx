@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { ShieldAlert, CheckCircle2, AlertTriangle, Eye, RefreshCw, Star, ShieldCheck, ChevronRight } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.com/api/v1";
 
 interface Submission {
   id: string;
