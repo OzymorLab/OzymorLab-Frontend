@@ -45,6 +45,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Restore session from Supabase on mount
   useEffect(() => {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      const storedToken = typeof window !== "undefined" ? localStorage.getItem("edexia_token") : null;
+      if (storedToken) {
+        setToken(storedToken);
+        setRefreshToken(typeof window !== "undefined" ? localStorage.getItem("edexia_refresh_token") : null);
+        
+        fetch(`${API_BASE}/auth/me`, {
+          headers: { Authorization: `Bearer ${storedToken}` },
+        })
+          .then((res) => {
+            if (!res.ok) throw new Error("Invalid local session");
+            return res.json();
+          })
+          .then((json) => {
+            setUser(json.data);
+            setIsLoading(false);
+          })
+          .catch(() => {
+            if (typeof window !== "undefined") {
+              localStorage.removeItem("edexia_token");
+              localStorage.removeItem("edexia_refresh_token");
+            }
+            setUser(null);
+            setToken(null);
+            setIsLoading(false);
+          });
+      } else {
+        setIsLoading(false);
+      }
+      return;
+    }
+
     // 1. Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
@@ -118,6 +150,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        const json = await res.json();
+        if (!res.ok) {
+          return { success: false, error: json.detail || "Invalid email or password" };
+        }
+        
+        const { access_token, refresh_token } = json.data;
+        setToken(access_token);
+        setRefreshToken(refresh_token);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("edexia_token", access_token);
+          localStorage.setItem("edexia_refresh_token", refresh_token);
+        }
+        
+        // Fetch profile
+        const profileRes = await fetch(`${API_BASE}/auth/me`, {
+          headers: { Authorization: `Bearer ${access_token}` },
+        });
+        const profileJson = await profileRes.json();
+        if (profileRes.ok && profileJson.data) {
+          setUser(profileJson.data);
+        }
+        return { success: true };
+      } catch (err: any) {
+        return { success: false, error: err.message || "Failed to connect to local authentication backend" };
+      }
+    }
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -166,6 +232,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signup = async (email: string, password: string, fullName: string, role: string) => {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      try {
+        const res = await fetch(`${API_BASE}/auth/signup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, full_name: fullName, role: role.toLowerCase() }),
+        });
+        const json = await res.json();
+        if (!res.ok) {
+          return { success: false, error: json.detail || "Account creation failed" };
+        }
+        
+        const { tokens, user: userProfile } = json.data;
+        setToken(tokens.access_token);
+        setRefreshToken(tokens.refresh_token);
+        setUser(userProfile);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("edexia_token", tokens.access_token);
+          localStorage.setItem("edexia_refresh_token", tokens.refresh_token);
+        }
+        return { success: true };
+      } catch (err: any) {
+        return { success: false, error: err.message || "Failed to register local account" };
+      }
+    }
+
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -235,6 +327,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("edexia_token");
+      localStorage.removeItem("edexia_refresh_token");
+    }
     try {
       await supabase.auth.signOut();
     } catch { /* ignore */ }

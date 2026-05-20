@@ -153,7 +153,7 @@ export default function DashboardPage() {
             <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onChange={handleUpload} disabled={isUploading} />
             <div className={`upload-zone ${isUploading ? 'bg-surface-secondary' : ''}`}>
               {isUploading ? (
-                <><Activity className="upload-icon mx-auto animate-pulse" /><div className="upload-title">Uploading to S3...</div></>
+                <><Activity className="upload-icon mx-auto animate-pulse" /><div className="upload-title">Uploading to Storage...</div></>
               ) : (
                 <><UploadCloud className="upload-icon mx-auto" /><div className="upload-title">Drop answer sheets here</div><div className="upload-subtitle">or <em>browse files</em> (PDF, JPG)</div></>
               )}

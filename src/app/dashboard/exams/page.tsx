@@ -249,7 +249,7 @@ export default function ExamsPage() {
     formData.append("student_ids", JSON.stringify(customStudentIds));
 
     try {
-      // Step 3a: Upload files to S3 & register submissions
+      // Step 3a: Upload files to Supabase Storage & register submissions
       const uploadRes = await fetchWithAuth(`${API_BASE}/submissions/bulk`, {
         method: "POST",
         body: formData,
@@ -670,7 +670,7 @@ export default function ExamsPage() {
             <Activity className="animate-pulse text-brand-500 mx-auto mb-4" size={48} />
             <h3 className="text-[18px] font-semibold text-text-primary mb-2">Asynchronous Evaluation Queue Active</h3>
             <p className="text-[13px] text-text-tertiary max-w-[450px] mx-auto mb-8">
-              All student answer sheets are being transferred to AWS S3 storage. Once completed, the parallel evaluation pipelines (Text, Diagram, Reasoning) will execute synchronously.
+              All student answer sheets are being transferred to Supabase Storage. Once completed, the parallel evaluation pipelines (Text, Diagram, Reasoning) will execute synchronously.
             </p>
 
             {/* Run Progress status */}
@@ -706,7 +706,7 @@ export default function ExamsPage() {
               </div>
             ) : (
               <div className="flex flex-col items-center gap-4">
-                <p className="text-[13px] text-text-tertiary">Waiting for S3 upload task to trigger evaluations...</p>
+                <p className="text-[13px] text-text-tertiary">Waiting for upload task to trigger evaluations...</p>
                 <button className="btn flex items-center gap-2" onClick={startGradingManual}>
                   <Loader2 className="animate-spin" size={14} /> Start Grading Manually
                 </button>
