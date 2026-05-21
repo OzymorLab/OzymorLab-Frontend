@@ -20,11 +20,11 @@ interface GradeDetail {
   confidence: number;
   step_grades: Array<{
     step_num: number;
-    awarded: number;
-    max: number;
+    marks_awarded: number;
+    max_marks: number;
     justification: string;
-    is_correct: boolean;
-    step_type: string;
+    error_type: string | null;
+    sympy_valid: boolean | null;
   }>;
   latency_ms: number;
   model_used: string;
@@ -36,6 +36,21 @@ export default function DashboardPage() {
   const [selectedSub, setSelectedSub] = useState<Submission | null>(null);
   const [gradeDetail, setGradeDetail] = useState<GradeDetail | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [tasks, setTasks] = useState<Array<{ id: string; title: string; subject: string }>>([]);
+  const [selectedTaskId, setSelectedTaskId] = useState<string>("");
+
+  const fetchTasks = async () => {
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/tasks`);
+      const json = await res.json();
+      if (json.data && json.data.length > 0) {
+        setTasks(json.data);
+        if (!selectedTaskId) setSelectedTaskId(json.data[0].id);
+      }
+    } catch (e) {
+      console.error("Failed to fetch tasks", e);
+    }
+  };
 
   const fetchSubmissions = async () => {
     try {
@@ -48,6 +63,7 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
+    fetchTasks();
     fetchSubmissions();
     const interval = setInterval(fetchSubmissions, 5000);
     return () => clearInterval(interval);
@@ -67,11 +83,15 @@ export default function DashboardPage() {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!selectedTaskId) {
+      alert("Please select an exam/task first.");
+      return;
+    }
 
     setIsUploading(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("task_id", "00000000-0000-0000-0000-000000000000");
+    formData.append("task_id", selectedTaskId);
     formData.append("student_id", "STUDENT-" + Math.floor(Math.random() * 1000));
 
     try {
@@ -149,11 +169,25 @@ export default function DashboardPage() {
         </div>
 
         <div className="right-rail">
+          <div className="mb-4">
+            <label className="block text-[12px] font-medium text-text-secondary mb-1">Select Exam Task</label>
+            <select 
+              className="w-full bg-surface-primary border border-border-subtle rounded-md px-3 py-2 text-[13px] text-text-primary focus:outline-none focus:border-brand-600"
+              value={selectedTaskId}
+              onChange={(e) => setSelectedTaskId(e.target.value)}
+            >
+              <option value="" disabled>Select an exam to grade...</option>
+              {tasks.map(t => (
+                <option key={t.id} value={t.id}>{t.subject} - {t.title}</option>
+              ))}
+            </select>
+          </div>
+
           <div className="relative">
             <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onChange={handleUpload} disabled={isUploading} />
             <div className={`upload-zone ${isUploading ? 'bg-surface-secondary' : ''}`}>
               {isUploading ? (
-                <><Activity className="upload-icon mx-auto animate-pulse" /><div className="upload-title">Uploading to S3...</div></>
+                <><Activity className="upload-icon mx-auto animate-pulse" /><div className="upload-title">Uploading to Storage...</div></>
               ) : (
                 <><UploadCloud className="upload-icon mx-auto" /><div className="upload-title">Drop answer sheets here</div><div className="upload-subtitle">or <em>browse files</em> (PDF, JPG)</div></>
               )}
@@ -253,7 +287,7 @@ export default function DashboardPage() {
                         <div key={idx} className="step-card">
                           <div className="step-card-top">
                             <div className="step-name">Step {step.step_num}</div>
-                            <div className="step-marks">{step.awarded} / {step.max}</div>
+                            <div className="step-marks">{step.marks_awarded} / {step.max_marks}</div>
                           </div>
                           <div className="step-justification">{step.justification}</div>
                         </div>
