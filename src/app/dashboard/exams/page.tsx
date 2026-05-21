@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { 
   UploadCloud, CheckCircle2, AlertTriangle, FileText, 
   Activity, BrainCircuit, ArrowRight, ArrowLeft, Plus, 
-  Trash2, FileSpreadsheet, Loader2, Sparkles, Check, Play
+  Trash2, FileSpreadsheet, Loader2, Sparkles, Check, Play,
+  Calendar, Layers, ShieldCheck, UserCheck, RefreshCw
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -22,17 +23,32 @@ interface RubricStep {
   diagram_relations: any[];
 }
 
-interface DraftRubric {
-  steps: RubricStep[];
-  grading_notes: string;
-  total_marks_allocated: number;
-  question_count: number;
+interface ExamCycle {
+  id: string;
+  name: string;
+  start_date?: string;
+  end_date?: string;
+  status: string;
+  task_count: number;
 }
 
 export default function ExamsPage() {
-  const { fetchWithAuth } = useAuth();
-  const [step, setStep] = useState(1); // 1: Paper Upload, 2: Rubric Edit, 3: Bulk Answer Upload, 4: Live Progress
+  const { user, fetchWithAuth } = useAuth();
   
+  // Phase 4: Wizard steps (0: Cycle Selection, 1: Paper Upload, 2: Rubric Edit & State Machine, 3: Bulk Answer Upload, 4: Live Progress)
+  const [step, setStep] = useState(0); 
+
+  // Exam Cycles State
+  const [cycles, setCycles] = useState<ExamCycle[]>([]);
+  const [selectedCycleId, setSelectedCycleId] = useState("");
+  const [isLoadingCycles, setIsLoadingCycles] = useState(false);
+  
+  // Create Cycle Modal State
+  const [newCycleName, setNewCycleName] = useState("");
+  const [newCycleStart, setNewCycleStart] = useState("");
+  const [newCycleEnd, setNewCycleEnd] = useState("");
+  const [isCreatingCycle, setIsCreatingCycle] = useState(false);
+
   // Form Metadata
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("Physics");
@@ -40,6 +56,7 @@ export default function ExamsPage() {
   const [gradeLevel, setGradeLevel] = useState("Class 12");
   const [maxMarks, setMaxMarks] = useState(30);
   const [description, setDescription] = useState("");
+  const [paperSet, setPaperSet] = useState("A");
 
   // Step 1: Question Paper
   const [qpaperFile, setQpaperFile] = useState<File | null>(null);
@@ -48,28 +65,76 @@ export default function ExamsPage() {
   const [questionPaperKey, setQuestionPaperKey] = useState("");
   const [aiConfidence, setAiConfidence] = useState(0.0);
 
-  // Step 2: Rubric Edit
+  // Step 2: Rubric Edit & Approval Status
   const [rubricSteps, setRubricSteps] = useState<RubricStep[]>([]);
   const [gradingNotes, setGradingNotes] = useState("");
   const [taskId, setTaskId] = useState("");
   const [isCreatingTask, setIsCreatingTask] = useState(false);
+  const [rubricApprovalStatus, setRubricApprovalStatus] = useState("DRAFT");
+  const [rejectionNotes, setRejectionNotes] = useState("");
 
   // Step 3: Bulk Answer Upload
   const [answerFiles, setAnswerFiles] = useState<File[]>([]);
   const [customStudentIds, setCustomStudentIds] = useState<string[]>([]);
   const [isUploadingAnswers, setIsUploadingAnswers] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Step 4: Live Grading
   const [runId, setRunId] = useState("");
   const [runStatus, setRunStatus] = useState<any>(null);
 
-  // Auto-generate task title when subject/grade changes
   useEffect(() => {
-    if (!title) {
-      setTitle(`${subject} ${gradeLevel} - Mid-Term Exam`);
+    fetchExamCycles();
+  }, []);
+
+  const fetchExamCycles = async () => {
+    setIsLoadingCycles(true);
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/exam-cycles`);
+      const json = await res.json();
+      if (json.data) {
+        setCycles(json.data);
+        if (json.data.length > 0 && !selectedCycleId) {
+          setSelectedCycleId(json.data[0].id);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch exam cycles", e);
+    } finally {
+      setIsLoadingCycles(false);
     }
-  }, [subject, gradeLevel]);
+  };
+
+  const handleCreateCycle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCycleName.trim()) return;
+
+    setIsCreatingCycle(true);
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/exam-cycles`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newCycleName,
+          start_date: newCycleStart || null,
+          end_date: newCycleEnd || null,
+        }),
+      });
+      const json = await res.json();
+      if (res.ok && json.data) {
+        setCycles([json.data, ...cycles]);
+        setSelectedCycleId(json.data.id);
+        setNewCycleName("");
+        setNewCycleStart("");
+        setNewCycleEnd("");
+      } else {
+        throw new Error(json.detail || "Failed to create exam cycle");
+      }
+    } catch (e: any) {
+      alert(e.message || "An error occurred");
+    } finally {
+      setIsCreatingCycle(false);
+    }
+  };
 
   // Poll grading run progress in Step 4
   useEffect(() => {
@@ -131,7 +196,6 @@ export default function ExamsPage() {
       setGradingNotes(data.draft_rubric.grading_notes || "");
       setAiConfidence(data.ai_confidence);
       
-      // Move to Step 2 (Rubric Edit)
       setStep(2);
     } catch (e: any) {
       alert(e.message || "An error occurred while processing the question paper.");
@@ -140,12 +204,11 @@ export default function ExamsPage() {
     }
   };
 
-  // Add new step in Rubric Review
   const addRubricStep = () => {
     const nextNum = rubricSteps.length > 0 ? Math.max(...rubricSteps.map(s => s.step_num)) + 1 : 1;
     const newStep: RubricStep = {
       step_num: nextNum,
-      description: "New question description",
+      description: "New step description",
       marks: 5,
       step_type: "statement",
       component_type: "text",
@@ -157,19 +220,17 @@ export default function ExamsPage() {
     setRubricSteps([...rubricSteps, newStep]);
   };
 
-  // Remove rubric step
   const removeRubricStep = (num: number) => {
     setRubricSteps(rubricSteps.filter(s => s.step_num !== num));
   };
 
-  // Update step values
   const updateStepValue = (num: number, key: keyof RubricStep, value: any) => {
     setRubricSteps(
       rubricSteps.map(s => (s.step_num === num ? { ...s, [key]: value } : s))
     );
   };
 
-  // Confirm Rubric & Create Task
+  // Confirm Rubric & Create Task in DRAFT
   const confirmRubric = async () => {
     setIsCreatingTask(true);
     const payload = {
@@ -180,6 +241,8 @@ export default function ExamsPage() {
       max_marks: maxMarks,
       description,
       question_paper_key: questionPaperKey,
+      exam_cycle_id: selectedCycleId,
+      paper_set: paperSet,
       rubric: {
         version: "1.0.0",
         grading_notes: gradingNotes,
@@ -201,9 +264,7 @@ export default function ExamsPage() {
 
       const json = await res.json();
       setTaskId(json.data.id);
-      
-      // Move to Step 3 (Bulk Answer Sheet Upload)
-      setStep(3);
+      setRubricApprovalStatus("DRAFT"); // Default state when confirmed
     } catch (e: any) {
       alert(e.message || "Failed to create task & rubric");
     } finally {
@@ -211,7 +272,42 @@ export default function ExamsPage() {
     }
   };
 
-  // Step 3: Handle Answer sheets drop
+  // Submit for approval (Teacher workflow)
+  const submitForApproval = async () => {
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/question-papers/${taskId}/rubric/submit-for-approval`, {
+        method: "POST",
+      });
+      const json = await res.json();
+      if (res.ok && json.data) {
+        setRubricApprovalStatus(json.data.approval_status);
+        alert("Rubric submitted for HOD review successfully!");
+      } else {
+        throw new Error(json.detail || "Submission failed");
+      }
+    } catch (e: any) {
+      alert(e.message);
+    }
+  };
+
+  // Direct approval (HOD/Principal workflow)
+  const approveRubric = async () => {
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/question-papers/${taskId}/rubric/approve`, {
+        method: "POST",
+      });
+      const json = await res.json();
+      if (res.ok && json.data) {
+        setRubricApprovalStatus(json.data.approval_status);
+        alert("Rubric APPROVED. Evaluation unlocked!");
+      } else {
+        throw new Error(json.detail || "Approval failed");
+      }
+    } catch (e: any) {
+      alert(e.message);
+    }
+  };
+
   const handleAnswersDrop = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const filesArray = Array.from(e.target.files);
@@ -225,12 +321,10 @@ export default function ExamsPage() {
     ]);
   };
 
-  // Update specific student ID
   const updateStudentId = (idx: number, id: string) => {
     setCustomStudentIds(prev => prev.map((item, i) => (i === idx ? id : item)));
   };
 
-  // Remove answer file
   const removeAnswerFile = (idx: number) => {
     setAnswerFiles(prev => prev.filter((_, i) => i !== idx));
     setCustomStudentIds(prev => prev.filter((_, i) => i !== idx));
@@ -249,7 +343,6 @@ export default function ExamsPage() {
     formData.append("student_ids", JSON.stringify(customStudentIds));
 
     try {
-      // Step 3a: Upload files to Supabase Storage & register submissions
       const uploadRes = await fetchWithAuth(`${API_BASE}/submissions/bulk`, {
         method: "POST",
         body: formData,
@@ -260,25 +353,15 @@ export default function ExamsPage() {
         throw new Error(err.detail || "Answer sheet bulk upload failed");
       }
 
-      // Step 3b: Wait brief moment, then start grading run
-      // In real scenario, Celery handles parsing asynchronously, but we trigger the bulk-grade
-      // We will show step 4 and poll until parsing is done, then let grading run start.
-      // Or we call the bulk-grade endpoint immediately which queues everything if parsed or tells us status.
-      // Since parsing takes some seconds, let's start the run. Let's call /submissions/bulk-grade.
-      // We wrap this inside an alert or direct attempt because some sheets might still be parsing.
-      // We will attempt to trigger immediately or let the user click "Start Evaluation" once ready.
-      
-      // Let's call the bulk grade api
       const gradePayload = {
         task_id: taskId,
         description: `Bulk evaluation run for ${title}`,
         temperature: 0.0,
       };
 
-      // Let's poll for a moment until submissions are parsed or just navigate to step 4
       setStep(4);
       
-      // Try initiating grading
+      // Initiate grading (requires APPROVED rubric status)
       setTimeout(async () => {
         try {
           const res = await fetchWithAuth(`${API_BASE}/submissions/bulk-grade`, {
@@ -289,11 +372,13 @@ export default function ExamsPage() {
           const json = await res.json();
           if (json.data && json.data.run_id) {
             setRunId(json.data.run_id);
+          } else if (json.detail) {
+            alert(json.detail);
           }
-        } catch (e) {
-          console.log("Submissions still parsing, will let auto-polling manage.");
+        } catch (e: any) {
+          console.log("Evaluation scheduling deferred.");
         }
-      }, 3000);
+      }, 2000);
 
     } catch (e: any) {
       alert(e.message || "Bulk grading start failed");
@@ -315,7 +400,7 @@ export default function ExamsPage() {
         body: JSON.stringify(gradePayload),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.detail || "Grading failed to start. Submissions might still be parsing.");
+      if (!res.ok) throw new Error(json.detail || "Grading failed to start. Submissions might still be parsing or rubric is not approved.");
       if (json.data && json.data.run_id) {
         setRunId(json.data.run_id);
       }
@@ -326,40 +411,163 @@ export default function ExamsPage() {
 
   return (
     <>
-      {/* ── Title Area ── */}
+      {/* Title Area */}
       <div className="flex-between mb-8">
         <div>
           <h1 className="text-[24px] font-semibold text-text-primary flex items-center gap-2">
             <Sparkles className="text-brand-500 animate-pulse" size={24} />
-            AI-Assisted Exam Evaluation Setup
+            Institutional Exam & Assessment Engine
           </h1>
           <p className="text-[13px] text-text-tertiary mt-1">
-            Complete assessment lifecycle from physical question papers to automated component grading
+            Group subject papers under institutional exam cycles, configure math/diagram rubrics, and run bulk graded evaluations.
           </p>
         </div>
       </div>
 
-      {/* ── Steps Indicator ── */}
-      <div className="steps-container mb-8">
-        {[
-          { num: 1, label: "Question Paper" },
-          { num: 2, label: "Rubric Configuration" },
-          { num: 3, label: "Bulk Student Answers" },
-          { num: 4, label: "Live Grading & Analytics" }
-        ].map((s) => (
-          <div key={s.num} className={`step-item ${step === s.num ? "active" : ""} ${step > s.num ? "completed" : ""}`}>
-            <div className="step-number">
-              {step > s.num ? <Check size={14} className="stroke-[3]" /> : s.num}
+      {/* Steps Indicator */}
+      {step > 0 && (
+        <div className="steps-container mb-8">
+          {[
+            { num: 1, label: "Question Paper" },
+            { num: 2, label: "Rubric & Approvals" },
+            { num: 3, label: "Bulk answer sheets" },
+            { num: 4, label: "Live evaluation queue" }
+          ].map((s) => (
+            <div key={s.num} className={`step-item ${step === s.num ? "active" : ""} ${step > s.num ? "completed" : ""}`}>
+              <div className="step-number">
+                {step > s.num ? <Check size={14} className="stroke-[3]" /> : s.num}
+              </div>
+              <div className="step-label">{s.label}</div>
+              {s.num < 4 && <div className="step-connector" />}
             </div>
-            <div className="step-label">{s.label}</div>
-            {s.num < 4 && <div className="step-connector" />}
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {/* ── Wizard Body ── */}
+      {/* Wizard Body */}
       <div className="card p-6">
         
+        {/* ── Step 0: Cycle Selection ── */}
+        {step === 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Cycle Selection Panel */}
+            <div className="lg:col-span-2 flex flex-col gap-5">
+              <h3 className="text-[16px] font-semibold text-text-primary flex items-center gap-2">
+                <Layers size={18} className="text-brand-500" />
+                Select Institutional Exam Cycle
+              </h3>
+              <p className="text-[12.5px] text-text-tertiary">
+                Choose an active exam cycle to upload and decompose a new subject paper.
+              </p>
+
+              {isLoadingCycles ? (
+                <div className="py-12 text-center text-text-tertiary">
+                  <Loader2 className="animate-spin mx-auto mb-2 text-brand-500" size={24} />
+                  Fetching exam cycles...
+                </div>
+              ) : cycles.length === 0 ? (
+                <div className="py-12 text-center text-text-tertiary border border-dashed rounded-lg p-6 bg-surface-secondary/25">
+                  No active exam cycles found. Create one on the right to get started.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {cycles.map((c) => (
+                    <div 
+                      key={c.id} 
+                      className={`border rounded-xl p-5 cursor-pointer transition-all ${selectedCycleId === c.id ? "border-brand-500 bg-brand-500/5 shadow-sm" : "border-border-default hover:border-border-strong bg-surface-primary"}`}
+                      onClick={() => setSelectedCycleId(c.id)}
+                    >
+                      <div className="flex-between mb-2">
+                        <span className="text-[13.5px] font-bold text-text-primary">{c.name}</span>
+                        <span className={`pill ${c.status === "ACTIVE" ? "pill-success" : "pill-info"}`}>{c.status}</span>
+                      </div>
+                      <div className="text-[11.5px] text-text-secondary flex items-center gap-2">
+                        <Calendar size={13} className="text-text-tertiary" />
+                        {c.start_date ? new Date(c.start_date).toLocaleDateString() : "TBD"} - {c.end_date ? new Date(c.end_date).toLocaleDateString() : "TBD"}
+                      </div>
+                      <div className="text-[11.5px] text-brand-600 font-semibold mt-3">
+                        {c.task_count} subject papers linked
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {cycles.length > 0 && (
+                <div className="flex justify-end pt-4 border-t border-border-subtle mt-4">
+                  <button 
+                    className="btn btn-brand btn-lg flex items-center gap-1.5"
+                    onClick={() => {
+                      const cycle = cycles.find(c => c.id === selectedCycleId);
+                      if (cycle) {
+                        setTitle(`${cycle.name} - Physics Paper`);
+                      }
+                      setStep(1);
+                    }}
+                  >
+                    Select & Proceed to Paper Upload
+                    <ArrowRight size={16} />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Create Cycle Panel */}
+            <div className="lg:col-span-1 border-l border-border-subtle pl-0 lg:pl-8">
+              <h3 className="text-[15px] font-semibold text-text-primary mb-4 flex items-center gap-2">
+                <Plus size={16} className="text-brand-500" />
+                Create New Exam Cycle
+              </h3>
+
+              <form onSubmit={handleCreateCycle} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-medium text-text-secondary uppercase">Cycle Title</label>
+                  <input 
+                    type="text" 
+                    className="input-field" 
+                    placeholder="e.g. Mid-Term Oct 2026"
+                    value={newCycleName}
+                    onChange={(e) => setNewCycleName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-medium text-text-secondary uppercase">Start Date</label>
+                  <input 
+                    type="date" 
+                    className="input-field" 
+                    value={newCycleStart}
+                    onChange={(e) => setNewCycleStart(e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-medium text-text-secondary uppercase">End Date</label>
+                  <input 
+                    type="date" 
+                    className="input-field" 
+                    value={newCycleEnd}
+                    onChange={(e) => setNewCycleEnd(e.target.value)}
+                  />
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="btn btn-brand w-full flex justify-center items-center gap-2 py-2"
+                  disabled={isCreatingCycle}
+                >
+                  {isCreatingCycle ? (
+                    <>
+                      <Loader2 className="animate-spin" size={14} /> Creating...
+                    </>
+                  ) : (
+                    "Create Cycle Standard"
+                  )}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
         {/* ── Step 1: Upload Question Paper ── */}
         {step === 1 && (
           <div className="animate-fade-in">
@@ -368,8 +576,8 @@ export default function ExamsPage() {
                 <h3 className="text-[16px] font-medium text-text-primary">Exam Metadata</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1">
-                    <label className="text-[11px] font-medium text-text-secondary uppercase">Exam Title</label>
-                    <input type="text" className="input-field" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Physics Mid-Term" />
+                    <label className="text-[11px] font-medium text-text-secondary uppercase">Subject Paper Title</label>
+                    <input type="text" className="input-field" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Physics Grade 12" />
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-[11px] font-medium text-text-secondary uppercase">Subject</label>
@@ -383,8 +591,17 @@ export default function ExamsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="flex flex-col gap-1">
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="flex flex-col gap-1 col-span-1">
+                    <label className="text-[11px] font-medium text-text-secondary uppercase">Paper Set</label>
+                    <select className="input-field" value={paperSet} onChange={(e) => setPaperSet(e.target.value)}>
+                      <option value="A">Set A</option>
+                      <option value="B">Set B</option>
+                      <option value="C">Set C</option>
+                      <option value="None">None</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1 col-span-1">
                     <label className="text-[11px] font-medium text-text-secondary uppercase">Board</label>
                     <select className="input-field" value={board} onChange={(e) => setBoard(e.target.value)}>
                       <option value="CBSE">CBSE</option>
@@ -392,11 +609,11 @@ export default function ExamsPage() {
                       <option value="State Board">State Board</option>
                     </select>
                   </div>
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 col-span-1">
                     <label className="text-[11px] font-medium text-text-secondary uppercase">Grade Level</label>
                     <input type="text" className="input-field" value={gradeLevel} onChange={(e) => setGradeLevel(e.target.value)} />
                   </div>
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 col-span-1">
                     <label className="text-[11px] font-medium text-text-secondary uppercase">Max Marks</label>
                     <input type="number" className="input-field" value={maxMarks} onChange={(e) => setMaxMarks(parseInt(e.target.value))} />
                   </div>
@@ -429,7 +646,10 @@ export default function ExamsPage() {
               </div>
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-border-secondary">
+            <div className="flex justify-between pt-4 border-t border-border-secondary">
+              <button className="btn btn-lg flex items-center gap-2" onClick={() => setStep(0)}>
+                <ArrowLeft size={16} /> Change Cycle
+              </button>
               <button 
                 className="btn btn-brand btn-lg flex items-center gap-2" 
                 onClick={processQuestionPaper} 
@@ -451,20 +671,54 @@ export default function ExamsPage() {
           </div>
         )}
 
-        {/* ── Step 2: Review & Edit Rubric ── */}
+        {/* ── Step 2: Review & Edit Rubric + Approvals ── */}
         {step === 2 && (
           <div className="animate-fade-in">
-            <div className="flex-between mb-4 pb-2 border-b border-border-secondary">
-              <div>
-                <h3 className="text-[16px] font-medium text-text-primary">Gemini-Generated Rubric Structure</h3>
-                <p className="text-[12px] text-text-tertiary mt-1 flex items-center gap-2">
-                  <BrainCircuit className="text-brand-500" size={14} />
-                  AI confidence: {(aiConfidence * 100).toFixed(0)}% • Please verify matching components and marks distribution before finalizing.
-                </p>
+            {/* Top info and Approval Status panel */}
+            <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-border-secondary">
+              <div className="flex-between flex-wrap gap-4">
+                <div>
+                  <h3 className="text-[16px] font-medium text-text-primary">Gemini-Generated Rubric Structure</h3>
+                  <p className="text-[12px] text-text-tertiary mt-1 flex items-center gap-2">
+                    <BrainCircuit className="text-brand-500" size={14} />
+                    AI confidence: {(aiConfidence * 100).toFixed(0)}% • Verify marks allocation before proceeding.
+                  </p>
+                </div>
+                
+                {/* Approval Status Badge */}
+                <div className="flex items-center gap-3">
+                  <span className="text-[12px] font-medium text-text-secondary">Approval Status:</span>
+                  <span className={`pill font-bold py-1 px-3 ${
+                    rubricApprovalStatus === "APPROVED" ? "pill-success" : 
+                    rubricApprovalStatus === "PENDING_APPROVAL" ? "pill-warning" : "pill-danger"
+                  }`}>
+                    {rubricApprovalStatus}
+                  </span>
+                  
+                  {/* Action buttons inside the wizard */}
+                  {!taskId ? (
+                    <button className="btn btn-brand py-1 px-3 text-[12px]" onClick={confirmRubric} disabled={isCreatingTask}>
+                      {isCreatingTask ? <Loader2 className="animate-spin" size={12} /> : "Save Rubric Schema"}
+                    </button>
+                  ) : (
+                    <div className="flex gap-2">
+                      {rubricApprovalStatus === "DRAFT" && (
+                        <button className="btn btn-brand py-1 px-3 text-[12px] flex items-center gap-1" onClick={submitForApproval}>
+                          <ShieldCheck size={13} />
+                          Submit for HOD Approval
+                        </button>
+                      )}
+                      {(user?.role === "hod" || user?.role === "principal" || user?.role === "admin") && 
+                       rubricApprovalStatus === "PENDING_APPROVAL" && (
+                        <button className="btn btn-brand py-1 px-3 text-[12px] bg-green-600 hover:bg-green-700 border-green-600 text-white flex items-center gap-1" onClick={approveRubric}>
+                          <UserCheck size={13} />
+                          Approve Rubric
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-              <button className="btn flex items-center gap-1 text-[12px] py-1 px-3" onClick={addRubricStep}>
-                <Plus size={14} /> Add Step
-              </button>
             </div>
 
             {/* Rubric General Grading Notes */}
@@ -479,7 +733,7 @@ export default function ExamsPage() {
             </div>
 
             {/* Steps List */}
-            <div className="flex flex-col gap-4 mb-6 max-h-[450px] overflow-y-auto pr-2">
+            <div className="flex flex-col gap-4 mb-6 max-h-[350px] overflow-y-auto pr-2">
               {rubricSteps.map((s, idx) => (
                 <div key={s.step_num} className="border border-border-secondary rounded-lg p-4 bg-surface-secondary/20 flex flex-col gap-3">
                   <div className="flex-between">
@@ -535,7 +789,7 @@ export default function ExamsPage() {
                         className="input-field font-mono text-[11px]" 
                         value={s.expected_exprs.join(", ")} 
                         onChange={(e) => updateStepValue(s.step_num, "expected_exprs", e.target.value.split(",").map(t => t.trim()))} 
-                        placeholder="e.g. F = k * q1 * q2 / r**2 (optional)"
+                        placeholder="e.g. F = k * q1 * q2 / r**2"
                       />
                     </div>
                     <div className="flex flex-col gap-1">
@@ -557,22 +811,16 @@ export default function ExamsPage() {
               <button className="btn btn-lg flex items-center gap-2" onClick={() => setStep(1)}>
                 <ArrowLeft size={16} /> Back
               </button>
+              
+              {/* Unlock only if rubric is approved */}
               <button 
                 className="btn btn-brand btn-lg flex items-center gap-2" 
-                onClick={confirmRubric} 
-                disabled={isCreatingTask}
+                onClick={() => setStep(3)}
+                disabled={rubricApprovalStatus !== "APPROVED"}
+                title={rubricApprovalStatus !== "APPROVED" ? "HOD/Principal must approve the rubric before evaluations can begin." : ""}
               >
-                {isCreatingTask ? (
-                  <>
-                    <Loader2 className="animate-spin" size={16} />
-                    Configuring Task...
-                  </>
-                ) : (
-                  <>
-                    Confirm & Proceed
-                    <ArrowRight size={16} />
-                  </>
-                )}
+                Proceed to Bulk Evaluation
+                <ArrowRight size={16} />
               </button>
             </div>
           </div>
@@ -608,7 +856,7 @@ export default function ExamsPage() {
                     <thead>
                       <tr>
                         <th>Filename</th>
-                        <th>Auto-assigned Student ID (Editable)</th>
+                        <th>Auto-assigned Student ID</th>
                         <th>File Size</th>
                         <th className="w-[50px] text-center">Action</th>
                       </tr>
@@ -670,10 +918,9 @@ export default function ExamsPage() {
             <Activity className="animate-pulse text-brand-500 mx-auto mb-4" size={48} />
             <h3 className="text-[18px] font-semibold text-text-primary mb-2">Asynchronous Evaluation Queue Active</h3>
             <p className="text-[13px] text-text-tertiary max-w-[450px] mx-auto mb-8">
-              All student answer sheets are being transferred to Supabase Storage. Once completed, the parallel evaluation pipelines (Text, Diagram, Reasoning) will execute synchronously.
+              All student answer sheets are being transferred to Supabase Storage. Once completed, the parallel evaluation pipelines will execute synchronously.
             </p>
 
-            {/* Run Progress status */}
             {runStatus ? (
               <div className="max-w-[500px] mx-auto border border-border-secondary rounded-lg p-6 bg-surface-secondary/10 flex flex-col gap-4 text-left">
                 <div className="flex-between pb-2 border-b border-border-secondary">
@@ -696,7 +943,6 @@ export default function ExamsPage() {
                   </div>
                 </div>
 
-                {/* Progress bar */}
                 <div className="w-full bg-border-secondary h-2 rounded-full overflow-hidden mt-2">
                   <div 
                     className="bg-brand-500 h-full transition-all duration-500" 

@@ -4,7 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, Settings, BookOpen, LogOut, Key,
-  Bell, Search, Shield, GraduationCap, Sun, Moon
+  Bell, Search, Shield, GraduationCap, Sun, Moon, BarChart3, ShieldCheck
 } from "lucide-react";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import Link from "next/link";
@@ -35,6 +35,9 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
     localStorage.setItem("theme", nextTheme);
     setTheme(nextTheme);
   };
+
+  const isAdmin = user?.role === "admin" || user?.role === "principal";
+  const isHOD = user?.role === "hod";
 
   if (isLoading || !user) {
     return (
@@ -85,6 +88,23 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
             <Shield className="nav-item-icon" />
             Reviews
           </Link>
+          <Link href="/dashboard/reports" className={`nav-item ${pathname.startsWith("/dashboard/reports") ? "active" : ""}`}>
+            <BarChart3 className="nav-item-icon" />
+            Reports
+          </Link>
+
+          {(isAdmin || isHOD) && (
+            <>
+              <div className="divider"></div>
+              <div className="nav-section-label">ADMINISTRATION</div>
+              {isAdmin && (
+                <Link href="/dashboard/admin" className={`nav-item ${pathname.startsWith("/dashboard/admin") ? "active" : ""}`}>
+                  <ShieldCheck className="nav-item-icon" />
+                  School Admin
+                </Link>
+              )}
+            </>
+          )}
 
           <div className="divider"></div>
 

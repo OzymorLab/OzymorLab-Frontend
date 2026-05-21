@@ -92,7 +92,6 @@ export default function DashboardPage() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("task_id", selectedTaskId);
-    formData.append("student_id", "STUDENT-" + Math.floor(Math.random() * 1000));
 
     try {
       await fetchWithAuth(`${API_BASE}/submissions`, { method: "POST", body: formData });
@@ -150,12 +149,14 @@ export default function DashboardPage() {
               <tbody>
                 {submissions.map((sub) => (
                   <tr key={sub.id} onClick={() => setSelectedSub(sub)}>
-                    <td className="col-primary font-mono text-[12px]">{sub.student_id}</td>
+                    <td className="col-primary font-mono text-[12px]">{sub.student_id || <span className="text-text-tertiary animate-pulse">Extracting Identity...</span>}</td>
                     <td className="text-[12px] max-w-[150px] truncate">{sub.file_name}</td>
                     <td>
                       {sub.status === "GRADED" && <span className="pill pill-success"><div className="pill-dot"/>Graded</span>}
                       {sub.status === "FAILED" && <span className="pill pill-danger"><div className="pill-dot"/>Failed</span>}
-                      {sub.status !== "GRADED" && sub.status !== "FAILED" && <span className="pill pill-info"><div className="pill-dot"/>{sub.status}</span>}
+                      {sub.status === "IDENTITY_EXTRACTED" && <span className="pill pill-info"><div className="pill-dot"/>Identity Found</span>}
+                      {sub.status === "GRADING" && <span className="pill pill-warning"><div className="pill-dot"/>Grading (AI)</span>}
+                      {sub.status !== "GRADED" && sub.status !== "FAILED" && sub.status !== "IDENTITY_EXTRACTED" && sub.status !== "GRADING" && <span className="pill pill-info"><div className="pill-dot"/>{sub.status}</span>}
                     </td>
                     <td className="text-[11px]">{new Date(sub.created_at).toLocaleTimeString()}</td>
                   </tr>
@@ -221,7 +222,7 @@ export default function DashboardPage() {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-border opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-success-border"></span>
                   </span>
-                  FastAPI CORE
+                  CORE
                 </span>
                 <span className="font-mono text-text-secondary">Connected (1.4s)</span>
               </div>
@@ -231,7 +232,7 @@ export default function DashboardPage() {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-600 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-600"></span>
                   </span>
-                  GEMINI VISION
+                  INTELLIGENT VISION ocr 
                 </span>
                 <span className="font-mono text-text-secondary">BYOK Online</span>
               </div>
