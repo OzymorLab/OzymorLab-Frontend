@@ -166,16 +166,19 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
       {/* Main Area */}
       <div className="main-area">
         <header className="topbar">
-          <div className="flex-center gap-2 text-text-tertiary">
-            <Search size={16} />
-            <span className="text-[13px]">Search student ID or batch...</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-secondary border border-border-subtle rounded-lg text-text-tertiary">
+            <Search size={14} />
+            <span className="text-[12px]">Search ID or batch...</span>
           </div>
-          <div className="flex-center gap-4">
-            <div className="relative cursor-pointer">
-              <Bell size={18} className="text-text-secondary" />
-              <div className="absolute top-0 right-0 w-2 h-2 bg-brand-600 rounded-full border border-surface-primary"></div>
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col items-end mr-2">
+              <span className="text-[12px] font-medium text-text-primary leading-tight">{user.full_name}</span>
+              <span className="text-[10px] text-text-tertiary">{user.role}</span>
             </div>
-            <span className="text-[12px] text-text-tertiary">{user.email}</span>
+            <div className="notif-btn relative">
+              <Bell size={16} />
+              <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-brand-600 rounded-full"></div>
+            </div>
           </div>
         </header>
 

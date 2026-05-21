@@ -113,26 +113,30 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="stats-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="stat-card">
+          <div className="stat-icon bg-success-bg text-success-border"><CheckCircle2 size={18} /></div>
+          <div className="stat-num">{submissions.filter(s => s.status === 'GRADED').length}</div>
           <div className="stat-label">Total Processed</div>
-          <div className="stat-value">{submissions.filter(s => s.status === 'GRADED').length}</div>
-          <div className="stat-delta positive">Live updating</div>
+          <div className="stat-delta positive"><Activity size={12} /> Live updating</div>
         </div>
         <div className="stat-card">
+          <div className="stat-icon bg-warning-bg text-warning-border"><AlertTriangle size={18} /></div>
+          <div className="stat-num">{submissions.filter(s => s.status !== 'GRADED').length}</div>
           <div className="stat-label">In Queue</div>
-          <div className="stat-value">{submissions.filter(s => s.status !== 'GRADED').length}</div>
-          <div className="stat-delta warning">Processing...</div>
+          <div className="stat-delta warning"><Activity size={12} /> Processing...</div>
         </div>
         <div className="stat-card">
+          <div className="stat-icon bg-info-bg text-info-text"><Activity size={18} /></div>
+          <div className="stat-num">1.4s</div>
           <div className="stat-label">Avg System Latency</div>
-          <div className="stat-value">1.4s</div>
-          <div className="stat-delta">per PDF submission</div>
+          <div className="stat-delta text-text-tertiary">per PDF submission</div>
         </div>
         <div className="stat-card">
+          <div className="stat-icon bg-brand-50 text-brand-600"><BrainCircuit size={18} /></div>
+          <div className="stat-num">0</div>
           <div className="stat-label">Drift Alerts</div>
-          <div className="stat-value">0</div>
-          <div className="stat-delta positive">No rubric drift</div>
+          <div className="stat-delta positive"><CheckCircle2 size={12} /> No rubric drift</div>
         </div>
       </div>
 

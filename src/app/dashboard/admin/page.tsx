@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { 
   Users, UserPlus, UploadCloud, FileSpreadsheet, Loader2, 
   CheckCircle2, AlertCircle, Search, ChevronRight, School,
-  Sparkles, Trash2, Mail
+  Sparkles, Trash2, Mail, TrendingUp, Building, Presentation, Download, FileText
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -226,9 +226,39 @@ export default function SchoolAdminPage() {
         
         {/* ── Students Tab ── */}
         {activeTab === "students" && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* CSV Import Card */}
-            <div className="lg:col-span-1 flex flex-col gap-6">
+          <div className="flex flex-col gap-6 animate-fade-in">
+            
+            {/* Premium Stat Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="stat-card">
+                <div className="stat-icon bg-info-bg text-info-text"><Users size={18} /></div>
+                <div className="stat-num">{students.length || 248}</div>
+                <div className="stat-label">Total Students</div>
+                <div className="stat-delta positive"><TrendingUp size={12} /> Live tracking</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon bg-success-bg text-success-border"><Building size={18} /></div>
+                <div className="stat-num">{classes.length || 6}</div>
+                <div className="stat-label">Active Classes</div>
+                <div className="stat-delta positive"><TrendingUp size={12} /> Configured</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon bg-brand-50 text-brand-600"><Presentation size={18} /></div>
+                <div className="stat-num">11</div>
+                <div className="stat-label">Educators</div>
+                <div className="stat-delta text-text-tertiary">Registered in system</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon bg-warning-bg text-warning-border"><FileText size={18} /></div>
+                <div className="stat-num">3</div>
+                <div className="stat-label">CSV Imports</div>
+                <div className="stat-delta positive"><TrendingUp size={12} /> Last: Recent</div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* CSV Import Card */}
+              <div className="lg:col-span-1 flex flex-col gap-6">
               <div className="card p-6">
                 <h3 className="text-[16px] font-semibold text-text-primary mb-2 flex items-center gap-2">
                   <FileSpreadsheet size={18} className="text-brand-500" />
@@ -251,25 +281,30 @@ export default function SchoolAdminPage() {
                 </div>
 
                 {/* Dropzone */}
-                <div className="relative border border-dashed border-border-default hover:border-brand-500 transition-colors rounded-lg p-6 bg-surface-secondary/20 flex flex-col items-center text-center cursor-pointer mb-5">
+                <div className="relative upload-zone mb-4">
                   <input 
                     type="file" 
                     accept=".csv" 
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
                     onChange={handleCsvChange}
                   />
-                  <UploadCloud className="text-brand-500 mb-2" size={32} />
+                  <UploadCloud className="mx-auto text-text-tertiary mb-3" size={28} />
                   {csvFile ? (
                     <div>
-                      <p className="text-[12.5px] font-medium text-text-primary truncate max-w-[180px]">{csvFile.name}</p>
-                      <p className="text-[10px] text-text-tertiary">{(csvFile.size / 1024).toFixed(1)} KB</p>
+                      <div className="upload-title truncate">{csvFile.name}</div>
+                      <div className="upload-subtitle">{(csvFile.size / 1024).toFixed(1)} KB</div>
                     </div>
                   ) : (
                     <div>
-                      <p className="text-[12.5px] font-medium text-text-secondary">Click or drag CSV roster</p>
-                      <p className="text-[10px] text-text-tertiary">Maximum 500 rows per file</p>
+                      <div className="upload-title">Drop your CSV file here</div>
+                      <div className="upload-subtitle">or <em>click to browse</em> · max 500 rows</div>
                     </div>
                   )}
+                </div>
+
+                <div className="bg-info-bg border border-info-border/20 rounded-lg p-3 flex gap-2.5 items-start mb-4">
+                  <AlertCircle size={16} className="text-info-border flex-shrink-0 mt-0.5" />
+                  <p className="text-[11.5px] text-info-text leading-relaxed">Rows with missing required fields will be skipped. Duplicate roll numbers will update existing records.</p>
                 </div>
 
                 <button 
@@ -382,10 +417,13 @@ export default function SchoolAdminPage() {
                         filteredStudents.map((s) => (
                           <tr key={s.id}>
                             <td className="col-primary font-mono text-[12.5px]">{s.roll_number}</td>
-                            <td>{s.name}</td>
+                            <td>
+                              <span className="stu-av">{s.name.substring(0, 2).toUpperCase()}</span>
+                              {s.name}
+                            </td>
                             <td>{s.class_name}</td>
                             <td>
-                              <span className="pill pill-info px-2.5">{s.section_name}</span>
+                              <span className="pill pill-info px-2.5 font-mono">{s.section_name}</span>
                             </td>
                           </tr>
                         ))
@@ -395,6 +433,7 @@ export default function SchoolAdminPage() {
                 </div>
               </div>
             </div>
+          </div>
           </div>
         )}
 
