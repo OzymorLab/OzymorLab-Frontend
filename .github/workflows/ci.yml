@@ -1,0 +1,30 @@
+name: Edexia AIOS Frontend CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "feat/*", "bug/*" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: "20"
+        cache: "npm"
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Lint Code
+      run: npm run lint
+
+    - name: Build Next.js Application
+      run: npm run build
