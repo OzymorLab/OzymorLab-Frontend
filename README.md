@@ -1,20 +1,19 @@
-# Edexia AIOS Teacher Dashboard
+# Edexia AIOS: Multi-Tenant Educational Dashboard
 
-Welcome to the **Edexia Frontend**, the central command center for teachers and evaluators utilizing the Edexia Assessment Intelligence Operating System.
-
+Welcome to the **Edexia Frontend**, the central command center for teachers, administrators, and evaluators utilizing the Edexia Assessment Intelligence Operating System (AIOS).
 
 # AI-Powered Multimodal Evaluation Infrastructure for Board Examination Systems
 
 ## Inspired by the Edexia Evaluation Philosophy
 
-This proposal presents a next-generation AI-assisted evaluation infrastructure designed for large-scale board examination systems such as:
+This platform is a next-generation AI-assisted evaluation infrastructure designed for large-scale board examination systems such as:
 - CBSE
 - ICSE
 - State Boards
 - Open School Boards
 - Competitive Examination Bodies
 
-The platform extends the rubric-grounded and explainable evaluation principles inspired by Edexia into a multimodal educational assessment system capable of evaluating:
+The platform extends the rubric-grounded and explainable evaluation principles into a multimodal educational assessment system capable of evaluating:
 - textual answers,
 - diagrams,
 - labels,
@@ -22,6 +21,7 @@ The platform extends the rubric-grounded and explainable evaluation principles i
 - and mixed-format responses.
 
 The objective is not to replace teachers, but to create:
+- **Multi-Tenant Institutional command centers**,
 - evaluator-assistance infrastructure,
 - moderation intelligence,
 - scalable answer-sheet processing,
@@ -31,40 +31,17 @@ The objective is not to replace teachers, but to create:
 
 # Problem Statement
 
-Current answer-sheet evaluation systems are heavily manual and difficult to scale consistently.
+Current answer-sheet evaluation systems are heavily manual and difficult to scale consistently. Traditional AI grading systems fail in educational environments because they typically evaluate only text or only semantic similarity, often treating entire answers as a single block.
 
-The major challenges include:
-- evaluator fatigue,
-- inconsistent marking,
-- delayed result processing,
-- subjective moderation,
-- poor auditability,
-- handling diagram-based answers,
-- and difficulty maintaining fairness at scale.
-
-Traditional AI grading systems also fail in educational environments because they typically evaluate:
-- only text,
-- only semantic similarity,
-- or entire answers as a single block.
-
-However, real board examination answers are multimodal.
-
-A single answer may contain:
-- textual explanation,
-- labeled diagrams,
-- formulas,
-- reasoning steps,
-- and structured presentation.
-
-Therefore, evaluation must happen component-wise rather than treating the entire response as a single entity.
+Real board examination answers are multimodal. A single answer may contain textual explanation, labeled diagrams, formulas, reasoning steps, and structured presentation. Therefore, evaluation must happen component-wise rather than treating the entire response as a single entity.
 
 ---
 
 # Core Evaluation Philosophy
 
-The proposed system follows the same foundational philosophy that made Edexia effective:
+The system evaluates answers the same way a trained examiner evaluates them: independently, rubric-wise, component-wise, and evidence-backed.
 
-| Edexia Principle | Proposed Extension |
+| Edexia Principle | Platform Extension |
 |---|---|
 | Rubric-grounded evaluation | Board-specific component-based grading |
 | Evidence-linked scoring | Explainable multimodal scoring |
@@ -73,39 +50,17 @@ The proposed system follows the same foundational philosophy that made Edexia ef
 | Structured evaluation | Parallel evaluation pipelines |
 | Calibration support | Moderation analytics and consistency tracking |
 
-The system evaluates answers the same way a trained examiner evaluates them:
-- independently,
-- rubric-wise,
-- component-wise,
-- and evidence-backed.
-
 ---
 
-# Key Architectural Shift
+# Multi-Tenant Institutional Architecture
 
-Instead of evaluating the entire answer through a single grading flow, the proposed architecture first understands:
+To support massive adoption, the Frontend operates as a **Multi-Tenant Command Center**. Powered securely by **Supabase Authentication and Storage**, it enforces strict hierarchical visibility across the school ecosystem:
 
-```text
-What components are expected in this answer?
-````
+*   **Principal & Admins**: Full institutional visibility, bulk student/roster imports, school-wide statistical performance analytics, and educator role assignments.
+*   **HOD (Head of Department)**: Gatekeepers of quality. They have department-level visibility and act as the final approval authority for AI-drafted grading rubrics before bulk evaluations can commence.
+*   **Teachers & Evaluators**: Dedicated grading dashboards focusing purely on assigned tasks, flagging low-confidence AI grades for human moderation, and managing their own student cohorts.
 
-For example:
-
-Question:
-
-> Explain the working of human heart with a neat labeled diagram.
-
-The system decomposes the expected answer into:
-
-* theory explanation,
-* biological correctness,
-* diagram structure,
-* labels,
-* presentation quality.
-
-Each component is evaluated independently and then combined into a final score.
-
-This mirrors real human evaluation behavior.
+All uploads, secure file storage, and BYOK (Bring Your Own Key) configurations are driven dynamically via Supabase integration to guarantee strict data segregation per tenant.
 
 ---
 
@@ -113,7 +68,7 @@ This mirrors real human evaluation behavior.
 
 ```mermaid
 graph TD
-    A[Teacher uploads answer sheet]
+    A[Teacher uploads answer sheet via Supabase Storage]
 
     A --> B[Question Segmentation Engine]
 
@@ -147,276 +102,44 @@ graph TD
 
     M --> N{Low Confidence?}
 
-    N -->|Yes| O[Human Review Required]
+    N -->|Yes| O[Human Review Required via Dashboard]
 
-    N -->|No| P[Store Final Grade]
+    N -->|No| P[Store Final Grade securely]
 
     O --> P
 ```
 
 ---
 
-# Why This Architecture is Important
-
-This architecture solves a major limitation of traditional AI grading systems.
-
-Most grading systems incorrectly assume:
-
-```text
-One answer = One evaluation process
-```
-
-But real educational evaluation works like this:
-
-```text
-One answer = Multiple independent scoring components
-```
-
-For example:
-
-| Component              | Marks |
-| ---------------------- | ----- |
-| Explanation            | 4     |
-| Conceptual Correctness | 2     |
-| Diagram                | 3     |
-| Labels                 | 1     |
-
-The final score is produced only after evaluating each component separately.
-
-This creates:
-
-* fairness,
-* explainability,
-* consistency,
-* and better moderation support.
-
----
-
 # Diagram Evaluation Intelligence System (DEIS)
 
-The platform includes a dedicated Diagram Evaluation Intelligence System responsible for:
+The platform seamlessly communicates with the **DEIS microservice cluster**. DEIS does not simply detect whether a diagram exists. It structurally evaluates:
 
-1. Detecting diagrams
-2. Extracting diagram regions
-3. Validating relevance against the question
-4. Understanding structure
-5. Detecting labels
-6. Mapping labels to diagram regions
-7. Identifying missing components
-8. Assigning partial marks
-9. Producing explainable scoring evidence
-
-The system does not simply detect whether a diagram exists.
-
-It evaluates:
-
-* whether the diagram is relevant,
-* whether it is correct,
-* whether labels are accurate,
-* and whether required components are present.
+1. Whether the diagram is relevant and structurally correct using PyTorch and YOLOv8.
+2. Whether handwritten labels are accurate and map to the right geometric regions.
+3. Whether required rubric components are present, calculating determinist partial marks via NetworkX.
 
 ---
 
-# Parallel Multimodal Evaluation
+# CI/CD Pipeline (GitHub Actions)
 
-The proposed system evaluates answer components independently.
-
-## Text Evaluation Pipeline
-
-Handles:
-
-* explanations,
-* derivations,
-* theoretical reasoning,
-* semantic understanding,
-* and concept correctness.
-
----
-
-## Diagram Evaluation Pipeline
-
-Handles:
-
-* structural correctness,
-* relevance,
-* labels,
-* arrows,
-* completeness,
-* and diagram-specific rubric scoring.
-
----
-
-## Label Evaluation Pipeline
-
-Handles:
-
-* handwritten labels,
-* label placement,
-* spatial mapping,
-* and terminology correctness.
-
----
-
-## Structured Reasoning Pipeline
-
-Handles:
-
-* stepwise logic,
-* presentation,
-* derivation flow,
-* and procedural correctness.
-
----
-
-# Rubric-Aware Question Decomposition
-
-One of the most important components of the system is the Question Decomposition Engine.
-
-Before evaluation begins, the system determines:
-
-* what type of answer is expected,
-* what scoring components exist,
-* and how marks should be distributed.
-
-Examples:
-
-| Question Type        | Expected Components     |
-| -------------------- | ----------------------- |
-| Explain with diagram | text + diagram + labels |
-| Draw circuit         | diagram only            |
-| Define law           | text only               |
-| Derive equation      | steps + formulas        |
-| Label map            | diagram + labels        |
-
-This creates dynamic evaluation workflows.
-
----
-
-# Partial Marking System
-
-The platform supports true rubric-based partial marking.
-
-Marks are assigned incrementally based on:
-
-* evidence,
-* completeness,
-* correctness,
-* and rubric alignment.
-
-Example:
-
-| Component         | Marks |
-| ----------------- | ----- |
-| Correct structure | 1     |
-| Labels            | 2     |
-| Completeness      | 1     |
-| Accuracy          | 1     |
-
-The system never assigns marks without evidence.
+To ensure the frontend is always highly available and performant, the repository utilizes a robust CI/CD pipeline. 
+On every push and pull request, GitHub Actions automatically:
+1. Installs the Node.js 20 environment.
+2. Resolves all project dependencies.
+3. Executes ESLint strict formatting checks to maintain codebase health.
+4. Performs a Next.js Production Build (`npm run build`) to guarantee there are no rendering or compilation failures before deployment.
 
 ---
 
 # Explainability and Auditability
 
-Every assigned mark contains supporting evidence.
+Every assigned mark contains supporting evidence. The system maintains scoring explanations, evidence regions, moderation logs, evaluator overrides, and confidence metadata. 
 
-The system maintains:
-
-* scoring explanations,
-* evidence regions,
-* moderation logs,
-* evaluator overrides,
-* and confidence metadata.
-
-This creates:
-
-* transparency,
-* moderation support,
-* and legal defensibility.
-
----
-
-# Human-in-the-Loop Evaluation
-
-The system is designed as:
-
-* evaluator assistance infrastructure,
-* not evaluator replacement.
-
-Low-confidence evaluations automatically trigger:
-
-* mandatory human review.
-
-Teachers remain:
-
-* final moderators,
-* reviewers,
-* and decision-makers.
-
----
-
-# Scalability Goals
-
-The platform is designed for:
-
-* large-scale national examinations,
-* millions of answer sheets,
-* distributed evaluation centers,
-* multilingual answer sheets,
-* and concurrent evaluation workflows.
-
-The system supports:
-
-* asynchronous processing,
-* distributed execution,
-* modular evaluation pipelines,
-* and incremental scaling.
-
----
-
-# Indian Board-Specific Adaptation
-
-The platform is specifically designed for Indian educational environments.
-
-It supports:
-
-* multilingual answer sheets,
-* mixed-language responses,
-* poor handwriting,
-* low-quality scans,
-* STEM-heavy evaluations,
-* and state-board-specific rubric structures.
-
----
-
-# Expected Outcomes
-
-| Metric                 | Current System | Proposed System       |
-| ---------------------- | -------------- | --------------------- |
-| Evaluation Time        | High           | Significantly Reduced |
-| Manual Workload        | Very High      | Reduced               |
-| Moderation Consistency | Variable       | Standardized          |
-| Diagram Evaluation     | Manual         | AI-Assisted           |
-| Auditability           | Limited        | Full Evidence-Based   |
-| Rechecking Disputes    | Frequent       | Reduced               |
-| Transparency           | Low            | High                  |
+This creates unparalleled transparency, robust moderation support, and legal defensibility at an institutional scale. Low-confidence evaluations automatically trigger mandatory human reviews, proving that teachers remain the final decision-makers.
 
 ---
 
 # Long-Term Vision
 
-The proposed platform evolves beyond grading software into:
-
-```text
-National Educational Evaluation Infrastructure
-```
-
-Potential future applications include:
-
-* board examinations,
-* university assessments,
-* engineering drawing evaluation,
-* practical examination moderation,
-* recruitment examinations,
-* and digital academic audit systems.
-
+The proposed platform evolves beyond grading software into a **National Educational Evaluation Infrastructure**. Future applications include board examinations, university assessments, practical examination moderation, recruitment examinations, and digital academic audit systems.
