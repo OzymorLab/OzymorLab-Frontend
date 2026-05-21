@@ -57,9 +57,21 @@ export default function SchoolAdminPage() {
   const [isImporting, setIsImporting] = useState(false);
   const [importResult, setImportResult] = useState<{ created: number; updated: number; total_rows: number; errors: any[] } | null>(null);
 
+  // Dashboard Stats State
+  const [stats, setStats] = useState<{
+    total_teachers: number;
+    total_students: number;
+    total_exam_cycles: number;
+    total_tasks: number;
+    total_submissions: number;
+    total_graded: number;
+  } | null>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(false);
+
   useEffect(() => {
     fetchClassHierarchy();
     fetchStudentsList();
+    fetchSchoolStats();
   }, []);
 
   const fetchClassHierarchy = async () => {
@@ -96,6 +108,21 @@ export default function SchoolAdminPage() {
     }
   };
 
+  const fetchSchoolStats = async () => {
+    setIsLoadingStats(true);
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/reports/school/dashboard`);
+      const json = await res.json();
+      if (json.data) {
+        setStats(json.data);
+      }
+    } catch (e) {
+      console.error("Failed to load school stats", e);
+    } finally {
+      setIsLoadingStats(false);
+    }
+  };
+
   // Re-fetch when class/section filters change
   useEffect(() => {
     fetchStudentsList();
@@ -129,6 +156,7 @@ export default function SchoolAdminPage() {
       if (res.ok && json.data) {
         setInviteResult(json.data);
         setTeacherEmails("");
+        fetchSchoolStats();
       } else {
         throw new Error(json.detail || "Bulk invite failed");
       }
@@ -168,6 +196,7 @@ export default function SchoolAdminPage() {
         // Refresh listings
         fetchClassHierarchy();
         fetchStudentsList();
+        fetchSchoolStats();
       } else {
         throw new Error(json.detail || "CSV import failed");
       }
@@ -232,27 +261,27 @@ export default function SchoolAdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="stat-card">
                 <div className="stat-icon bg-info-bg text-info-text"><Users size={18} /></div>
-                <div className="stat-num">{students.length || 248}</div>
+                <div className="stat-num">{isLoadingStats ? "..." : (stats?.total_students ?? 0)}</div>
                 <div className="stat-label">Total Students</div>
                 <div className="stat-delta positive"><TrendingUp size={12} /> Live tracking</div>
               </div>
               <div className="stat-card">
                 <div className="stat-icon bg-success-bg text-success-border"><Building size={18} /></div>
-                <div className="stat-num">{classes.length || 6}</div>
+                <div className="stat-num">{isLoadingClasses ? "..." : classes.length}</div>
                 <div className="stat-label">Active Classes</div>
                 <div className="stat-delta positive"><TrendingUp size={12} /> Configured</div>
               </div>
               <div className="stat-card">
                 <div className="stat-icon bg-brand-50 text-brand-600"><Presentation size={18} /></div>
-                <div className="stat-num">11</div>
+                <div className="stat-num">{isLoadingStats ? "..." : (stats?.total_teachers ?? 0)}</div>
                 <div className="stat-label">Educators</div>
                 <div className="stat-delta text-text-tertiary">Registered in system</div>
               </div>
               <div className="stat-card">
                 <div className="stat-icon bg-warning-bg text-warning-border"><FileText size={18} /></div>
-                <div className="stat-num">3</div>
-                <div className="stat-label">CSV Imports</div>
-                <div className="stat-delta positive"><TrendingUp size={12} /> Last: Recent</div>
+                <div className="stat-num">{isLoadingStats ? "..." : (stats?.total_submissions ?? 0)}</div>
+                <div className="stat-label">Total Submissions</div>
+                <div className="stat-delta positive"><TrendingUp size={12} /> Graded: {stats?.total_graded ?? 0}</div>
               </div>
             </div>
 
