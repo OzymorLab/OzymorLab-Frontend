@@ -98,9 +98,9 @@ export default function SubmissionsPage() {
   }, [selectedSub]);
 
   return (
-    <div className="submissions-container py-4 flex flex-col gap-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
         <div>
           <h1 className="text-[22px] font-medium text-text-primary flex items-center gap-2">
             <FileText size={22} className="text-brand-600" />
@@ -111,7 +111,22 @@ export default function SubmissionsPage() {
         <button 
           onClick={fetchSubmissions} 
           disabled={isLoading}
-          className="btn btn-secondary flex items-center gap-1.5 text-[12.5px] cursor-pointer"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '8px 16px',
+            borderRadius: '10px',
+            fontSize: '12.5px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            border: '1px solid var(--border-subtle)',
+            background: 'var(--surface-primary)',
+            color: 'var(--text-primary)',
+            whiteSpace: 'nowrap' as const,
+            flexShrink: 0,
+            fontFamily: 'var(--font-sans)',
+          }}
         >
           <RefreshCw size={13} className={isLoading ? "animate-spin" : ""} />
           Reload Queue
@@ -119,33 +134,78 @@ export default function SubmissionsPage() {
       </div>
 
       {/* Filters Bar */}
-      <div className="card bg-surface-primary border border-border-subtle p-4 rounded-lg flex flex-wrap gap-4 items-center justify-between shadow-sm">
-        <div className="flex items-center gap-3 flex-1 min-w-[280px]">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-2.5 text-text-tertiary" size={16} />
-            <input
-              type="text"
-              className="w-full bg-surface-secondary border border-border-default rounded-md py-2 pl-9 pr-4 text-[13px] focus:outline-none focus:border-brand-600 text-text-primary"
-              placeholder="Search Student ID or File name..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '16px',
+        background: 'var(--surface-primary)',
+        border: '1px solid var(--border-subtle)',
+        borderRadius: '14px',
+        padding: '12px 16px',
+        flexWrap: 'wrap' as const,
+      }}>
+        {/* Search */}
+        <div style={{ position: 'relative', flex: 1, minWidth: '260px', maxWidth: '500px' }}>
+          <Search 
+            size={15} 
+            style={{ 
+              position: 'absolute', 
+              left: '12px', 
+              top: '50%', 
+              transform: 'translateY(-50%)', 
+              color: 'var(--text-tertiary)',
+              pointerEvents: 'none',
+            }} 
+          />
+          <input
+            type="text"
+            placeholder="Search Student ID or File name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              width: '100%',
+              background: 'var(--surface-secondary)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: '10px',
+              padding: '9px 14px 9px 36px',
+              fontSize: '13px',
+              fontFamily: 'var(--font-sans)',
+              color: 'var(--text-primary)',
+              outline: 'none',
+            }}
+          />
         </div>
 
-        <div className="flex items-center gap-2">
-          <Filter size={14} className="text-text-tertiary" />
-          <span className="text-[12.5px] text-text-secondary mr-2 font-medium">Status:</span>
-          <div className="flex gap-1 bg-surface-secondary p-1 rounded-md border border-border-subtle">
+        {/* Status Filter */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          <Filter size={13} style={{ color: 'var(--text-tertiary)' }} />
+          <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>Status:</span>
+          <div style={{
+            display: 'flex',
+            gap: '4px',
+            background: 'var(--surface-secondary)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: '10px',
+            padding: '3px',
+          }}>
             {["ALL", "GRADED", "FAILED", "PENDING"].map((status) => (
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
-                className={`px-3 py-1 rounded-md text-[11px] font-medium transition cursor-pointer ${
-                  statusFilter === status
-                    ? "bg-surface-primary text-text-primary shadow-xs border border-border-subtle"
-                    : "text-text-secondary hover:text-text-primary"
-                }`}
+                style={{
+                  padding: '5px 12px',
+                  borderRadius: '8px',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  fontFamily: 'var(--font-sans)',
+                  letterSpacing: '0.04em',
+                  cursor: 'pointer',
+                  border: statusFilter === status ? '1px solid var(--border-subtle)' : '1px solid transparent',
+                  background: statusFilter === status ? 'var(--surface-primary)' : 'transparent',
+                  color: statusFilter === status ? 'var(--text-primary)' : 'var(--text-tertiary)',
+                  boxShadow: statusFilter === status ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
+                }}
               >
                 {status}
               </button>
@@ -154,32 +214,48 @@ export default function SubmissionsPage() {
         </div>
       </div>
 
-      {/* Grid or Table */}
-      <div className="card overflow-hidden border border-border-subtle shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="data-table w-full">
+      {/* Table */}
+      <div className="card" style={{ overflow: 'hidden', border: '1px solid var(--border-subtle)', borderRadius: '16px' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table className="data-table">
             <thead>
-              <tr className="bg-surface-secondary">
-                <th className="px-6 py-4">Student ID</th>
-                <th className="px-6 py-4">Filename</th>
-                <th className="px-6 py-4">Created Time</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Actions</th>
+              <tr>
+                <th>Student ID</th>
+                <th>Filename</th>
+                <th>Created Time</th>
+                <th>Status</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredSubmissions.map((sub) => (
-                <tr key={sub.id} onClick={() => setSelectedSub(sub)} className="hover:bg-surface-secondary cursor-pointer">
-                  <td className="px-6 py-4 font-mono text-[12px] text-text-primary font-medium">{sub.student_id}</td>
-                  <td className="px-6 py-4 text-[12.5px] max-w-[200px] truncate text-text-secondary">{sub.file_name}</td>
-                  <td className="px-6 py-4 text-[12px] text-text-tertiary">{new Date(sub.created_at).toLocaleString()}</td>
-                  <td className="px-6 py-4">
+                <tr key={sub.id} onClick={() => setSelectedSub(sub)}>
+                  <td className="col-primary font-mono text-[12px]">{sub.student_id}</td>
+                  <td className="text-[12.5px] max-w-[200px] truncate" style={{ color: 'var(--text-secondary)' }}>{sub.file_name}</td>
+                  <td className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>{new Date(sub.created_at).toLocaleString()}</td>
+                  <td>
                     {sub.status === "GRADED" && <span className="pill pill-success"><div className="pill-dot"/>Graded</span>}
                     {sub.status === "FAILED" && <span className="pill pill-danger"><div className="pill-dot"/>Failed</span>}
                     {sub.status !== "GRADED" && sub.status !== "FAILED" && <span className="pill pill-info"><div className="pill-dot"/>{sub.status}</span>}
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="btn btn-secondary py-1 px-3 text-[11.5px] flex items-center gap-1 ml-auto cursor-pointer">
+                  <td style={{ textAlign: 'right' }}>
+                    <button 
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        padding: '5px 12px',
+                        borderRadius: '8px',
+                        fontSize: '11.5px',
+                        fontWeight: 500,
+                        fontFamily: 'var(--font-sans)',
+                        cursor: 'pointer',
+                        border: '1px solid var(--border-subtle)',
+                        background: 'var(--surface-secondary)',
+                        color: 'var(--text-secondary)',
+                        marginLeft: 'auto',
+                      }}
+                    >
                       <Eye size={12} /> Audit
                     </button>
                   </td>
@@ -228,9 +304,23 @@ export default function SubmissionsPage() {
                     <div className="score-max">/ {gradeDetail.max_grade}</div>
                   </div>
                   
-                  <div className="bg-surface-secondary p-3 rounded-lg border border-border-subtle flex justify-between mb-6 text-[12.5px]">
-                    <span className="text-text-secondary">AI Verdict Confidence</span>
-                    <span className={`font-semibold ${gradeDetail.confidence >= 0.8 ? "text-success-text" : "text-warning-text"}`}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    background: 'var(--surface-secondary)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: '10px',
+                    padding: '10px 14px',
+                    marginBottom: '20px',
+                    fontSize: '12.5px',
+                    color: 'var(--text-secondary)',
+                  }}>
+                    <span>AI Verdict Confidence</span>
+                    <span style={{
+                      fontWeight: 700,
+                      color: gradeDetail.confidence >= 0.8 ? 'var(--color-success-border)' : 'var(--color-warning-border)',
+                    }}>
                       {(gradeDetail.confidence * 100).toFixed(1)}%
                     </span>
                   </div>
@@ -238,18 +328,18 @@ export default function SubmissionsPage() {
                   <div className="divider"></div>
                   
                   <div className="slide-section">
-                    <div className="slide-section-label text-[11.5px] font-semibold tracking-wider text-text-tertiary mb-3 uppercase">Component Marks breakdown</div>
-                    <div className="step-list flex flex-col gap-3">
+                    <div className="slide-section-label">Component Marks breakdown</div>
+                    <div className="step-list">
                       {gradeDetail.step_grades.map((step, idx) => (
-                        <div key={idx} className="step-card bg-surface-secondary border border-border-subtle p-3 rounded-lg">
-                          <div className="step-card-top flex justify-between font-medium text-[12.5px] text-text-primary mb-1">
-                            <span className="flex items-center gap-1.5">
+                        <div key={idx} className="step-card">
+                          <div className="step-card-top">
+                            <span className="step-name flex items-center gap-1.5">
                               <Sparkles size={12} className="text-brand-600" />
                               Step {step.step_num} ({step.step_type})
                             </span>
-                            <span>{step.awarded} / {step.max}</span>
+                            <span className="step-marks">{step.awarded} / {step.max}</span>
                           </div>
-                          <p className="step-justification text-[11.5px] text-text-secondary leading-relaxed mt-1">
+                          <p className="step-justification">
                             {step.justification}
                           </p>
                         </div>
@@ -260,10 +350,10 @@ export default function SubmissionsPage() {
                   <div className="divider"></div>
 
                   <div className="slide-section">
-                    <div className="slide-section-label text-[11.5px] font-semibold tracking-wider text-text-tertiary mb-3 uppercase">Metadata Logs</div>
-                    <div className="flex flex-col gap-2 text-[12px]">
-                      <div className="meta-row flex justify-between py-1 border-b border-border-subtle"><span className="text-text-tertiary">Processor latency</span><span className="text-text-primary font-medium">{gradeDetail.latency_ms}ms</span></div>
-                      <div className="meta-row flex justify-between py-1 border-b border-border-subtle"><span className="text-text-tertiary">Language Model</span><span className="text-text-primary font-mono truncate max-w-[180px]">{gradeDetail.model_used}</span></div>
+                    <div className="slide-section-label">Metadata Logs</div>
+                    <div>
+                      <div className="meta-row"><span className="meta-key">Processor latency</span><span className="meta-val">{gradeDetail.latency_ms}ms</span></div>
+                      <div className="meta-row"><span className="meta-key">Language Model</span><span className="meta-val truncate max-w-[180px]">{gradeDetail.model_used}</span></div>
                     </div>
                   </div>
                 </>

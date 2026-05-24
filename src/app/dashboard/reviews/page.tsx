@@ -244,12 +244,12 @@ export default function ReviewsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Title block */}
-      <div className="flex justify-between items-center flex-wrap gap-4">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' as const }}>
         <div>
-          <h1 className="text-[24px] font-semibold text-text-primary flex items-center gap-2">
-            <ShieldAlert size={24} className="text-brand-600 animate-pulse" />
+          <h1 className="text-[22px] font-medium text-text-primary flex items-center gap-2">
+            <ShieldAlert size={22} className="text-brand-600" />
             Institutional Moderation & Approval Center
           </h1>
           <p className="text-[13px] text-text-tertiary mt-1">
@@ -259,7 +259,7 @@ export default function ReviewsPage() {
         <button 
           onClick={() => { fetchPendingReviews(); if (isAdminOrHOD) fetchPendingRubrics(); }}
           disabled={isLoadingReviews || isLoadingRubrics}
-          className="btn flex items-center gap-1.5 text-[12.5px]"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '10px', fontSize: '12.5px', fontWeight: 600, cursor: 'pointer', border: '1px solid var(--border-subtle)', background: 'var(--surface-primary)', color: 'var(--text-primary)', whiteSpace: 'nowrap' as const, flexShrink: 0, fontFamily: 'var(--font-sans)' }}
         >
           <RefreshCw size={13} className={isLoadingReviews || isLoadingRubrics ? "animate-spin" : ""} />
           Refresh Lists
@@ -268,13 +268,13 @@ export default function ReviewsPage() {
 
       {/* ── State Machine Rubric Approvals (HOD / Admin only) ── */}
       {isAdminOrHOD && (
-        <div className="card border border-brand-500/25 bg-brand-500/5 overflow-hidden">
-          <div className="card-header border-b border-brand-500/20 bg-brand-500/10 px-6 py-4 flex justify-between items-center">
-            <div className="card-title font-semibold text-[13.5px] text-brand-800 flex items-center gap-2">
+        <div style={{ background: 'var(--surface-primary)', border: '1px solid var(--border-subtle)', borderRadius: '16px', overflow: 'hidden' }}>
+          <div style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--surface-secondary)', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ fontWeight: 600, fontSize: '13.5px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <ShieldCheck size={16} className="text-brand-600" />
               Teacher Rubrics Awaiting Approval ({pendingRubrics.length} Pending)
             </div>
-            <span className="text-[11px] text-brand-700 font-medium px-2 py-0.5 rounded bg-brand-500/20">HOD Approval Gate</span>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--brand-600)', padding: '3px 10px', borderRadius: '6px', background: 'rgba(83,74,183,0.08)', border: '1px solid rgba(83,74,183,0.15)' }}>HOD Approval Gate</span>
           </div>
 
           <div className="card-body p-0">
@@ -326,13 +326,13 @@ export default function ReviewsPage() {
       )}
 
       {/* ── Submissions Flagged for Human Review ── */}
-      <div className="card border border-border-subtle shadow-sm overflow-hidden">
-        <div className="card-header border-b border-border-subtle bg-surface-secondary px-6 py-4 flex justify-between items-center">
-          <div className="card-title font-medium text-[13.5px] flex items-center gap-2">
-            <ShieldAlert size={16} className="text-color-danger-border animate-pulse" />
+      <div style={{ background: 'var(--surface-primary)', border: '1px solid var(--border-subtle)', borderRadius: '16px', overflow: 'hidden' }}>
+        <div style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--surface-secondary)', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' as const, gap: '8px' }}>
+          <div style={{ fontWeight: 500, fontSize: '13.5px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ShieldAlert size={16} style={{ color: 'var(--color-danger-border)' }} />
             Submissions Requiring Moderator Review ({reviews.length} Flagged)
           </div>
-          <span className="text-[11px] text-text-tertiary">Triggered when confidence score drifts or fails rubric parameters</span>
+          <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Triggered when confidence score drifts or fails rubric parameters</span>
         </div>
 
         <div className="card-body p-0">

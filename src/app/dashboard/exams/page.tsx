@@ -412,16 +412,18 @@ export default function ExamsPage() {
   return (
     <>
       {/* Title Area */}
-      <div className="flex-between mb-8">
-        <div>
-          <h1 className="text-[24px] font-semibold text-text-primary flex items-center gap-2">
-            <Sparkles className="text-brand-500 animate-pulse" size={24} />
-            Institutional Exam & Assessment Engine
-          </h1>
-          <p className="text-[13px] text-text-tertiary mt-1">
+      <div className="dash-header">
+        <div className="dash-header-content">
+          <div className="dash-header-badge">
+            <Sparkles size={12} />
+            <span>Assessment Engine</span>
+          </div>
+          <h1 className="dash-header-title">Institutional Exam & Assessment Engine</h1>
+          <p className="dash-header-subtitle">
             Group subject papers under institutional exam cycles, configure math/diagram rubrics, and run bulk graded evaluations.
           </p>
         </div>
+        <div className="dash-header-glow" />
       </div>
 
       {/* Steps Indicator */}
@@ -445,7 +447,7 @@ export default function ExamsPage() {
       )}
 
       {/* Wizard Body */}
-      <div className="card p-6">
+      <div className="dash-card" style={{ padding: '24px' }}>
         
         {/* ── Step 0: Cycle Selection ── */}
         {step === 0 && (
@@ -453,7 +455,9 @@ export default function ExamsPage() {
             {/* Cycle Selection Panel */}
             <div className="lg:col-span-2 flex flex-col gap-5">
               <h3 className="text-[16px] font-semibold text-text-primary flex items-center gap-2">
-                <Layers size={18} className="text-brand-500" />
+                <div className="dash-card-title-icon brand" style={{width: '28px', height: '28px'}}>
+                  <Layers size={15} />
+                </div>
                 Select Institutional Exam Cycle
               </h3>
               <p className="text-[12.5px] text-text-tertiary">
@@ -466,7 +470,10 @@ export default function ExamsPage() {
                   Fetching exam cycles...
                 </div>
               ) : cycles.length === 0 ? (
-                <div className="py-12 text-center text-text-tertiary border border-dashed rounded-lg p-6 bg-surface-secondary/25">
+                <div className="dash-empty-state" style={{padding: '48px 20px', border: '2px dashed var(--border-default)', borderRadius: '14px', background: 'var(--surface-secondary)'}}>
+                  <div className="dash-empty-icon">
+                    <Layers size={28} />
+                  </div>
                   No active exam cycles found. Create one on the right to get started.
                 </div>
               ) : (
@@ -513,9 +520,11 @@ export default function ExamsPage() {
             </div>
 
             {/* Create Cycle Panel */}
-            <div className="lg:col-span-1 border-l border-border-subtle pl-0 lg:pl-8">
-              <h3 className="text-[15px] font-semibold text-text-primary mb-4 flex items-center gap-2">
-                <Plus size={16} className="text-brand-500" />
+            <div className="lg:col-span-1 pl-0 lg:pl-8" style={{borderLeft: '1px solid var(--border-subtle)'}}>
+              <h3 className="text-[15px] font-semibold text-text-primary mb-5 flex items-center gap-2">
+                <div className="dash-card-title-icon brand" style={{width: '26px', height: '26px'}}>
+                  <Plus size={14} />
+                </div>
                 Create New Exam Cycle
               </h3>
 
@@ -552,7 +561,8 @@ export default function ExamsPage() {
 
                 <button 
                   type="submit" 
-                  className="btn btn-brand w-full flex justify-center items-center gap-2 py-2"
+                  className="btn btn-brand w-full flex justify-center items-center gap-2"
+                  style={{padding: '10px 16px', borderRadius: '10px', fontWeight: 600, fontSize: '13px'}}
                   disabled={isCreatingCycle}
                 >
                   {isCreatingCycle ? (
@@ -560,7 +570,10 @@ export default function ExamsPage() {
                       <Loader2 className="animate-spin" size={14} /> Creating...
                     </>
                   ) : (
-                    "Create Cycle Standard"
+                    <>
+                      <Plus size={14} />
+                      Create Exam Cycle
+                    </>
                   )}
                 </button>
               </form>

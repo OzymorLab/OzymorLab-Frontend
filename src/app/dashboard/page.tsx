@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { UploadCloud, CheckCircle2, AlertTriangle, FileText, Activity, BrainCircuit, Search } from "lucide-react";
+import { UploadCloud, CheckCircle2, AlertTriangle, FileText, Activity, BrainCircuit, Search, Zap, Clock, TrendingUp, Sparkles, ArrowUpRight, Shield } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.com/api/v1";
@@ -104,80 +104,152 @@ export default function DashboardPage() {
     }
   };
 
+  const processedCount = submissions.filter(s => s.status === 'GRADED').length;
+  const queueCount = submissions.filter(s => s.status !== 'GRADED').length;
+
   return (
     <>
-      <div className="flex-between mb-6">
-        <div>
-          <h1 className="text-[22px] font-medium text-text-primary">Live Evaluation Engine</h1>
-          <p className="text-[13px] text-text-tertiary mt-1">Real-time asynchronous assessment queue</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="stat-card">
-          <div className="stat-icon bg-success-bg text-success-border"><CheckCircle2 size={18} /></div>
-          <div className="stat-num">{submissions.filter(s => s.status === 'GRADED').length}</div>
-          <div className="stat-label">Total Processed</div>
-          <div className="stat-delta positive"><Activity size={12} /> Live updating</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon bg-warning-bg text-warning-border"><AlertTriangle size={18} /></div>
-          <div className="stat-num">{submissions.filter(s => s.status !== 'GRADED').length}</div>
-          <div className="stat-label">In Queue</div>
-          <div className="stat-delta warning"><Activity size={12} /> Processing...</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon bg-info-bg text-info-text"><Activity size={18} /></div>
-          <div className="stat-num">1.4s</div>
-          <div className="stat-label">Avg System Latency</div>
-          <div className="stat-delta text-text-tertiary">per PDF submission</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon bg-brand-50 text-brand-600"><BrainCircuit size={18} /></div>
-          <div className="stat-num">0</div>
-          <div className="stat-label">Drift Alerts</div>
-          <div className="stat-delta positive"><CheckCircle2 size={12} /> No rubric drift</div>
-        </div>
-      </div>
-
-      <div className="dashboard-grid">
-        <div className="card flex flex-col">
-          <div className="card-header">
-            <div className="card-title"><FileText className="card-title-icon" /> Submission Queue</div>
+      {/* Dashboard Header */}
+      <div className="dash-header">
+        <div className="dash-header-content">
+          <div className="dash-header-badge">
+            <Zap size={12} />
+            <span>Live Engine</span>
           </div>
-          <div className="overflow-x-auto flex-1">
-            <table className="data-table">
+          <h1 className="dash-header-title">Evaluation Engine</h1>
+          <p className="dash-header-subtitle">Real-time asynchronous assessment pipeline</p>
+        </div>
+        <div className="dash-header-glow" />
+      </div>
+
+      {/* Stats Grid */}
+      <div className="dash-stats-grid">
+        <div className="dash-stat-card dash-stat-success">
+          <div className="dash-stat-icon-wrap">
+            <CheckCircle2 size={20} />
+          </div>
+          <div className="dash-stat-content">
+            <div className="dash-stat-number">{processedCount}</div>
+            <div className="dash-stat-label">Total Processed</div>
+          </div>
+          <div className="dash-stat-footer">
+            <span className="dash-stat-live-dot" />
+            <span>Live updating</span>
+          </div>
+          <div className="dash-stat-shimmer" />
+        </div>
+
+        <div className="dash-stat-card dash-stat-warning">
+          <div className="dash-stat-icon-wrap">
+            <AlertTriangle size={20} />
+          </div>
+          <div className="dash-stat-content">
+            <div className="dash-stat-number">{queueCount}</div>
+            <div className="dash-stat-label">In Queue</div>
+          </div>
+          <div className="dash-stat-footer">
+            <Activity size={12} className="dash-stat-pulse" />
+            <span>Processing...</span>
+          </div>
+          <div className="dash-stat-shimmer" />
+        </div>
+
+        <div className="dash-stat-card dash-stat-info">
+          <div className="dash-stat-icon-wrap">
+            <Clock size={20} />
+          </div>
+          <div className="dash-stat-content">
+            <div className="dash-stat-number">1.4<span className="dash-stat-unit">s</span></div>
+            <div className="dash-stat-label">Avg Latency</div>
+          </div>
+          <div className="dash-stat-footer">
+            <TrendingUp size={12} />
+            <span>per PDF submission</span>
+          </div>
+          <div className="dash-stat-shimmer" />
+        </div>
+
+        <div className="dash-stat-card dash-stat-brand">
+          <div className="dash-stat-icon-wrap">
+            <Shield size={20} />
+          </div>
+          <div className="dash-stat-content">
+            <div className="dash-stat-number">0</div>
+            <div className="dash-stat-label">Drift Alerts</div>
+          </div>
+          <div className="dash-stat-footer">
+            <CheckCircle2 size={12} />
+            <span>No rubric drift</span>
+          </div>
+          <div className="dash-stat-shimmer" />
+        </div>
+      </div>
+
+      {/* Main Grid */}
+      <div className="dashboard-grid">
+        {/* Submission Queue Card */}
+        <div className="dash-card dash-card-main">
+          <div className="dash-card-header">
+            <div className="dash-card-title">
+              <div className="dash-card-title-icon">
+                <FileText size={16} />
+              </div>
+              <span>Submission Queue</span>
+            </div>
+            <div className="dash-card-badge">{submissions.length} total</div>
+          </div>
+          <div className="dash-table-wrap">
+            <table className="dash-table">
               <thead>
-                <tr><th>Student ID</th><th>Filename</th><th>Status</th><th>Time</th></tr>
+                <tr>
+                  <th>Student ID</th>
+                  <th>Filename</th>
+                  <th>Status</th>
+                  <th>Time</th>
+                </tr>
               </thead>
               <tbody>
                 {submissions.map((sub) => (
-                  <tr key={sub.id} onClick={() => setSelectedSub(sub)}>
-                    <td className="col-primary font-mono text-[12px]">{sub.student_id || <span className="text-text-tertiary animate-pulse">Extracting Identity...</span>}</td>
+                  <tr key={sub.id} onClick={() => setSelectedSub(sub)} className="dash-table-row">
+                    <td className="col-primary font-mono text-[12px]">
+                      {sub.student_id || <span className="dash-extracting">Extracting Identity...</span>}
+                    </td>
                     <td className="text-[12px] max-w-[150px] truncate">{sub.file_name}</td>
                     <td>
-                      {sub.status === "GRADED" && <span className="pill pill-success"><div className="pill-dot"/>Graded</span>}
-                      {sub.status === "FAILED" && <span className="pill pill-danger"><div className="pill-dot"/>Failed</span>}
-                      {sub.status === "IDENTITY_EXTRACTED" && <span className="pill pill-info"><div className="pill-dot"/>Identity Found</span>}
-                      {sub.status === "GRADING" && <span className="pill pill-warning"><div className="pill-dot"/>Grading (AI)</span>}
-                      {sub.status !== "GRADED" && sub.status !== "FAILED" && sub.status !== "IDENTITY_EXTRACTED" && sub.status !== "GRADING" && <span className="pill pill-info"><div className="pill-dot"/>{sub.status}</span>}
+                      {sub.status === "GRADED" && <span className="dash-pill dash-pill-success"><span className="dash-pill-dot" />Graded</span>}
+                      {sub.status === "FAILED" && <span className="dash-pill dash-pill-danger"><span className="dash-pill-dot" />Failed</span>}
+                      {sub.status === "IDENTITY_EXTRACTED" && <span className="dash-pill dash-pill-info"><span className="dash-pill-dot" />Identity Found</span>}
+                      {sub.status === "GRADING" && <span className="dash-pill dash-pill-warning"><span className="dash-pill-dot" />Grading (AI)</span>}
+                      {sub.status !== "GRADED" && sub.status !== "FAILED" && sub.status !== "IDENTITY_EXTRACTED" && sub.status !== "GRADING" && <span className="dash-pill dash-pill-info"><span className="dash-pill-dot" />{sub.status}</span>}
                     </td>
-                    <td className="text-[11px]">{new Date(sub.created_at).toLocaleTimeString()}</td>
+                    <td className="text-[11px] dash-time">{new Date(sub.created_at).toLocaleTimeString()}</td>
                   </tr>
                 ))}
                 {submissions.length === 0 && (
-                  <tr><td colSpan={4} className="text-center py-8 text-text-tertiary">No submissions found. Drop a PDF to begin!</td></tr>
+                  <tr>
+                    <td colSpan={4} className="dash-empty-state">
+                      <div className="dash-empty-icon">
+                        <FileText size={32} />
+                      </div>
+                      <span>No submissions found. Drop a PDF to begin!</span>
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
           </div>
         </div>
 
+        {/* Right Rail */}
         <div className="right-rail">
-          <div className="mb-4">
-            <label className="block text-[12px] font-medium text-text-secondary mb-1">Select Exam Task</label>
+          {/* Task Selector */}
+          <div className="dash-task-selector">
+            <label className="dash-task-label">
+              <Sparkles size={14} />
+              Select Exam Task
+            </label>
             <select 
-              className="w-full bg-surface-primary border border-border-subtle rounded-md px-3 py-2 text-[13px] text-text-primary focus:outline-none focus:border-brand-600"
+              className="dash-task-select"
               value={selectedTaskId}
               onChange={(e) => setSelectedTaskId(e.target.value)}
             >
@@ -188,23 +260,42 @@ export default function DashboardPage() {
             </select>
           </div>
 
-          <div className="relative">
-            <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onChange={handleUpload} disabled={isUploading} />
-            <div className={`upload-zone ${isUploading ? 'bg-surface-secondary' : ''}`}>
+          {/* Upload Zone */}
+          <div className="dash-upload-wrapper">
+            <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="dash-upload-input" onChange={handleUpload} disabled={isUploading} />
+            <div className={`dash-upload-zone ${isUploading ? 'uploading' : ''}`}>
+              <div className="dash-upload-border" />
               {isUploading ? (
-                <><Activity className="upload-icon mx-auto animate-pulse" /><div className="upload-title">Uploading to Storage...</div></>
+                <>
+                  <div className="dash-upload-spinner">
+                    <Activity size={24} />
+                  </div>
+                  <div className="dash-upload-title">Uploading to Storage...</div>
+                </>
               ) : (
-                <><UploadCloud className="upload-icon mx-auto" /><div className="upload-title">Drop answer sheets here</div><div className="upload-subtitle">or <em>browse files</em> (PDF, JPG)</div></>
+                <>
+                  <div className="dash-upload-icon-wrap">
+                    <UploadCloud size={28} />
+                  </div>
+                  <div className="dash-upload-title">Drop answer sheets here</div>
+                  <div className="dash-upload-subtitle">or <em>browse files</em> (PDF, JPG)</div>
+                </>
               )}
             </div>
           </div>
 
-          <div className="card">
-            <div className="card-header">
-              <div className="card-title"><Activity className="card-title-icon text-brand-600" /> Evaluation Command Center</div>
+          {/* Evaluation Command Center */}
+          <div className="dash-card dash-command-center">
+            <div className="dash-card-header">
+              <div className="dash-card-title">
+                <div className="dash-card-title-icon brand">
+                  <BrainCircuit size={16} />
+                </div>
+                <span>Evaluation Command Center</span>
+              </div>
             </div>
             
-            {/* Pulsing Conic Radar HUD */}
+            {/* Radar HUD */}
             <div className="radar-container bg-surface-secondary">
               <div className="radar-cross-h"></div>
               <div className="radar-cross-v"></div>
@@ -213,48 +304,49 @@ export default function DashboardPage() {
               </div>
               <div className="radar-sweep"></div>
               
-              {/* Animated Blips */}
               <div className="radar-blip radar-blip-backend" title="FastAPI Engine Active"></div>
               <div className="radar-blip radar-blip-llm" title="Gemini Multi-Modal Active"></div>
               <div className="radar-blip radar-blip-kb" title="Dynamic Ruleset Sync Active"></div>
             </div>
 
-            <div className="flex flex-col p-4 gap-3 bg-surface-primary">
-              <div className="flex justify-between items-center text-[12px] border-b border-border-subtle pb-2">
-                <span className="text-text-tertiary flex items-center gap-1.5 font-medium">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-border opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-success-border"></span>
+            {/* System Status */}
+            <div className="dash-system-status">
+              <div className="dash-status-row">
+                <div className="dash-status-left">
+                  <span className="dash-status-indicator success">
+                    <span className="dash-status-ping" />
+                    <span className="dash-status-dot" />
                   </span>
-                  CORE
-                </span>
-                <span className="font-mono text-text-secondary">Connected (1.4s)</span>
+                  <span className="dash-status-name">CORE</span>
+                </div>
+                <span className="dash-status-value">Connected (1.4s)</span>
               </div>
-              <div className="flex justify-between items-center text-[12px] border-b border-border-subtle pb-2">
-                <span className="text-text-tertiary flex items-center gap-1.5 font-medium">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-600 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-600"></span>
+              <div className="dash-status-row">
+                <div className="dash-status-left">
+                  <span className="dash-status-indicator brand">
+                    <span className="dash-status-ping" />
+                    <span className="dash-status-dot" />
                   </span>
-                  INTELLIGENT VISION ocr 
-                </span>
-                <span className="font-mono text-text-secondary">BYOK Online</span>
+                  <span className="dash-status-name">INTELLIGENT VISION OCR</span>
+                </div>
+                <span className="dash-status-value">BYOK Online</span>
               </div>
-              <div className="flex justify-between items-center text-[12px]">
-                <span className="text-text-tertiary flex items-center gap-1.5 font-medium">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-info-border opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-info-border"></span>
+              <div className="dash-status-row last">
+                <div className="dash-status-left">
+                  <span className="dash-status-indicator info">
+                    <span className="dash-status-ping" />
+                    <span className="dash-status-dot" />
                   </span>
-                  DYNAMIC RULES
-                </span>
-                <span className="font-mono text-text-secondary">Sync Complete</span>
+                  <span className="dash-status-name">DYNAMIC RULES</span>
+                </div>
+                <span className="dash-status-value">Sync Complete</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Detail Slide Panel */}
       {selectedSub && (
         <div className="slide-overlay" onClick={() => setSelectedSub(null)}>
           <div className="slide-panel animate-slide-r" onClick={(e) => e.stopPropagation()}>

@@ -216,38 +216,43 @@ export default function SchoolAdminPage() {
   return (
     <>
       {/* Title Area */}
-      <div className="flex-between mb-8">
-        <div>
-          <h1 className="text-[24px] font-semibold text-text-primary flex items-center gap-2">
-            <School className="text-brand-500" size={24} />
-            Institutional Administration Panel
-          </h1>
-          <p className="text-[13px] text-text-tertiary mt-1">
-            Manage school rosters, import classrooms, and orchestrate role permissions.
-          </p>
-        </div>
+      <div style={{ marginBottom: '24px' }}>
+        <h1 className="text-[22px] font-medium text-text-primary flex items-center gap-2">
+          <School className="text-brand-500" size={22} />
+          Institutional Administration Panel
+        </h1>
+        <p className="text-[13px] text-text-tertiary mt-1">
+          Manage school rosters, import classrooms, and orchestrate role permissions.
+        </p>
       </div>
 
       {/* Tabs Layout */}
-      <div className="flex gap-4 border-b border-border-subtle mb-6 pb-px">
-        <button 
-          className={`pb-3 text-[14px] font-medium transition-colors border-b-2 relative ${activeTab === "students" ? "text-brand-600 border-brand-600 font-semibold" : "text-text-tertiary border-transparent hover:text-text-primary"}`}
-          onClick={() => setActiveTab("students")}
-        >
-          Student Imports
-        </button>
-        <button 
-          className={`pb-3 text-[14px] font-medium transition-colors border-b-2 relative ${activeTab === "teachers" ? "text-brand-600 border-brand-600 font-semibold" : "text-text-tertiary border-transparent hover:text-text-primary"}`}
-          onClick={() => setActiveTab("teachers")}
-        >
-          Teacher Invites
-        </button>
-        <button 
-          className={`pb-3 text-[14px] font-medium transition-colors border-b-2 relative ${activeTab === "classes" ? "text-brand-600 border-brand-600 font-semibold" : "text-text-tertiary border-transparent hover:text-text-primary"}`}
-          onClick={() => setActiveTab("classes")}
-        >
-          Classes & Roster
-        </button>
+      <div style={{ display: 'flex', gap: '0', borderBottom: '1px solid var(--border-subtle)', marginBottom: '24px' }}>
+        {[
+          { key: 'students' as const, label: 'Student Imports' },
+          { key: 'teachers' as const, label: 'Teacher Invites' },
+          { key: 'classes' as const, label: 'Classes & Roster' },
+        ].map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setActiveTab(t.key)}
+            style={{
+              padding: '10px 20px',
+              fontSize: '13.5px',
+              fontWeight: activeTab === t.key ? 600 : 500,
+              fontFamily: 'var(--font-sans)',
+              color: activeTab === t.key ? 'var(--brand-600)' : 'var(--text-tertiary)',
+              background: 'transparent',
+              border: 'none',
+              borderBottom: activeTab === t.key ? '2px solid var(--brand-600)' : '2px solid transparent',
+              cursor: 'pointer',
+              transition: 'color 0.15s, border-color 0.15s',
+              marginBottom: '-1px',
+            }}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {/* Tab Contents */}
@@ -258,39 +263,33 @@ export default function SchoolAdminPage() {
           <div className="flex flex-col gap-6 animate-fade-in">
             
             {/* Premium Stat Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="stat-card">
-                <div className="stat-icon bg-info-bg text-info-text"><Users size={18} /></div>
-                <div className="stat-num">{isLoadingStats ? "..." : (stats?.total_students ?? 0)}</div>
-                <div className="stat-label">Total Students</div>
-                <div className="stat-delta positive"><TrendingUp size={12} /> Live tracking</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-icon bg-success-bg text-success-border"><Building size={18} /></div>
-                <div className="stat-num">{isLoadingClasses ? "..." : classes.length}</div>
-                <div className="stat-label">Active Classes</div>
-                <div className="stat-delta positive"><TrendingUp size={12} /> Configured</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-icon bg-brand-50 text-brand-600"><Presentation size={18} /></div>
-                <div className="stat-num">{isLoadingStats ? "..." : (stats?.total_teachers ?? 0)}</div>
-                <div className="stat-label">Educators</div>
-                <div className="stat-delta text-text-tertiary">Registered in system</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-icon bg-warning-bg text-warning-border"><FileText size={18} /></div>
-                <div className="stat-num">{isLoadingStats ? "..." : (stats?.total_submissions ?? 0)}</div>
-                <div className="stat-label">Total Submissions</div>
-                <div className="stat-delta positive"><TrendingUp size={12} /> Graded: {stats?.total_graded ?? 0}</div>
-              </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+              {[
+                { label: 'Total Students', value: isLoadingStats ? '...' : (stats?.total_students ?? 0), delta: 'Live tracking', deltaColor: 'var(--brand-600)', icon: <Users size={18} />, bg: 'linear-gradient(135deg, rgba(55,138,221,0.08), rgba(55,138,221,0.15))', iconColor: 'var(--color-info-text)' },
+                { label: 'Active Classes', value: isLoadingClasses ? '...' : classes.length, delta: 'Configured', deltaColor: '#16a34a', icon: <Building size={18} />, bg: 'linear-gradient(135deg, rgba(22,163,106,0.08), rgba(22,163,106,0.15))', iconColor: 'var(--color-success-border)' },
+                { label: 'Educators', value: isLoadingStats ? '...' : (stats?.total_teachers ?? 0), delta: 'Registered in system', deltaColor: 'var(--text-tertiary)', icon: <Presentation size={18} />, bg: 'linear-gradient(135deg, var(--brand-50), rgba(83,74,183,0.12))', iconColor: 'var(--brand-600)' },
+                { label: 'Total Submissions', value: isLoadingStats ? '...' : (stats?.total_submissions ?? 0), delta: `Graded: ${stats?.total_graded ?? 0}`, deltaColor: '#16a34a', icon: <FileText size={18} />, bg: 'linear-gradient(135deg, rgba(234,179,8,0.08), rgba(234,179,8,0.15))', iconColor: 'var(--color-warning-border)' },
+              ].map((s, i) => (
+                <div key={i} style={{ background: 'var(--surface-primary)', border: '1px solid var(--border-subtle)', borderRadius: '16px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '12px', color: 'var(--text-tertiary)', fontWeight: 500 }}>{s.label}</span>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: s.bg, color: s.iconColor }}>{s.icon}</div>
+                  </div>
+                  <div style={{ fontSize: '26px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1, letterSpacing: '-0.03em' }}>{s.value}</div>
+                  <span style={{ fontSize: '11px', fontWeight: 500, color: s.deltaColor, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    {s.deltaColor !== 'var(--text-tertiary)' && <TrendingUp size={11} />}
+                    {s.delta}
+                  </span>
+                </div>
+              ))}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* CSV Import Card */}
               <div className="lg:col-span-1 flex flex-col gap-6">
-              <div className="card p-6">
-                <h3 className="text-[16px] font-semibold text-text-primary mb-2 flex items-center gap-2">
-                  <FileSpreadsheet size={18} className="text-brand-500" />
+              <div style={{ background: 'var(--surface-primary)', border: '1px solid var(--border-subtle)', borderRadius: '16px', padding: '24px' }}>
+                <h3 className="text-[15px] font-semibold text-text-primary mb-2 flex items-center gap-2">
+                  <FileSpreadsheet size={17} className="text-brand-500" />
                   Roster CSV Import
                 </h3>
                 <p className="text-[12.5px] text-text-tertiary mb-4 leading-relaxed">
@@ -392,25 +391,24 @@ export default function SchoolAdminPage() {
 
             {/* Students List Card */}
             <div className="lg:col-span-2 flex flex-col gap-4">
-              <div className="card flex flex-col flex-1">
-                <div className="card-header flex-between gap-4 flex-wrap">
-                  <div className="card-title flex items-center gap-2">
+              <div style={{ background: 'var(--surface-primary)', border: '1px solid var(--border-subtle)', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' as const, gap: '12px' }}>
+                  <div style={{ fontWeight: 600, fontSize: '14px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Users size={16} className="text-brand-600" />
                     Student Directory
                   </div>
-                  {/* Filters */}
-                  <div className="flex gap-2 flex-wrap">
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' as const }}>
                     <input 
                       type="text" 
-                      className="bg-surface-secondary border border-border-subtle rounded-md px-2.5 py-1 text-[12px] text-text-primary placeholder-text-tertiary focus:outline-none w-[150px]"
                       placeholder="Search name/roll..."
                       value={studentSearch}
                       onChange={(e) => setStudentSearch(e.target.value)}
+                      style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '10px', padding: '7px 12px', fontSize: '12px', fontFamily: 'var(--font-sans)', color: 'var(--text-primary)', outline: 'none', width: '160px' }}
                     />
                     <select 
-                      className="bg-surface-secondary border border-border-subtle rounded-md px-2 py-1 text-[12px] text-text-primary focus:outline-none"
                       value={classFilter}
                       onChange={(e) => setClassFilter(e.target.value)}
+                      style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '10px', padding: '7px 12px', fontSize: '12px', fontFamily: 'var(--font-sans)', color: 'var(--text-primary)', outline: 'none' }}
                     >
                       <option value="">All Classes</option>
                       {classes.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
@@ -588,9 +586,9 @@ export default function SchoolAdminPage() {
 
         {/* ── Classes & Roster Tab ── */}
         {activeTab === "classes" && (
-          <div className="card flex flex-col">
-            <div className="card-header">
-              <div className="card-title">Class Standard & Section Hierarchies</div>
+          <div style={{ background: 'var(--surface-primary)', border: '1px solid var(--border-subtle)', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-subtle)', fontWeight: 600, fontSize: '14px', color: 'var(--text-primary)' }}>
+              Class Standard & Section Hierarchies
             </div>
             
             <div className="overflow-x-auto">
