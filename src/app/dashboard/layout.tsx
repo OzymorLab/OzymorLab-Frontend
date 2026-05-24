@@ -166,18 +166,25 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
       {/* Main Area */}
       <div className="main-area">
         <header className="topbar">
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-secondary border border-border-subtle rounded-lg text-text-tertiary">
-            <Search size={14} />
-            <span className="text-[12px]">Search ID or batch...</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="flex flex-col items-end mr-2">
-              <span className="text-[12px] font-medium text-text-primary leading-tight">{user.full_name}</span>
-              <span className="text-[10px] text-text-tertiary">{user.role}</span>
+          <div className="topbar-search">
+            <Search size={14} className="topbar-search-icon" />
+            <input
+              type="text"
+              placeholder="Search student ID, batch, or submission..."
+              className="topbar-search-input"
+            />
+            <div className="topbar-search-kbd">
+              <kbd>⌘</kbd><kbd>K</kbd>
             </div>
-            <div className="notif-btn relative">
+          </div>
+          <div className="topbar-right">
+            <div className="topbar-user">
+              <span className="topbar-user-name">{user.full_name}</span>
+              <span className="topbar-user-role">{user.role}</span>
+            </div>
+            <div className="topbar-notif">
               <Bell size={16} />
-              <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-brand-600 rounded-full"></div>
+              <span className="topbar-notif-dot" />
             </div>
           </div>
         </header>

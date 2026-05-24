@@ -91,74 +91,60 @@ export default function ReportsPage() {
   return (
     <>
       {/* Title area */}
-      <div className="flex-between mb-8">
-        <div>
-          <h1 className="text-[24px] font-semibold text-text-primary flex items-center gap-2">
-            <BarChart3 className="text-brand-500" size={24} />
-            Institutional Reports & Analytics Dashboard
-          </h1>
-          <p className="text-[13px] text-text-tertiary mt-1">
-            Aggregate student metrics, class standard averages, and download fully-formatted report card PDFs.
-          </p>
-        </div>
+      <div style={{ marginBottom: '24px' }}>
+        <h1 className="text-[22px] font-medium text-text-primary flex items-center gap-2">
+          <BarChart3 className="text-brand-500" size={22} />
+          Institutional Reports & Analytics Dashboard
+        </h1>
+        <p className="text-[13px] text-text-tertiary mt-1">
+          Aggregate student metrics, class standard averages, and download fully-formatted report card PDFs.
+        </p>
       </div>
 
       {/* Stats row */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-label">Active Institutional Roster</div>
-          <div className="stat-value">
-            {isLoading ? <Loader2 className="animate-spin text-brand-500" size={20} /> : stats?.total_students_active || 0}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+        {[
+          { label: 'Active Institutional Roster', value: stats?.total_students_active || 0, delta: 'Provisioned Students', deltaColor: 'var(--brand-600)', icon: <GraduationCap size={18} />, bg: 'linear-gradient(135deg, var(--brand-50), rgba(83,74,183,0.12))' },
+          { label: 'AI Papers Evaluated', value: stats?.total_papers_evaluated || 0, delta: 'Parallel OCR Pipes active', deltaColor: '#16a34a', icon: <TrendingUp size={18} />, bg: 'linear-gradient(135deg, rgba(22,163,106,0.08), rgba(22,163,106,0.15))' },
+          { label: 'Overall Average Grade', value: `${(stats?.overall_average_percentage || 0).toFixed(1)}%`, delta: 'Institutional GPA Average', deltaColor: 'var(--brand-600)', icon: <BarChart3 size={18} />, bg: 'linear-gradient(135deg, rgba(55,138,221,0.08), rgba(55,138,221,0.15))' },
+          { label: 'Assessment Pass Percentage', value: `${(stats?.pass_percentage || 0).toFixed(0)}%`, delta: 'Above standard target', deltaColor: '#16a34a', icon: <CheckCircle size={18} />, bg: 'linear-gradient(135deg, rgba(22,163,106,0.08), rgba(22,163,106,0.15))' },
+        ].map((s, i) => (
+          <div key={i} style={{ background: 'var(--surface-primary)', border: '1px solid var(--border-subtle)', borderRadius: '16px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '12px', color: 'var(--text-tertiary)', fontWeight: 500 }}>{s.label}</span>
+              <div style={{ width: '32px', height: '32px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: s.bg, color: s.deltaColor }}>{s.icon}</div>
+            </div>
+            <div style={{ fontSize: '26px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1, letterSpacing: '-0.03em' }}>
+              {isLoading ? <Loader2 className="animate-spin text-brand-500" size={20} /> : s.value}
+            </div>
+            <span style={{ fontSize: '11px', fontWeight: 500, color: s.deltaColor, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              {i === 1 && <TrendingUp size={11} />}
+              {i === 3 && <CheckCircle size={11} />}
+              {s.delta}
+            </span>
           </div>
-          <div className="stat-delta positive">Provisioned Students</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">AI Papers Evaluated</div>
-          <div className="stat-value">
-            {isLoading ? <Loader2 className="animate-spin text-brand-500" size={20} /> : stats?.total_papers_evaluated || 0}
-          </div>
-          <div className="stat-delta flex items-center gap-1">
-            <TrendingUp size={12} className="text-green-600" />
-            Parallel OCR Pipes active
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">Overall Average Grade</div>
-          <div className="stat-value">
-            {isLoading ? <Loader2 className="animate-spin text-brand-500" size={20} /> : `${(stats?.overall_average_percentage || 0).toFixed(1)}%`}
-          </div>
-          <div className="stat-delta positive">Institutional GPA Average</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">Assessment Pass Percentage</div>
-          <div className="stat-value">
-            {isLoading ? <Loader2 className="animate-spin text-brand-500" size={20} /> : `${(stats?.pass_percentage || 0).toFixed(0)}%`}
-          </div>
-          <div className="stat-delta flex items-center gap-1 text-green-600 font-semibold">
-            <CheckCircle size={12} className="stroke-[2.5]" /> Above standard target
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* Report listing and interactive search/filter card */}
-      <div className="card flex flex-col">
-        <div className="card-header flex-between gap-4 flex-wrap">
-          <div className="card-title flex items-center gap-2">
+      <div style={{ background: 'var(--surface-primary)', border: '1px solid var(--border-subtle)', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' as const, gap: '12px' }}>
+          <div style={{ fontWeight: 600, fontSize: '14px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <FileText size={16} className="text-brand-600" />
             Student Performance Registry
           </div>
-          <div className="flex gap-2 flex-wrap">
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' as const }}>
             <input 
               type="text" 
-              className="bg-surface-secondary border border-border-subtle rounded-md px-2.5 py-1 text-[12px] text-text-primary placeholder-text-tertiary focus:outline-none w-[170px]"
               placeholder="Search Student ID/Name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '10px', padding: '7px 12px', fontSize: '12px', fontFamily: 'var(--font-sans)', color: 'var(--text-primary)', outline: 'none', width: '180px' }}
             />
             <select 
-              className="bg-surface-secondary border border-border-subtle rounded-md px-2 py-1 text-[12px] text-text-primary focus:outline-none"
               value={classFilter}
               onChange={(e) => setClassFilter(e.target.value)}
+              style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '10px', padding: '7px 12px', fontSize: '12px', fontFamily: 'var(--font-sans)', color: 'var(--text-primary)', outline: 'none' }}
             >
               <option value="">All Classes</option>
               <option value="Class 12">Class 12</option>
@@ -214,7 +200,7 @@ export default function ReportsPage() {
                     </td>
                     <td className="text-right">
                       <button 
-                        className="btn btn-secondary py-1 px-3 text-[11px] flex items-center gap-1 ml-auto"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 12px', borderRadius: '8px', fontSize: '11.5px', fontWeight: 500, fontFamily: 'var(--font-sans)', cursor: 'pointer', border: '1px solid var(--border-subtle)', background: 'var(--surface-secondary)', color: 'var(--text-secondary)', marginLeft: 'auto' }}
                         onClick={() => handleDownloadPdf(r.student_id, r.student_name)}
                         disabled={isDownloadingPdf === r.student_id}
                       >
