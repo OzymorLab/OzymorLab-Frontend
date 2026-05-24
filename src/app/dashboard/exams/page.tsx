@@ -82,9 +82,39 @@ export default function ExamsPage() {
   const [runId, setRunId] = useState("");
   const [runStatus, setRunStatus] = useState<any>(null);
 
+  // Existing Cycle Tasks State
+  const [selectedCycleTasks, setSelectedCycleTasks] = useState<any[]>([]);
+  const [isLoadingTasks, setIsLoadingTasks] = useState(false);
+
   useEffect(() => {
     fetchExamCycles();
   }, []);
+
+  useEffect(() => {
+    if (!selectedCycleId) {
+      setSelectedCycleTasks([]);
+      return;
+    }
+    fetchCycleTasks(selectedCycleId);
+  }, [selectedCycleId]);
+
+  const fetchCycleTasks = async (cycleId: string) => {
+    setIsLoadingTasks(true);
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/exam-cycles/${cycleId}`);
+      const json = await res.json();
+      if (json.data && json.data.tasks) {
+        setSelectedCycleTasks(json.data.tasks);
+      } else {
+        setSelectedCycleTasks([]);
+      }
+    } catch (e) {
+      console.error("Failed to fetch cycle tasks", e);
+      setSelectedCycleTasks([]);
+    } finally {
+      setIsLoadingTasks(false);
+    }
+  };
 
   const fetchExamCycles = async () => {
     setIsLoadingCycles(true);
@@ -500,8 +530,54 @@ export default function ExamsPage() {
                 </div>
               )}
 
+              {selectedCycleId && (
+                <div className="mt-6 border-t border-border-subtle pt-6">
+                  <h4 className="text-[14px] font-semibold text-text-primary mb-3 flex items-center gap-2">
+                    <FileText size={15} className="text-brand-600" />
+                    Existing Subject Papers in this Cycle:
+                  </h4>
+                  {isLoadingTasks ? (
+                    <div className="py-4 text-center text-text-tertiary">
+                      <Loader2 className="animate-spin inline-block mr-2 text-brand-500" size={16} />
+                      Loading papers...
+                    </div>
+                  ) : selectedCycleTasks.length === 0 ? (
+                    <p className="text-[12px] text-text-tertiary">No subject papers created yet in this cycle. Select & proceed below to upload one.</p>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      {selectedCycleTasks.map((t) => (
+                        <div key={t.id} className="border border-border-default rounded-lg p-3 bg-surface-secondary/40 flex justify-between items-center hover:border-brand-500/50 transition-all">
+                          <div>
+                            <div className="text-[13px] font-bold text-text-primary">{t.title}</div>
+                            <div className="text-[11px] text-text-secondary">
+                              Subject: {t.subject} | Grade: {t.grade_level} | Set: {t.paper_set} | Max Marks: {t.max_marks}
+                            </div>
+                          </div>
+                          <button
+                            className="btn btn-brand btn-sm flex items-center gap-1.5"
+                            onClick={() => {
+                              setTaskId(t.id);
+                              setTitle(t.title);
+                              setSubject(t.subject);
+                              setBoard(t.board);
+                              setGradeLevel(t.grade_level);
+                              setMaxMarks(t.max_marks);
+                              setPaperSet(t.paper_set);
+                              setStep(3); // Go straight to bulk answer sheets upload!
+                            }}
+                          >
+                            <UploadCloud size={14} />
+                            Upload Answers
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {cycles.length > 0 && (
-                <div className="flex justify-end pt-4 border-t border-border-subtle mt-4">
+                <div className="flex justify-end pt-4 border-t border-border-subtle mt-6">
                   <button 
                     className="btn btn-brand btn-lg flex items-center gap-1.5"
                     onClick={() => {
@@ -512,7 +588,7 @@ export default function ExamsPage() {
                       setStep(1);
                     }}
                   >
-                    Select & Proceed to Paper Upload
+                    Create New Subject Paper & Rubric
                     <ArrowRight size={16} />
                   </button>
                 </div>
@@ -628,7 +704,10 @@ export default function ExamsPage() {
                   </div>
                   <div className="flex flex-col gap-1 col-span-1">
                     <label className="text-[11px] font-medium text-text-secondary uppercase">Max Marks</label>
-                    <input type="number" className="input-field" value={maxMarks} onChange={(e) => setMaxMarks(parseInt(e.target.value))} />
+                    <input type="number" className="input-field" value={isNaN(maxMarks) ? "" : maxMarks} onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      setMaxMarks(isNaN(val) ? 0 : val);
+                    }} />
                   </div>
                 </div>
 
@@ -788,8 +867,11 @@ export default function ExamsPage() {
                       <input 
                         type="number" 
                         className="input-field" 
-                        value={s.marks} 
-                        onChange={(e) => updateStepValue(s.step_num, "marks", parseInt(e.target.value))} 
+                        value={isNaN(s.marks) ? "" : s.marks} 
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          updateStepValue(s.step_num, "marks", isNaN(val) ? 0 : val);
+                        }} 
                       />
                     </div>
                   </div>
