@@ -45,13 +45,13 @@ const blogPosts = [
   {
     slug: "the-pedagogy-of-rubric-grounded-grading-why-subjective-evaluations-demand-explainable-ai",
     title: "The Pedagogy of Rubric-Grounded Grading: Why Subjective Evaluations Demand Explainable AI",
-    content: `Traditional grading systems are facing a crisis of scalability and consistency. As student enrollment increases, educators find themselves overwhelmed by the sheer volume of subjective assessments, leading to grading fatigue and inadvertent grading discrepancies. While artificial intelligence offers a tempting solution, raw large language models (LLMs) frequently fail when applied directly to subjective answer sheets. The reason is simple: LLMs lack grounding. Without precise structural boundaries, their scores fluctuate, resulting in hallucinations and grading bias.
+    content: `Traditional grading systems are facing a crisis of scalability and consistency. As student enrollment increases across districts, educators find themselves overwhelmed by the sheer volume of subjective assessments. This administrative burden leads to grading fatigue and inadvertent grading discrepancies. While artificial intelligence offers a tempting solution to accelerate this bottleneck, raw large language models (LLMs) frequently fail when applied directly to subjective answer sheets. The reason is simple: LLMs lack grounding. Without precise structural boundaries, their scores fluctuate wildly based on prompts, resulting in hallucinations and grading bias.
 
 ### The Limits of Raw LLM Scoring
 When an AI is prompted with a simple instruction like "grade this essay on a scale of 1 to 10," it relies on heuristic probabilities rather than structured pedagogical guidelines. This lack of constraint causes several critical failure modes:
-1. **Hallucination of Merit**: The AI may award points for eloquent writing that completely misses the target core concepts.
-2. **Inconsistent Baselines**: An answer sheet graded in one context might receive a different score when processed in another context due to the model's token sensitivity.
-3. **Absence of Justification**: Teachers and students are left with a raw number and no actionable feedback or audit trail.
+1. **Hallucination of Merit**: The AI may award points for eloquent writing that completely misses the target core concepts. This penalizes students who write concise, highly accurate responses.
+2. **Inconsistent Baselines**: An answer sheet graded in one context might receive a different score when processed in another context due to the model's token sensitivity. This is unacceptable for high-stakes examinations.
+3. **Absence of Justification**: Teachers and students are left with a raw number and no actionable feedback, making it impossible to perform audit trails or handle grade appeals.
 
 ### What is Rubric Grounding?
 Rubric Grounding is OzymorLab's core architectural solution to these limitations. Rather than letting the model estimate scores in a vacuum, Rubric Grounding structures the evaluation process into a series of verifiable, deterministic steps:
@@ -60,7 +60,10 @@ Rubric Grounding is OzymorLab's core architectural solution to these limitations
 * **Mapping**: The model is forced to explicitly map each claimed score to a corresponding text segment and rubric criterion.
 * **Justification**: A detailed, human-readable trace is generated, explaining exactly why points were awarded or deducted.
 
-By enforcing these constraints, OzymorLab turns AI from a black-box scoring machine into a transparent, explainable assistant that teachers can trust. This level of rigor is essential for restoring grading integrity across educational districts.`,
+By enforcing these constraints, OzymorLab turns AI from a black-box scoring machine into a transparent, explainable assistant that teachers can trust. This level of rigor is essential for restoring grading integrity across educational districts.
+
+### Designing the Future of High-Stakes Assessments
+Ultimately, the future of education depends on maintaining high-fidelity grading standards. When high-stakes state board exams or university finals adopt Rubric Grounding, they guarantee that every student is evaluated purely on merit and the specific criteria outlined by the board. This reduces student disputes, eliminates systemic bias, and unlocks a brand new standard for educational scaling.`,
     date: "May 24, 2026",
     readTime: "12 min read",
     category: "Pedagogy",
@@ -84,7 +87,10 @@ To address these issues, OzymorLab leverages next-generation multimodal vision t
 * **Cursive Normalizer**: A specialized deep network straightens skewed handwritten lines and normalizes cursive script variations.
 * **Symbolic Math Parser**: A mathematical grammar model decodes cursive derivations into standard LaTeX formatting, preserving symbolic relationships.
 
-Through this advanced OCR pipeline, handwritten mathematical steps are accurately transcribed and mapped against standard rubrics. This represents a significant breakthrough, enabling fair and automated grading of STEM student answer sheets at scale.`,
+Through this advanced OCR pipeline, handwritten mathematical steps are accurately transcribed and mapped against standard rubrics. This represents a significant breakthrough, enabling fair and automated grading of STEM student answer sheets at scale.
+
+### Future Perspectives on Handwriting Synthesis
+As research progresses, the goal is to make these systems adaptive. By training models on hundreds of thousands of diverse handwritten scripts representing various regional handwriting styles, OzymorLab's OCR engine ensures that no student is disadvantaged due to their writing style, restoring confidence in digital script evaluations.`,
     date: "May 18, 2026",
     readTime: "9 min read",
     category: "Engineering",
@@ -105,7 +111,10 @@ OzymorLab resolves this disconnect by putting explainability at the absolute for
 * **Interactive Moderation**: Educators can click on any score sheet to view the highlighted segments in the student's scanned paper.
 * **One-Click Corrections**: If an educator disagrees with an AI suggestion, they can adjust the score directly, prompting the system to recalibrate the final grade instantly.
 
-By designing the system around the teacher as the primary moderator, OzymorLab ensures absolute alignment with institutional standards while saving hours of manual workload. This collaborative approach builds sustainable, long-term trust in academic AI.`,
+By designing the system around the teacher as the primary moderator, OzymorLab ensures absolute alignment with institutional standards while saving hours of manual workload. This collaborative approach builds sustainable, long-term trust in academic AI.
+
+### Empowering Educators as Directors of AI
+We see a future where teachers do not spend hours grading basic repetitive steps. Instead, they act as high-level directors of the evaluation pipeline, spending their valuable time design-thinking the curriculum, guiding individual students, and moderating subjective corner cases. OzymorLab makes this future a reality today.`,
     date: "May 12, 2026",
     readTime: "10 min read",
     category: "Product Strategy",
