@@ -1,6 +1,6 @@
 // Generated OzymorLab Bundled HTML Page
 // Transformed from remotebymodula Framer template - Educational Assessment Platform
-// Generated on: 2026-05-25 13:53:44
+// Generated on: 2026-05-25 14:03:39
 
 export const ozymorLabHtml = `<!DOCTYPE html>
 <!-- Made in Framer Â· framer.com â¨ -->
@@ -605,8 +605,7 @@ export const ozymorLabHtml = `<!DOCTYPE html>
   <!-- End of headEnd -->
  </head>
  <body>
-  <script async="" data-fid="7b2ec6dcefdd93577092fbf33f60df40d22381ed5769ae7c2ec7bcd299dc0a41" data-no-nt="" src="https://events.framer.com/script?v=2">
-  </script>
+  
   <!-- Start of bodyStart -->
   <!-- End of bodyStart -->
   <div data-framer-generated-page="" data-framer-hydrate-v2='{"routeId":"CMAN4sIX2","localeId":"default","breakpoints":[{"hash":"1yeacn0","mediaQuery":"(min-width: 1280px)"},{"hash":"1n4zf07","mediaQuery":"(min-width: 810px) and (max-width: 1279.98px)"},{"hash":"lkre0h","mediaQuery":"(max-width: 809.98px)"},{"hash":"i802lz","mediaQuery":"(min-width: 1280px)"},{"hash":"1cei8vb","mediaQuery":"(min-width: 810px) and (max-width: 1279.98px)"},{"hash":"1l7fi40","mediaQuery":"(max-width: 809.98px)"}]}' data-framer-page-optimized-at="2026-03-16T22:48:39.783Z" data-framer-ssr-released-at="2026-03-16T09:29:46.785Z" id="main">
@@ -667,19 +666,19 @@ export const ozymorLabHtml = `<!DOCTYPE html>
            <span>
             The
            </span>
-           <span style="position:relative;display:inline;vertical-align:baseline;overflow:visible">
+           <span style="position:relative;display:inline;vertical-align:baseline;overflow:visible;white-space:nowrap">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(34, 36, 42));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:70px;font-style:normal;font-weight:500;letter-spacing:-0.03em;line-height:1em'>
-             Operating
+             Smart
             </span>
             <span aria-hidden="true" style="position:absolute;left:50%;top:calc(100% - 77px);width:115%;transform:translateX(-50%);height:84px;background:var(--token-50f7c55d-562d-4beb-9e4e-86ed7b4f818d, rgb(224, 255, 130));-webkit-mask-image:url(https://iili.io/KFriAQI.png);mask-image:url(https://iili.io/KFriAQI.png);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-position:center;mask-position:center;border-radius:0;pointer-events:none;z-index:1;display:block">
             </span>
            </span>
            <span>
-            System for
+            Operating System for
            </span>
-           <span style="position:relative;display:inline-block;vertical-align:baseline">
+           <span style="position:relative;display:inline-block;vertical-align:baseline;white-space:nowrap">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(34, 36, 42));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:70px;font-style:normal;font-weight:500;letter-spacing:-0.03em;line-height:1em'>
-             Smart Educational
+             Educational
             </span>
             <span aria-hidden="true" style="position:absolute;left:52%;top:45%;transform:translate(-50%, -36%);z-index:1;display:block;width:103%;height:49px;background:var(--token-50f7c55d-562d-4beb-9e4e-86ed7b4f818d, rgb(231, 255, 161));-webkit-mask-image:url(https://iili.io/FGHmzAB.png);mask-image:url(https://iili.io/FGHmzAB.png);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-position:center;mask-position:center;pointer-events:none">
             </span>
@@ -694,19 +693,19 @@ export const ozymorLabHtml = `<!DOCTYPE html>
            <span>
             The
            </span>
-           <span style="position:relative;display:inline;vertical-align:baseline;overflow:visible">
+           <span style="position:relative;display:inline;vertical-align:baseline;overflow:visible;white-space:nowrap">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(34, 36, 42));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:50px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1em'>
-             Operating
+             Smart
             </span>
             <span aria-hidden="true" style="position:absolute;left:50%;top:calc(100% - 55.00000000000001px);width:115%;transform:translateX(-50%);height:60px;background:var(--token-50f7c55d-562d-4beb-9e4e-86ed7b4f818d, rgb(224, 255, 130));-webkit-mask-image:url(https://iili.io/KFriAQI.png);mask-image:url(https://iili.io/KFriAQI.png);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-position:center;mask-position:center;border-radius:0;pointer-events:none;z-index:1;display:block">
             </span>
            </span>
            <span>
-            System for
+            Operating System for
            </span>
-           <span style="position:relative;display:inline-block;vertical-align:baseline">
+           <span style="position:relative;display:inline-block;vertical-align:baseline;white-space:nowrap">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(34, 36, 42));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:50px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1em'>
-             Smart Educational
+             Educational
             </span>
             <span aria-hidden="true" style="position:absolute;left:52%;top:45%;transform:translate(-50%, -36%);z-index:1;display:block;width:103%;height:35px;background:var(--token-50f7c55d-562d-4beb-9e4e-86ed7b4f818d, rgb(231, 255, 161));-webkit-mask-image:url(https://iili.io/FGHmzAB.png);mask-image:url(https://iili.io/FGHmzAB.png);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-position:center;mask-position:center;pointer-events:none">
             </span>
@@ -721,19 +720,19 @@ export const ozymorLabHtml = `<!DOCTYPE html>
            <span>
             The
            </span>
-           <span style="position:relative;display:inline;vertical-align:baseline;overflow:visible">
+           <span style="position:relative;display:inline;vertical-align:baseline;overflow:visible;white-space:nowrap">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(34, 36, 42));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:60px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1em'>
-             Operating
+             Smart
             </span>
             <span aria-hidden="true" style="position:absolute;left:50%;top:calc(100% - 66px);width:115%;transform:translateX(-50%);height:72px;background:var(--token-50f7c55d-562d-4beb-9e4e-86ed7b4f818d, rgb(224, 255, 130));-webkit-mask-image:url(https://iili.io/KFriAQI.png);mask-image:url(https://iili.io/KFriAQI.png);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-position:center;mask-position:center;border-radius:0;pointer-events:none;z-index:1;display:block">
             </span>
            </span>
            <span>
-            System for
+            Operating System for
            </span>
-           <span style="position:relative;display:inline-block;vertical-align:baseline">
+           <span style="position:relative;display:inline-block;vertical-align:baseline;white-space:nowrap">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(34, 36, 42));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:60px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1em'>
-             Smart Educational
+             Educational
             </span>
             <span aria-hidden="true" style="position:absolute;left:52%;top:45%;transform:translate(-50%, -36%);z-index:1;display:block;width:103%;height:42px;background:var(--token-50f7c55d-562d-4beb-9e4e-86ed7b4f818d, rgb(231, 255, 161));-webkit-mask-image:url(https://iili.io/FGHmzAB.png);mask-image:url(https://iili.io/FGHmzAB.png);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-position:center;mask-position:center;pointer-events:none">
             </span>
@@ -2450,7 +2449,7 @@ export const ozymorLabHtml = `<!DOCTYPE html>
              Everything you 
 need, all in
             </span>
-            <span style="position:relative;display:inline-block;vertical-align:baseline">
+            <span style="position:relative;display:inline-block;vertical-align:baseline;white-space:nowrap">
              <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:36px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1.1em'>
               one place
              </span>
@@ -2467,7 +2466,7 @@ need, all in
              Everything you 
 need, all in
             </span>
-            <span style="position:relative;display:inline-block;vertical-align:baseline">
+            <span style="position:relative;display:inline-block;vertical-align:baseline;white-space:nowrap">
              <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:32px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1.1em'>
               one place
              </span>
@@ -4079,7 +4078,7 @@ need, all in
            Less paperwork,
 more
           </span>
-          <span style="position:relative;display:inline-block;vertical-align:baseline">
+          <span style="position:relative;display:inline-block;vertical-align:baseline;white-space:nowrap">
            <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:48px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1.05em'>
             people work
            </span>
@@ -4096,7 +4095,7 @@ more
            Less paperwork,
 more
           </span>
-          <span style="position:relative;display:inline-block;vertical-align:baseline">
+          <span style="position:relative;display:inline-block;vertical-align:baseline;white-space:nowrap">
            <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:38px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1em'>
             people work
            </span>
@@ -4113,7 +4112,7 @@ more
            Less paperwork,
 more
           </span>
-          <span style="position:relative;display:inline-block;vertical-align:baseline">
+          <span style="position:relative;display:inline-block;vertical-align:baseline;white-space:nowrap">
            <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:40px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1.05em'>
             people work
            </span>
@@ -4179,7 +4178,7 @@ more
            <span>
             Make
            </span>
-           <span style="position:relative;display:inline;vertical-align:baseline;overflow:visible">
+           <span style="position:relative;display:inline;vertical-align:baseline;overflow:visible;white-space:nowrap">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:48px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1.05em'>
              actionable
             </span>
@@ -4188,7 +4187,7 @@ more
            </span>
            <span>
            </span>
-           <span style="position:relative;display:inline-block;vertical-align:baseline">
+           <span style="position:relative;display:inline-block;vertical-align:baseline;white-space:nowrap">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:48px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1.05em'>
              decisions
             </span>
@@ -4205,7 +4204,7 @@ more
            <span>
             Make
            </span>
-           <span style="position:relative;display:inline;vertical-align:baseline;overflow:visible">
+           <span style="position:relative;display:inline;vertical-align:baseline;overflow:visible;white-space:nowrap">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:38px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1em'>
              actionable
             </span>
@@ -4214,7 +4213,7 @@ more
            </span>
            <span>
            </span>
-           <span style="position:relative;display:inline-block;vertical-align:baseline">
+           <span style="position:relative;display:inline-block;vertical-align:baseline;white-space:nowrap">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:38px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1em'>
              decisions
             </span>
@@ -4231,7 +4230,7 @@ more
            <span>
             Make
            </span>
-           <span style="position:relative;display:inline;vertical-align:baseline;overflow:visible">
+           <span style="position:relative;display:inline;vertical-align:baseline;overflow:visible;white-space:nowrap">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:40px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1.05em'>
              actionable
             </span>
@@ -4240,7 +4239,7 @@ more
            </span>
            <span>
            </span>
-           <span style="position:relative;display:inline-block;vertical-align:baseline">
+           <span style="position:relative;display:inline-block;vertical-align:baseline;white-space:nowrap">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:40px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1.05em'>
              decisions
             </span>
@@ -4837,7 +4836,7 @@ more
            <span>
             Pilot plans for
            </span>
-           <span style="position:relative;display:inline-block;vertical-align:baseline">
+           <span style="position:relative;display:inline-block;vertical-align:baseline;white-space:nowrap">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:48px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1.05em'>
              anyone
             </span>
@@ -4864,7 +4863,7 @@ more
            <span>
             Pilot plans for
            </span>
-           <span style="position:relative;display:inline-block;vertical-align:baseline">
+           <span style="position:relative;display:inline-block;vertical-align:baseline;white-space:nowrap">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:38px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1em'>
              anyone
             </span>
@@ -4891,7 +4890,7 @@ more
            <span>
             Pilot plans for
            </span>
-           <span style="position:relative;display:inline-block;vertical-align:baseline">
+           <span style="position:relative;display:inline-block;vertical-align:baseline;white-space:nowrap">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:40px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1.05em'>
              anyone
             </span>
@@ -6790,23 +6789,22 @@ more
   <script>
    typeof document<"u"&&(window.process={...window.process,env:{...window.process?.env,NODE_ENV:"production"}});
   </script>
-  <link fetchpriority="low" href="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/react.2SdJLjpQ.mjs" rel="modulepreload"/>
-  <link fetchpriority="low" href="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/rolldown-runtime.DlX1TBGi.mjs" rel="modulepreload"/>
-  <link fetchpriority="low" href="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/motion.B8bW6bfh.mjs" rel="modulepreload"/>
-  <link fetchpriority="low" href="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/framer.DK83H08T.mjs" rel="modulepreload"/>
-  <link fetchpriority="low" href="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/shared-lib.CGOPau-R.mjs" rel="modulepreload"/>
-  <link fetchpriority="low" href="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/OEDHaoQ-WnYH0uCBMPNIP3RkB2Pi31RsjG4NoM34MmM.BngdZyL5.mjs" rel="modulepreload"/>
-  <link fetchpriority="low" href="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/YckFIlg3V.D2TRq4Cu.mjs" rel="modulepreload"/>
-  <link fetchpriority="low" href="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/sxipfz473.Bc9Z8HzL.mjs" rel="modulepreload"/>
-  <link fetchpriority="low" href="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/d2AofqtL8.DcvN_IhX.mjs" rel="modulepreload"/>
-  <link fetchpriority="low" href="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/CMAN4sIX2.Dh3ffMWg.mjs" rel="modulepreload"/>
-  <link fetchpriority="low" href="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/adY0lpJ8d.C3NH3HLI.mjs" rel="modulepreload"/>
-  <link fetchpriority="low" href="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/TextDoodles.C5dZ7cDd.mjs" rel="modulepreload"/>
-  <link fetchpriority="low" href="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/GNdy0Lctx.DkKU-E4O.mjs" rel="modulepreload"/>
-  <link fetchpriority="low" href="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/Qbr3ydpDa.B7LIuQtw.mjs" rel="modulepreload"/>
-  <link fetchpriority="low" href="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/ZtjuK0OBj.BeqO2B4O.mjs" rel="modulepreload"/>
-  <script async="" data-framer-bundle="main" fetchpriority="low" src="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/script_main.CXJtC3Bc.mjs" type="module">
-  </script>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   <script id="__framer__handoverData" type="framer/handover">
    [{"0":1,"1":2},["Map"],["Map",3,4],"getSlugByRecordId|MGQ7hC0OW|default|px97zVK3V","announcing-our-2-3m-seed-round-transforming-ozymorlab-work-management"]
   </script>
