@@ -1,6 +1,6 @@
 // Generated OzymorLab Bundled HTML Page
 // Transformed from remotebymodula Framer template - Educational Assessment Platform
-// Generated on: 2026-05-25 14:03:39
+// Generated on: 2026-05-25 14:05:24
 
 export const ozymorLabHtml = `<!DOCTYPE html>
 <!-- Made in Framer Â· framer.com â¨ -->
@@ -19,8 +19,8 @@ export const ozymorLabHtml = `<!DOCTYPE html>
    OzymorLab
   </title>
   <meta content="Welcome to OzymorLab. Designed for modern educational systems: public school boards, university cohorts, and high-stakes examiners — OzymorLab works the way you do." name="description"/>
-  <meta content="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/searchIndex-MDyNe5IqWI01.json" name="framer-search-index"/>
-  <meta content="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/searchIndex-unlJFM7XaOzC.json" name="framer-search-index-fallback"/>
+  <meta content="/framer/searchIndex-MDyNe5IqWI01.json" name="framer-search-index"/>
+  <meta content="/framer/searchIndex-unlJFM7XaOzC.json" name="framer-search-index-fallback"/>
   <link href="https://framerusercontent.com/images/OF1bik2zVZSkrbcYg0is1OC7OM.svg" media="(prefers-color-scheme: light)" rel="icon"/>
   <link href="https://framerusercontent.com/images/I00GmtfUKSYsfqRgZcNkjWvlF4Y.svg" media="(prefers-color-scheme: dark)" rel="icon"/>
   <link href="https://framerusercontent.com/images/Y7gUndOQf7ip5cKD17ISlcK110.png" rel="apple-touch-icon"/>
@@ -605,7 +605,8 @@ export const ozymorLabHtml = `<!DOCTYPE html>
   <!-- End of headEnd -->
  </head>
  <body>
-  
+  <script async="" data-fid="7b2ec6dcefdd93577092fbf33f60df40d22381ed5769ae7c2ec7bcd299dc0a41" data-no-nt="" src="https://events.framer.com/script?v=2">
+  </script>
   <!-- Start of bodyStart -->
   <!-- End of bodyStart -->
   <div data-framer-generated-page="" data-framer-hydrate-v2='{"routeId":"CMAN4sIX2","localeId":"default","breakpoints":[{"hash":"1yeacn0","mediaQuery":"(min-width: 1280px)"},{"hash":"1n4zf07","mediaQuery":"(min-width: 810px) and (max-width: 1279.98px)"},{"hash":"lkre0h","mediaQuery":"(max-width: 809.98px)"},{"hash":"i802lz","mediaQuery":"(min-width: 1280px)"},{"hash":"1cei8vb","mediaQuery":"(min-width: 810px) and (max-width: 1279.98px)"},{"hash":"1l7fi40","mediaQuery":"(max-width: 809.98px)"}]}' data-framer-page-optimized-at="2026-03-16T22:48:39.783Z" data-framer-ssr-released-at="2026-03-16T09:29:46.785Z" id="main">
@@ -6789,22 +6790,23 @@ more
   <script>
    typeof document<"u"&&(window.process={...window.process,env:{...window.process?.env,NODE_ENV:"production"}});
   </script>
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+  <link fetchpriority="low" href="/framer/react.2SdJLjpQ.mjs" rel="modulepreload"/>
+  <link fetchpriority="low" href="/framer/rolldown-runtime.DlX1TBGi.mjs" rel="modulepreload"/>
+  <link fetchpriority="low" href="/framer/motion.B8bW6bfh.mjs" rel="modulepreload"/>
+  <link fetchpriority="low" href="/framer/framer.DK83H08T.mjs" rel="modulepreload"/>
+  <link fetchpriority="low" href="/framer/shared-lib.CGOPau-R.mjs" rel="modulepreload"/>
+  <link fetchpriority="low" href="/framer/OEDHaoQ-WnYH0uCBMPNIP3RkB2Pi31RsjG4NoM34MmM.BngdZyL5.mjs" rel="modulepreload"/>
+  <link fetchpriority="low" href="/framer/YckFIlg3V.D2TRq4Cu.mjs" rel="modulepreload"/>
+  <link fetchpriority="low" href="/framer/sxipfz473.Bc9Z8HzL.mjs" rel="modulepreload"/>
+  <link fetchpriority="low" href="/framer/d2AofqtL8.DcvN_IhX.mjs" rel="modulepreload"/>
+  <link fetchpriority="low" href="/framer/CMAN4sIX2.Dh3ffMWg.mjs" rel="modulepreload"/>
+  <link fetchpriority="low" href="/framer/adY0lpJ8d.C3NH3HLI.mjs" rel="modulepreload"/>
+  <link fetchpriority="low" href="/framer/TextDoodles.C5dZ7cDd.mjs" rel="modulepreload"/>
+  <link fetchpriority="low" href="/framer/GNdy0Lctx.DkKU-E4O.mjs" rel="modulepreload"/>
+  <link fetchpriority="low" href="/framer/Qbr3ydpDa.B7LIuQtw.mjs" rel="modulepreload"/>
+  <link fetchpriority="low" href="/framer/ZtjuK0OBj.BeqO2B4O.mjs" rel="modulepreload"/>
+  <script async="" data-framer-bundle="main" fetchpriority="low" src="/framer/script_main.CXJtC3Bc.mjs" type="module">
+  </script>
   <script id="__framer__handoverData" type="framer/handover">
    [{"0":1,"1":2},["Map"],["Map",3,4],"getSlugByRecordId|MGQ7hC0OW|default|px97zVK3V","announcing-our-2-3m-seed-round-transforming-ozymorlab-work-management"]
   </script>
