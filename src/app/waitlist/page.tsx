@@ -77,7 +77,7 @@ export default function WaitlistPage() {
     setFeedbackMsg("");
 
     try {
-      // 1. Try to save in Supabase waitlist table
+      // Persist waitlist registration strictly in Supabase waitlist table
       const { error } = await supabase
         .from("waitlist")
         .insert([
@@ -91,29 +91,15 @@ export default function WaitlistPage() {
         ]);
 
       if (error) {
-        throw error;
+        throw new Error(error.message);
       }
 
       setSubmitted(true);
     } catch (dbError: any) {
-      console.warn("Supabase insertion error or table missing, falling back to localStorage preservation:", dbError);
-      
-      // 2. Resilient local fallback: save in localStorage so the registration is preserved
-      try {
-        const localWaitlist = JSON.parse(localStorage.getItem("ozymorlab_waitlist") || "[]");
-        localWaitlist.push({
-          name: fullName,
-          school_name: schoolName,
-          email: email,
-          phone: mobileNumber,
-          role: role,
-          registered_at: new Date().toISOString(),
-        });
-        localStorage.setItem("ozymorlab_waitlist", JSON.stringify(localWaitlist));
-        setSubmitted(true);
-      } catch {
-        setFeedbackMsg("An error occurred. Please verify your details and try again.");
-      }
+      console.error("Supabase Insertion Error:", dbError);
+      setFeedbackMsg(
+        dbError.message || "Failed to store registration in Supabase database. Please ensure the waitlist table exists."
+      );
     } finally {
       setLoading(false);
     }
