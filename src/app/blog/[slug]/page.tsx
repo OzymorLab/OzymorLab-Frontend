@@ -141,6 +141,79 @@ We see a future where teachers do not spend hours grading basic repetitive steps
   }
 ];
 
+function renderInlineMarkdown(text: string) {
+  const boldParts = text.split("**");
+  return boldParts.map((part, index) => {
+    const isBold = index % 2 === 1;
+    const italicParts = part.split("*");
+    const parsedPart = italicParts.map((subPart, subIndex) => {
+      const isItalic = subIndex % 2 === 1;
+      if (isItalic) {
+        return <em key={subIndex} style={{ fontStyle: "italic" }}>{subPart}</em>;
+      }
+      return subPart;
+    });
+
+    if (isBold) {
+      return <strong key={index} style={{ fontWeight: 700, color: "var(--lp-fg)" }}>{parsedPart}</strong>;
+    }
+    return <span key={index}>{parsedPart}</span>;
+  });
+}
+
+function renderBlockMarkdown(block: string, key: number) {
+  const trimmed = block.trim();
+  if (!trimmed) return null;
+
+  if (trimmed.startsWith("### ")) {
+    return (
+      <h3 key={key} style={{ fontSize: 22, fontWeight: 700, color: "var(--lp-fg)", marginTop: 36, marginBottom: 16, lineHeight: 1.3 }}>
+        {renderInlineMarkdown(trimmed.replace("### ", ""))}
+      </h3>
+    );
+  }
+
+  if (trimmed.startsWith("## ")) {
+    return (
+      <h2 key={key} style={{ fontSize: 26, fontWeight: 700, color: "var(--lp-fg)", marginTop: 40, marginBottom: 18, lineHeight: 1.3 }}>
+        {renderInlineMarkdown(trimmed.replace("## ", ""))}
+      </h2>
+    );
+  }
+
+  if (trimmed.startsWith("* ") || trimmed.startsWith("- ")) {
+    const items = trimmed.split("\n").map(line => line.trim().replace(/^[\*\-]\s+/, ""));
+    return (
+      <ul key={key} style={{ margin: "20px 0", paddingLeft: 24, listStyleType: "disc" }}>
+        {items.map((item, idx) => (
+          <li key={idx} style={{ marginBottom: 10, color: "var(--lp-fg-alt)" }}>
+            {renderInlineMarkdown(item)}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  if (/^\d+\.\s+/.test(trimmed)) {
+    const items = trimmed.split("\n").map(line => line.trim().replace(/^\d+\.\s+/, ""));
+    return (
+      <ol key={key} style={{ margin: "20px 0", paddingLeft: 24, listStyleType: "decimal" }}>
+        {items.map((item, idx) => (
+          <li key={idx} style={{ marginBottom: 10, color: "var(--lp-fg-alt)" }}>
+            {renderInlineMarkdown(item)}
+          </li>
+        ))}
+      </ol>
+    );
+  }
+
+  return (
+    <p key={key} style={{ marginBottom: 20, color: "var(--lp-fg-alt)" }}>
+      {renderInlineMarkdown(trimmed)}
+    </p>
+  );
+}
+
 export default function ArticlePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -205,21 +278,7 @@ export default function ArticlePage() {
 
         {/* Content Body */}
         <div className="lp-article-body" style={{ fontSize: 16, lineHeight: 1.8, color: "var(--lp-fg-alt)" }}>
-          {post.content.split("\n\n").map((para, i) => {
-            if (para.startsWith("### ")) {
-              return <h3 key={i} style={{ fontSize: 20, fontWeight: 600, color: "var(--lp-fg)", marginTop: 32, marginBottom: 16 }}>{para.replace("### ", "")}</h3>;
-            }
-            if (para.startsWith("* ")) {
-              return (
-                <ul key={i} style={{ margin: "16px 0", paddingLeft: 20 }}>
-                  {para.split("\n").map((li, j) => (
-                    <li key={j} style={{ marginBottom: 8 }}>{li.replace("* ", "")}</li>
-                  ))}
-                </ul>
-              );
-            }
-            return <p key={i} style={{ marginBottom: 20 }}>{para}</p>;
-          })}
+          {post.content.split("\n\n").map((para, i) => renderBlockMarkdown(para, i))}
         </div>
       </article>
 
