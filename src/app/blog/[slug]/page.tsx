@@ -155,63 +155,106 @@ function renderInlineMarkdown(text: string) {
     });
 
     if (isBold) {
-      return <strong key={index} style={{ fontWeight: 700, color: "var(--lp-fg)" }}>{parsedPart}</strong>;
+      return <strong key={index} style={{ fontWeight: 600, color: "var(--lp-fg)" }}>{parsedPart}</strong>;
     }
     return <span key={index}>{parsedPart}</span>;
   });
 }
 
-function renderBlockMarkdown(block: string, key: number) {
-  const trimmed = block.trim();
-  if (!trimmed) return null;
+function renderArticleContent(content: string) {
+  const lines = content.split("\n");
+  const elements: React.ReactNode[] = [];
+  let currentList: React.ReactNode[] = [];
+  let currentListType: "ul" | "ol" | null = null;
+  let listKeyCounter = 0;
 
-  if (trimmed.startsWith("### ")) {
-    return (
-      <h3 key={key} style={{ fontSize: 22, fontWeight: 700, color: "var(--lp-fg)", marginTop: 36, marginBottom: 16, lineHeight: 1.3 }}>
-        {renderInlineMarkdown(trimmed.replace("### ", ""))}
-      </h3>
+  const flushList = () => {
+    if (currentList.length > 0 && currentListType) {
+      const key = `list-${listKeyCounter++}`;
+      if (currentListType === "ul") {
+        elements.push(
+          <ul key={key} style={{ margin: "16px 0 20px", paddingLeft: 24, listStyleType: "disc" }}>
+            {currentList}
+          </ul>
+        );
+      } else {
+        elements.push(
+          <ol key={key} style={{ margin: "16px 0 20px", paddingLeft: 24, listStyleType: "decimal" }}>
+            {currentList}
+          </ol>
+        );
+      }
+      currentList = [];
+      currentListType = null;
+    }
+  };
+
+  lines.forEach((line, index) => {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      flushList();
+      return;
+    }
+
+    if (trimmed.startsWith("### ")) {
+      flushList();
+      elements.push(
+        <h3 key={index} style={{ fontSize: 18, fontWeight: 600, color: "var(--lp-fg)", marginTop: 28, marginBottom: 12, lineHeight: 1.4 }}>
+          {renderInlineMarkdown(trimmed.replace("### ", ""))}
+        </h3>
+      );
+      return;
+    }
+
+    if (trimmed.startsWith("## ")) {
+      flushList();
+      elements.push(
+        <h2 key={index} style={{ fontSize: 22, fontWeight: 600, color: "var(--lp-fg)", marginTop: 32, marginBottom: 14, lineHeight: 1.4 }}>
+          {renderInlineMarkdown(trimmed.replace("## ", ""))}
+        </h2>
+      );
+      return;
+    }
+
+    if (trimmed.startsWith("* ") || trimmed.startsWith("- ")) {
+      if (currentListType !== "ul") {
+        flushList();
+        currentListType = "ul";
+      }
+      const itemText = trimmed.replace(/^[\*\-]\s+/, "");
+      currentList.push(
+        <li key={index} style={{ marginBottom: 8, fontSize: 15, color: "var(--lp-fg-alt)", lineHeight: 1.6 }}>
+          {renderInlineMarkdown(itemText)}
+        </li>
+      );
+      return;
+    }
+
+    const numMatch = trimmed.match(/^(\d+)\.\s+(.*)$/);
+    if (numMatch) {
+      if (currentListType !== "ol") {
+        flushList();
+        currentListType = "ol";
+      }
+      const itemText = numMatch[2];
+      currentList.push(
+        <li key={index} style={{ marginBottom: 8, fontSize: 15, color: "var(--lp-fg-alt)", lineHeight: 1.6 }}>
+          {renderInlineMarkdown(itemText)}
+        </li>
+      );
+      return;
+    }
+
+    flushList();
+    elements.push(
+      <p key={index} style={{ marginBottom: 16, fontSize: 15, color: "var(--lp-fg-alt)", lineHeight: 1.7 }}>
+        {renderInlineMarkdown(trimmed)}
+      </p>
     );
-  }
+  });
 
-  if (trimmed.startsWith("## ")) {
-    return (
-      <h2 key={key} style={{ fontSize: 26, fontWeight: 700, color: "var(--lp-fg)", marginTop: 40, marginBottom: 18, lineHeight: 1.3 }}>
-        {renderInlineMarkdown(trimmed.replace("## ", ""))}
-      </h2>
-    );
-  }
-
-  if (trimmed.startsWith("* ") || trimmed.startsWith("- ")) {
-    const items = trimmed.split("\n").map(line => line.trim().replace(/^[\*\-]\s+/, ""));
-    return (
-      <ul key={key} style={{ margin: "20px 0", paddingLeft: 24, listStyleType: "disc" }}>
-        {items.map((item, idx) => (
-          <li key={idx} style={{ marginBottom: 10, color: "var(--lp-fg-alt)" }}>
-            {renderInlineMarkdown(item)}
-          </li>
-        ))}
-      </ul>
-    );
-  }
-
-  if (/^\d+\.\s+/.test(trimmed)) {
-    const items = trimmed.split("\n").map(line => line.trim().replace(/^\d+\.\s+/, ""));
-    return (
-      <ol key={key} style={{ margin: "20px 0", paddingLeft: 24, listStyleType: "decimal" }}>
-        {items.map((item, idx) => (
-          <li key={idx} style={{ marginBottom: 10, color: "var(--lp-fg-alt)" }}>
-            {renderInlineMarkdown(item)}
-          </li>
-        ))}
-      </ol>
-    );
-  }
-
-  return (
-    <p key={key} style={{ marginBottom: 20, color: "var(--lp-fg-alt)" }}>
-      {renderInlineMarkdown(trimmed)}
-    </p>
-  );
+  flushList();
+  return elements;
 }
 
 export default function ArticlePage() {
@@ -278,7 +321,7 @@ export default function ArticlePage() {
 
         {/* Content Body */}
         <div className="lp-article-body" style={{ fontSize: 16, lineHeight: 1.8, color: "var(--lp-fg-alt)" }}>
-          {post.content.split("\n\n").map((para, i) => renderBlockMarkdown(para, i))}
+          {renderArticleContent(post.content)}
         </div>
       </article>
 
