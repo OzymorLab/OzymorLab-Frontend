@@ -9,6 +9,9 @@ const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mon
 export const metadata: Metadata = {
   title: "OzymorLab",
   description: "High-Fidelity Multimodal Examination Evaluation Infrastructure",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
