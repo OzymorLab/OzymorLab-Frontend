@@ -125,8 +125,8 @@ export default function LandingPage() {
             {navLinks.map(l => <Link key={l.label} href={l.href} className="lp-nav__link">{l.label}</Link>)}
           </div>
           <div className="lp-nav__actions">
-            <Link href="/login" className="lp-btn lp-btn--outline">Start Free Pilot</Link>
-            <Link href="/login" className="lp-btn lp-btn--primary">Request Demo</Link>
+            <Link href="/login" className="lp-btn lp-btn--outline transition-all duration-300 hover:-translate-y-1">Join Waitlist</Link>
+            <Link href="/login" className="lp-btn lp-btn--primary text-white transition-all duration-300 hover:-translate-y-1">Request Demo</Link>
           </div>
           <button className="lp-nav__burger" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">{menuOpen ? <CloseIcon /> : <MenuIcon />}</button>
         </div>
@@ -134,8 +134,13 @@ export default function LandingPage() {
           <div className="lp-mobile-menu">
             {navLinks.map(l => <Link key={l.label} href={l.href} className="lp-mobile-menu__link" onClick={() => setMenuOpen(false)}>{l.label}</Link>)}
             <div className="lp-mobile-menu__actions">
-              <Link href="/login" className="lp-btn lp-btn--outline lp-btn--full">Start Free Pilot</Link>
-              <Link href="/login" className="lp-btn lp-btn--primary lp-btn--full">Request Demo</Link>
+              <Link
+                href="/login"
+                className="lp-btn lp-btn--outline lp-btn--full transition-all duration-300 hover:-translate-y-1"
+              >
+                Join Waitlist
+              </Link>
+              <Link href="/login" className="lp-btn lp-btn--primary lp-btn--full text-white transition-all duration-300 hover:-translate-y-1">Request Demo</Link>
             </div>
           </div>
         )}
