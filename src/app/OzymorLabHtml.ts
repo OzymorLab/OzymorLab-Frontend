@@ -1,6 +1,6 @@
 // Generated OzymorLab Bundled HTML Page
 // Transformed from remotebymodula Framer template - Educational Assessment Platform
-// Generated on: 2026-05-25 13:39:24
+// Generated on: 2026-05-25 13:53:44
 
 export const ozymorLabHtml = `<!DOCTYPE html>
 <!-- Made in Framer Â· framer.com â¨ -->
@@ -16,9 +16,9 @@ export const ozymorLabHtml = `<!DOCTYPE html>
   <meta content="width=device-width" name="viewport"/>
   <meta content="Framer 005c846" name="generator"/>
   <title>
-   OzymorLab - Academic Assessment Portal
+   OzymorLab
   </title>
-  <meta content="Say hello to OzymorLab. Designed for real businesses like yours: freelancers crafting from home offices, startups disrupting industries, agencies delivering client work â OzymorLab works the way you do. " name="description"/>
+  <meta content="Welcome to OzymorLab. Designed for modern educational systems: public school boards, university cohorts, and high-stakes examiners — OzymorLab works the way you do." name="description"/>
   <meta content="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/searchIndex-MDyNe5IqWI01.json" name="framer-search-index"/>
   <meta content="https://framerusercontent.com/sites/6z97y2T7oygeWIq1Gb7jP4/searchIndex-unlJFM7XaOzC.json" name="framer-search-index-fallback"/>
   <link href="https://framerusercontent.com/images/OF1bik2zVZSkrbcYg0is1OC7OM.svg" media="(prefers-color-scheme: light)" rel="icon"/>
@@ -27,12 +27,12 @@ export const ozymorLabHtml = `<!DOCTYPE html>
   <!-- Open Graph / Facebook -->
   <meta content="website" property="og:type"/>
   <meta content="OzymorLab - Academic Assessment Portal" property="og:title"/>
-  <meta content="Say hello to OzymorLab. Designed for real businesses like yours: freelancers crafting from home offices, startups disrupting industries, agencies delivering client work â OzymorLab works the way you do. " property="og:description"/>
+  <meta content="Welcome to OzymorLab. Designed for modern educational systems: public school boards, university cohorts, and high-stakes examiners — OzymorLab works the way you do." property="og:description"/>
   <meta content="https://framerusercontent.com/images/wXy3eJotnZZnsmvX0WkeyGXMhc.png" property="og:image"/>
   <!-- Twitter -->
   <meta content="summary_large_image" name="twitter:card"/>
   <meta content="OzymorLab - Academic Assessment Portal" name="twitter:title"/>
-  <meta content="Say hello to OzymorLab. Designed for real businesses like yours: freelancers crafting from home offices, startups disrupting industries, agencies delivering client work â OzymorLab works the way you do. " name="twitter:description"/>
+  <meta content="Welcome to OzymorLab. Designed for modern educational systems: public school boards, university cohorts, and high-stakes examiners — OzymorLab works the way you do." name="twitter:description"/>
   <meta content="https://framerusercontent.com/images/wXy3eJotnZZnsmvX0WkeyGXMhc.png" name="twitter:image"/>
   <style data-framer-font-css="">
    /* latin-ext */
@@ -665,81 +665,81 @@ export const ozymorLabHtml = `<!DOCTYPE html>
          <div class="ssr-variant hidden-lkre0h hidden-1n4zf07">
           <h1 style='width:100%;word-break:break-word;overflow-wrap:break-word;display:block;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(34, 36, 42));white-space:pre-line;text-align:center;font-family:"Onest", "Onest Placeholder", sans-serif;font-size:70px;font-style:normal;font-weight:500;letter-spacing:-0.03em;line-height:1em;margin:0;padding:0;margin-block-start:0;margin-block-end:0'>
            <span>
-            Say
+            The
            </span>
            <span style="position:relative;display:inline;vertical-align:baseline;overflow:visible">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(34, 36, 42));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:70px;font-style:normal;font-weight:500;letter-spacing:-0.03em;line-height:1em'>
-             hello
+             Operating
             </span>
             <span aria-hidden="true" style="position:absolute;left:50%;top:calc(100% - 77px);width:115%;transform:translateX(-50%);height:84px;background:var(--token-50f7c55d-562d-4beb-9e4e-86ed7b4f818d, rgb(224, 255, 130));-webkit-mask-image:url(https://iili.io/KFriAQI.png);mask-image:url(https://iili.io/KFriAQI.png);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-position:center;mask-position:center;border-radius:0;pointer-events:none;z-index:1;display:block">
             </span>
            </span>
            <span>
-            to
+            System for
            </span>
            <span style="position:relative;display:inline-block;vertical-align:baseline">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(34, 36, 42));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:70px;font-style:normal;font-weight:500;letter-spacing:-0.03em;line-height:1em'>
-             smarter
+             Smart Educational
             </span>
             <span aria-hidden="true" style="position:absolute;left:52%;top:45%;transform:translate(-50%, -36%);z-index:1;display:block;width:103%;height:49px;background:var(--token-50f7c55d-562d-4beb-9e4e-86ed7b4f818d, rgb(231, 255, 161));-webkit-mask-image:url(https://iili.io/FGHmzAB.png);mask-image:url(https://iili.io/FGHmzAB.png);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-position:center;mask-position:center;pointer-events:none">
             </span>
            </span>
            <span>
-            hiring
+            Evaluation
            </span>
           </h1>
          </div>
          <div class="ssr-variant hidden-1yeacn0 hidden-1n4zf07">
           <h1 style='width:100%;word-break:break-word;overflow-wrap:break-word;display:block;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(34, 36, 42));white-space:pre-line;text-align:center;font-family:"Onest", "Onest Placeholder", sans-serif;font-size:50px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1em;margin:0;padding:0;margin-block-start:0;margin-block-end:0'>
            <span>
-            Say
+            The
            </span>
            <span style="position:relative;display:inline;vertical-align:baseline;overflow:visible">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(34, 36, 42));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:50px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1em'>
-             hello
+             Operating
             </span>
             <span aria-hidden="true" style="position:absolute;left:50%;top:calc(100% - 55.00000000000001px);width:115%;transform:translateX(-50%);height:60px;background:var(--token-50f7c55d-562d-4beb-9e4e-86ed7b4f818d, rgb(224, 255, 130));-webkit-mask-image:url(https://iili.io/KFriAQI.png);mask-image:url(https://iili.io/KFriAQI.png);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-position:center;mask-position:center;border-radius:0;pointer-events:none;z-index:1;display:block">
             </span>
            </span>
            <span>
-            to
+            System for
            </span>
            <span style="position:relative;display:inline-block;vertical-align:baseline">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(34, 36, 42));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:50px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1em'>
-             smarter
+             Smart Educational
             </span>
             <span aria-hidden="true" style="position:absolute;left:52%;top:45%;transform:translate(-50%, -36%);z-index:1;display:block;width:103%;height:35px;background:var(--token-50f7c55d-562d-4beb-9e4e-86ed7b4f818d, rgb(231, 255, 161));-webkit-mask-image:url(https://iili.io/FGHmzAB.png);mask-image:url(https://iili.io/FGHmzAB.png);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-position:center;mask-position:center;pointer-events:none">
             </span>
            </span>
            <span>
-            hiring
+            Evaluation
            </span>
           </h1>
          </div>
          <div class="ssr-variant hidden-lkre0h hidden-1yeacn0">
           <h1 style='width:100%;word-break:break-word;overflow-wrap:break-word;display:block;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(34, 36, 42));white-space:pre-line;text-align:center;font-family:"Onest", "Onest Placeholder", sans-serif;font-size:60px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1em;margin:0;padding:0;margin-block-start:0;margin-block-end:0'>
            <span>
-            Say
+            The
            </span>
            <span style="position:relative;display:inline;vertical-align:baseline;overflow:visible">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(34, 36, 42));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:60px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1em'>
-             hello
+             Operating
             </span>
             <span aria-hidden="true" style="position:absolute;left:50%;top:calc(100% - 66px);width:115%;transform:translateX(-50%);height:72px;background:var(--token-50f7c55d-562d-4beb-9e4e-86ed7b4f818d, rgb(224, 255, 130));-webkit-mask-image:url(https://iili.io/KFriAQI.png);mask-image:url(https://iili.io/KFriAQI.png);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-position:center;mask-position:center;border-radius:0;pointer-events:none;z-index:1;display:block">
             </span>
            </span>
            <span>
-            to
+            System for
            </span>
            <span style="position:relative;display:inline-block;vertical-align:baseline">
             <span style='position:relative;z-index:2;color:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(34, 36, 42));font-family:"Onest", "Onest Placeholder", sans-serif;font-size:60px;font-style:normal;font-weight:500;letter-spacing:-0.02em;line-height:1em'>
-             smarter
+             Smart Educational
             </span>
             <span aria-hidden="true" style="position:absolute;left:52%;top:45%;transform:translate(-50%, -36%);z-index:1;display:block;width:103%;height:42px;background:var(--token-50f7c55d-562d-4beb-9e4e-86ed7b4f818d, rgb(231, 255, 161));-webkit-mask-image:url(https://iili.io/FGHmzAB.png);mask-image:url(https://iili.io/FGHmzAB.png);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-position:center;mask-position:center;pointer-events:none">
             </span>
            </span>
            <span>
-            hiring
+            Evaluation
            </span>
           </h1>
          </div>
@@ -5399,16 +5399,16 @@ more
               <!--$-->
               <div class="framer-kent31-container">
                <!--$-->
-               <a class="framer-2TNek framer-FlVxY framer-1l8hioj framer-v-16t52jk framer-1ljfdgx" data-framer-name="New" href="./careers" style="height:100%;width:100%">
+               <a class="framer-2TNek framer-FlVxY framer-1l8hioj framer-v-16t52jk framer-1ljfdgx" data-framer-name="New" href="/login" style="height:100%;width:100%">
                 <div class="framer-1tllw6k" data-framer-component-type="RichTextContainer" style="--extracted-r6o4lv:var(--token-ea690d84-0c2d-4322-885a-8bb8fee7e329, rgb(90, 109, 119));--framer-link-text-color:rgb(0, 153, 255);--framer-link-text-decoration:underline;transform:none">
                  <p class="framer-text framer-styles-preset-9oy5h3" data-styles-preset="j6DWcJyVn" style="--framer-text-color:var(--extracted-r6o4lv, var(--token-ea690d84-0c2d-4322-885a-8bb8fee7e329, rgb(90, 109, 119)))">
-                  Careers
+                  LMS Setup
                  </p>
                 </div>
                 <div class="framer-1lbbdcm" data-framer-name="Tag New" style="background-color:var(--token-50f7c55d-562d-4beb-9e4e-86ed7b4f818d, rgb(224, 255, 130));border-bottom-left-radius:54px;border-bottom-right-radius:54px;border-top-left-radius:54px;border-top-right-radius:54px">
                  <div class="framer-wl4588" data-framer-component-type="RichTextContainer" style='--extracted-1w1cjl5:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35));--extracted-l1lhml:"wght" 500;--framer-link-text-color:rgb(0, 153, 255);--framer-link-text-decoration:underline;transform:none'>
                   <h6 class="framer-text" style='--font-selector:R0Y7T25lc3QtdmFyaWFibGUtcmVndWxhclZGPUluZG5hSFFpSURVd01BPT0=;--framer-font-family:"Onest Variable", "Onest Placeholder", sans-serif;--framer-font-size:12px;--framer-font-variation-axes:var(--extracted-l1lhml, "wght" 500);--framer-line-height:1.4em;--framer-text-color:var(--extracted-1w1cjl5, var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35)))'>
-                   We're hiring!
+                   API Docs
                   </h6>
                  </div>
                 </div>
@@ -5761,16 +5761,16 @@ more
               <!--$-->
               <div class="framer-kent31-container">
                <!--$-->
-               <a class="framer-2TNek framer-FlVxY framer-1l8hioj framer-v-16t52jk framer-1ljfdgx" data-framer-name="New" href="./careers" style="height:100%;width:100%">
+               <a class="framer-2TNek framer-FlVxY framer-1l8hioj framer-v-16t52jk framer-1ljfdgx" data-framer-name="New" href="/login" style="height:100%;width:100%">
                 <div class="framer-1tllw6k" data-framer-component-type="RichTextContainer" style="--extracted-r6o4lv:var(--token-ea690d84-0c2d-4322-885a-8bb8fee7e329, rgb(90, 109, 119));--framer-link-text-color:rgb(0, 153, 255);--framer-link-text-decoration:underline;transform:none">
                  <p class="framer-text framer-styles-preset-9oy5h3" data-styles-preset="j6DWcJyVn" style="--framer-text-color:var(--extracted-r6o4lv, var(--token-ea690d84-0c2d-4322-885a-8bb8fee7e329, rgb(90, 109, 119)))">
-                  Careers
+                  LMS Setup
                  </p>
                 </div>
                 <div class="framer-1lbbdcm" data-framer-name="Tag New" style="background-color:var(--token-50f7c55d-562d-4beb-9e4e-86ed7b4f818d, rgb(224, 255, 130));border-bottom-left-radius:54px;border-bottom-right-radius:54px;border-top-left-radius:54px;border-top-right-radius:54px">
                  <div class="framer-wl4588" data-framer-component-type="RichTextContainer" style='--extracted-1w1cjl5:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35));--extracted-l1lhml:"wght" 500;--framer-link-text-color:rgb(0, 153, 255);--framer-link-text-decoration:underline;transform:none'>
                   <h6 class="framer-text" style='--font-selector:R0Y7T25lc3QtdmFyaWFibGUtcmVndWxhclZGPUluZG5hSFFpSURVd01BPT0=;--framer-font-family:"Onest Variable", "Onest Placeholder", sans-serif;--framer-font-size:12px;--framer-font-variation-axes:var(--extracted-l1lhml, "wght" 500);--framer-line-height:1.4em;--framer-text-color:var(--extracted-1w1cjl5, var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35)))'>
-                   We're hiring!
+                   API Docs
                   </h6>
                  </div>
                 </div>
@@ -6123,16 +6123,16 @@ more
               <!--$-->
               <div class="framer-kent31-container">
                <!--$-->
-               <a class="framer-2TNek framer-FlVxY framer-1l8hioj framer-v-16t52jk framer-1ljfdgx" data-framer-name="New" href="./careers" style="height:100%;width:100%">
+               <a class="framer-2TNek framer-FlVxY framer-1l8hioj framer-v-16t52jk framer-1ljfdgx" data-framer-name="New" href="/login" style="height:100%;width:100%">
                 <div class="framer-1tllw6k" data-framer-component-type="RichTextContainer" style="--extracted-r6o4lv:var(--token-ea690d84-0c2d-4322-885a-8bb8fee7e329, rgb(90, 109, 119));--framer-link-text-color:rgb(0, 153, 255);--framer-link-text-decoration:underline;transform:none">
                  <p class="framer-text framer-styles-preset-9oy5h3" data-styles-preset="j6DWcJyVn" style="--framer-text-color:var(--extracted-r6o4lv, var(--token-ea690d84-0c2d-4322-885a-8bb8fee7e329, rgb(90, 109, 119)))">
-                  Careers
+                  LMS Setup
                  </p>
                 </div>
                 <div class="framer-1lbbdcm" data-framer-name="Tag New" style="background-color:var(--token-50f7c55d-562d-4beb-9e4e-86ed7b4f818d, rgb(224, 255, 130));border-bottom-left-radius:54px;border-bottom-right-radius:54px;border-top-left-radius:54px;border-top-right-radius:54px">
                  <div class="framer-wl4588" data-framer-component-type="RichTextContainer" style='--extracted-1w1cjl5:var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35));--extracted-l1lhml:"wght" 500;--framer-link-text-color:rgb(0, 153, 255);--framer-link-text-decoration:underline;transform:none'>
                   <h6 class="framer-text" style='--font-selector:R0Y7T25lc3QtdmFyaWFibGUtcmVndWxhclZGPUluZG5hSFFpSURVd01BPT0=;--framer-font-family:"Onest Variable", "Onest Placeholder", sans-serif;--framer-font-size:12px;--framer-font-variation-axes:var(--extracted-l1lhml, "wght" 500);--framer-line-height:1.4em;--framer-text-color:var(--extracted-1w1cjl5, var(--token-54fbe6ca-60b1-4431-a556-3bdeb985788c, rgb(31, 34, 35)))'>
-                   We're hiring!
+                   API Docs
                   </h6>
                  </div>
                 </div>
