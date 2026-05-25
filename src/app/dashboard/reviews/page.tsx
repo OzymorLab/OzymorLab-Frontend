@@ -12,7 +12,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.c
 
 interface ReviewItem {
   submission_id: string;
-  student_id: string;
+  student_id: string | null;
   task_title: string;
   grade: number;
   max_grade: number;
@@ -25,7 +25,7 @@ interface ReviewItem {
 
 interface ReviewDetail {
   submission_id: string;
-  student_id: string;
+  student_id: string | null;
   task_title: string;
   grade: number;
   max_grade: number;
@@ -38,6 +38,8 @@ interface ReviewDetail {
   justification?: string;
   review_notes?: string;
   reviewed_by?: string;
+  raw_text?: string | null;
+  parsed_content?: any | null;
 }
 
 interface PendingRubric {
@@ -59,6 +61,7 @@ export default function ReviewsPage() {
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [selectedSub, setSelectedSub] = useState<ReviewItem | null>(null);
   const [reviewDetail, setReviewDetail] = useState<ReviewDetail | null>(null);
+  const [activeTab, setActiveTab] = useState<"evaluation" | "student_answer">("evaluation");
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
 
@@ -135,6 +138,7 @@ export default function ReviewsPage() {
       setReviewDetail(null);
       setNewGrade("");
       setModerationNotes("");
+      setActiveTab("evaluation");
     }
   }, [selectedSub]);
 
@@ -407,10 +411,10 @@ export default function ReviewsPage() {
             <div className="slide-body p-6">
               <div className="flex items-center gap-3 mb-6">
                 <div className="avatar avatar-lg bg-brand-500/10 text-brand-600 w-12 h-12 rounded-full flex items-center justify-center font-bold">
-                  {selectedSub.student_id.slice(-2)}
+                  {(selectedSub.student_id || '??').slice(-2)}
                 </div>
                 <div>
-                  <div className="text-[16px] font-semibold text-text-primary">{selectedSub.student_id}</div>
+                  <div className="text-[16px] font-semibold text-text-primary">{selectedSub.student_id || 'Unknown Student'}</div>
                   <div className="font-mono text-[11px] text-text-tertiary">{selectedSub.submission_id}</div>
                 </div>
               </div>
@@ -423,100 +427,161 @@ export default function ReviewsPage() {
               ) : !reviewDetail ? (
                 <div className="py-8 text-center text-text-tertiary">Failed to retrieve grade detail.</div>
               ) : (
-                <div className="flex flex-col gap-6">
-                  {/* Current Score Display */}
-                  <div className="bg-surface-secondary border border-border-subtle p-4 rounded-lg flex justify-between items-center">
-                    <div>
-                      <span className="text-[11.5px] text-text-tertiary uppercase tracking-wider block mb-1">AI Proposed Grade</span>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-[28px] font-bold text-text-primary">{reviewDetail.grade}</span>
-                        <span className="text-[14px] text-text-tertiary">/ {reviewDetail.max_grade}</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-[11.5px] text-text-tertiary uppercase tracking-wider block mb-1">AI Confidence</span>
-                      <span className="text-[14px] font-semibold text-color-warning-border bg-warning-bg px-2.5 py-1 rounded-md">
-                        {(reviewDetail.confidence * 100).toFixed(0)}%
-                      </span>
-                    </div>
+                <div className="flex flex-col gap-5">
+                  {/* Segmented Tab Control */}
+                  <div className="flex border-b border-border-secondary mb-2">
+                    <button
+                      type="button"
+                      className={`flex-1 pb-2.5 text-center font-medium text-[13px] transition-all relative ${
+                        activeTab === "evaluation"
+                          ? "text-primary border-b-2 border-primary font-semibold"
+                          : "text-text-tertiary hover:text-text-secondary"
+                      }`}
+                      onClick={() => setActiveTab("evaluation")}
+                    >
+                      Evaluation & Moderation
+                    </button>
+                    <button
+                      type="button"
+                      className={`flex-1 pb-2.5 text-center font-medium text-[13px] transition-all relative ${
+                        activeTab === "student_answer"
+                          ? "text-primary border-b-2 border-primary font-semibold"
+                          : "text-text-tertiary hover:text-text-secondary"
+                      }`}
+                      onClick={() => setActiveTab("student_answer")}
+                    >
+                      Student Answer
+                    </button>
                   </div>
 
-                  {/* Actions Grid */}
-                  <div className="flex flex-col gap-4 border border-border-subtle p-4 rounded-lg bg-surface-primary">
-                    <h3 className="text-[13px] font-semibold text-text-primary flex items-center gap-1.5">
-                      <ShieldCheck size={14} className="text-brand-600" />
-                      Human-in-the-Loop Moderation Form
-                    </h3>
-
-                    {/* Grade override input */}
-                    <form onSubmit={handleOverrideGrade} className="flex flex-col gap-3 mt-2">
-                      <div className="flex gap-4">
-                        <div className="flex-1 flex flex-col gap-1">
-                          <label className="text-[11px] font-semibold text-text-secondary uppercase">Corrected Score</label>
-                          <input 
-                            type="number"
-                            min="0"
-                            max={reviewDetail.max_grade}
-                            className="input-field py-2 text-[13px]"
-                            value={newGrade}
-                            onChange={(e) => setNewGrade(Number(e.target.value))}
-                          />
+                  {activeTab === "evaluation" ? (
+                    <div className="flex flex-col gap-6">
+                      {/* Current Score Display */}
+                      <div className="bg-surface-secondary border border-border-subtle p-4 rounded-lg flex justify-between items-center">
+                        <div>
+                          <span className="text-[11.5px] text-text-tertiary uppercase tracking-wider block mb-1">AI Proposed Grade</span>
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-[28px] font-bold text-text-primary">{reviewDetail.grade}</span>
+                            <span className="text-[14px] text-text-tertiary">/ {reviewDetail.max_grade}</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-[11.5px] text-text-tertiary uppercase tracking-wider block mb-1">AI Confidence</span>
+                          <span className="text-[14px] font-semibold text-color-warning-border bg-warning-bg px-2.5 py-1 rounded-md">
+                            {(reviewDetail.confidence * 100).toFixed(0)}%
+                          </span>
                         </div>
                       </div>
 
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[11px] font-semibold text-text-secondary uppercase">Moderation notes / rationale</label>
-                        <textarea 
-                          className="input-field min-h-[70px] text-[12.5px]"
-                          placeholder="Why are you approving or overriding this grade?"
-                          value={moderationNotes}
-                          onChange={(e) => setModerationNotes(e.target.value)}
-                        />
+                      {/* Actions Grid */}
+                      <div className="flex flex-col gap-4 border border-border-subtle p-4 rounded-lg bg-surface-primary">
+                        <h3 className="text-[13px] font-semibold text-text-primary flex items-center gap-1.5">
+                          <ShieldCheck size={14} className="text-brand-600" />
+                          Human-in-the-Loop Moderation Form
+                        </h3>
+
+                        {/* Grade override input */}
+                        <form onSubmit={handleOverrideGrade} className="flex flex-col gap-3 mt-2">
+                          <div className="flex gap-4">
+                            <div className="flex-1 flex flex-col gap-1">
+                              <label className="text-[11px] font-semibold text-text-secondary uppercase">Corrected Score</label>
+                              <input 
+                                type="number"
+                                min="0"
+                                max={reviewDetail.max_grade}
+                                className="input-field py-2 text-[13px]"
+                                value={isNaN(newGrade) ? "" : newGrade}
+                                onChange={(e) => setNewGrade(e.target.value === "" ? 0 : Number(e.target.value))}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[11px] font-semibold text-text-secondary uppercase">Moderation notes / rationale</label>
+                            <textarea 
+                              className="input-field min-h-[70px] text-[12.5px]"
+                              placeholder="Why are you approving or overriding this grade?"
+                              value={moderationNotes}
+                              onChange={(e) => setModerationNotes(e.target.value)}
+                            />
+                          </div>
+
+                          {actionSuccess ? (
+                            <div className="p-3 bg-success-bg text-success-text rounded-md text-[12px] flex items-center gap-1.5 font-semibold mt-1">
+                              <CheckCircle2 size={14} /> Moderation action committed successfully!
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-2 gap-3 mt-2">
+                              <button 
+                                type="button"
+                                className="btn btn-secondary py-2 justify-center text-[12.5px]"
+                                onClick={handleApproveGrade}
+                                disabled={isSubmittingAction}
+                              >
+                                Approve AI Grade
+                              </button>
+                              <button 
+                                type="submit"
+                                className="btn btn-brand py-2 justify-center text-[12.5px]"
+                                disabled={isSubmittingAction || newGrade === "" || !moderationNotes.trim()}
+                              >
+                                {isSubmittingAction ? <Loader2 className="animate-spin" size={14} /> : "Override AI Grade"}
+                              </button>
+                            </div>
+                          )}
+                        </form>
                       </div>
 
-                      {actionSuccess ? (
-                        <div className="p-3 bg-success-bg text-success-text rounded-md text-[12px] flex items-center gap-1.5 font-semibold mt-1">
-                          <CheckCircle2 size={14} /> Moderation action committed successfully!
+                      {/* Component step breakdowns */}
+                      <div className="flex flex-col gap-3">
+                        <h4 className="text-[11.5px] font-semibold tracking-wider text-text-tertiary uppercase">Component Step Audit traces</h4>
+                        <div className="flex flex-col gap-3">
+                          {(reviewDetail.step_grades || []).map((step, idx) => (
+                            <div key={idx} className="step-card bg-surface-secondary border border-border-subtle p-3 rounded-lg">
+                              <div className="step-card-top flex justify-between font-medium text-[12px] text-text-primary mb-1">
+                                <span>Step {step.step_num} ({step.component_type || "text"})</span>
+                                <span className="font-semibold">{step.marks_awarded || step.awarded} / {step.max_marks || step.max}</span>
+                              </div>
+                              <p className="step-justification text-[11.5px] text-text-secondary leading-relaxed mt-1">
+                                {step.justification}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-4">
+                      {reviewDetail.parsed_content?.steps && reviewDetail.parsed_content.steps.length > 0 ? (
+                        <div className="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-1">
+                          {reviewDetail.parsed_content.steps.map((step: any, idx: number) => (
+                            <div key={idx} className="bg-surface-secondary border border-border-secondary rounded-lg p-4 flex flex-col gap-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-[12px] font-bold text-primary uppercase tracking-wider">Step {step.step_num}</span>
+                                <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase font-medium">{step.step_type}</span>
+                              </div>
+                              <p className="text-text-primary text-[13.5px] leading-relaxed">{step.text}</p>
+                              {step.equations && step.equations.length > 0 && (
+                                <div className="mt-1 flex flex-wrap gap-1.5">
+                                  {step.equations.map((eq: string, eqIdx: number) => (
+                                    <code key={eqIdx} className="bg-surface-hover text-text-secondary px-2 py-0.5 rounded text-[11.5px] font-mono border border-border-subtle">
+                                      {eq}
+                                    </code>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : reviewDetail.raw_text ? (
+                        <div className="bg-surface-secondary border border-border-secondary rounded-lg p-4 font-mono text-[12.5px] text-text-secondary whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
+                          {reviewDetail.raw_text}
                         </div>
                       ) : (
-                        <div className="grid grid-cols-2 gap-3 mt-2">
-                          <button 
-                            type="button"
-                            className="btn btn-secondary py-2 justify-center text-[12.5px]"
-                            onClick={handleApproveGrade}
-                            disabled={isSubmittingAction}
-                          >
-                            Approve AI Grade
-                          </button>
-                          <button 
-                            type="submit"
-                            className="btn btn-brand py-2 justify-center text-[12.5px]"
-                            disabled={isSubmittingAction || newGrade === "" || !moderationNotes.trim()}
-                          >
-                            {isSubmittingAction ? <Loader2 className="animate-spin" size={14} /> : "Override AI Grade"}
-                          </button>
-                        </div>
+                        <div className="text-center text-text-tertiary py-8">No student answer text parsed yet.</div>
                       )}
-                    </form>
-                  </div>
-
-                  {/* Component step breakdowns */}
-                  <div className="flex flex-col gap-3">
-                    <h4 className="text-[11.5px] font-semibold tracking-wider text-text-tertiary uppercase">Component Step Audit traces</h4>
-                    <div className="flex flex-col gap-3">
-                      {(reviewDetail.step_grades || []).map((step, idx) => (
-                        <div key={idx} className="step-card bg-surface-secondary border border-border-subtle p-3 rounded-lg">
-                          <div className="step-card-top flex justify-between font-medium text-[12px] text-text-primary mb-1">
-                            <span>Step {step.step_num} ({step.component_type || "text"})</span>
-                            <span className="font-semibold">{step.marks_awarded || step.awarded} / {step.max_marks || step.max}</span>
-                          </div>
-                          <p className="step-justification text-[11.5px] text-text-secondary leading-relaxed mt-1">
-                            {step.justification}
-                          </p>
-                        </div>
-                      ))}
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
             </div>
