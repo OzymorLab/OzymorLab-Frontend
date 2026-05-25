@@ -30,7 +30,7 @@
 /* ── Animations ── */
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .lp-anim-fade { animation: fadeInUp 0.5s cubic-bezier(0.33, 1, 0.68, 1) both; }
-.lp-reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.lp-reveal { opacity: 0; transform: translateY(24px); transition: opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1), transform 1.5s cubic-bezier(0.16, 1, 0.3, 1); }
 .lp-reveal--visible { opacity: 1; transform: translateY(0); }
 
 /* ── Highlight marks (matching Framer underline/box) ── */
@@ -74,8 +74,8 @@
 }
 .lp-btn--outline { border: 1px solid var(--lp-border); background: transparent; color: var(--lp-fg); }
 .lp-btn--outline:hover { background: var(--lp-surface); }
-.lp-btn--primary { background: var(--lp-fg); color: #fff; }
-.lp-btn--primary:hover { background: #333; }
+.lp-btn--primary { background: var(--lp-fg); color: #ffffff !important; }
+.lp-btn--primary:hover { background: #333; color: #ffffff !important; }
 .lp-btn--accent { background: var(--lp-accent); color: var(--lp-fg); }
 .lp-btn--accent:hover { background: var(--lp-accent-soft); }
 .lp-btn--lg { padding: 14px 28px; font-size: 16px; border-radius: 14px; }
@@ -171,10 +171,20 @@
 .lp-hero-ui__team-role { font-size: 11px; color: var(--lp-muted); }
 
 /* ═══════════════ TRUST BAR ═══════════════ */
-.lp-trust { padding: 60px 24px; text-align: center; background: var(--lp-bg); }
+.lp-trust { padding: 60px 24px; text-align: center; background: var(--lp-bg); overflow: hidden; }
 .lp-trust__label { font-size: 14px; font-weight: 400; color: var(--lp-muted2); margin-bottom: 32px; }
-.lp-trust__logos { display: flex; flex-wrap: wrap; justify-content: center; gap: 32px; max-width: var(--lp-max-w); margin: 0 auto; align-items: center; }
-.lp-trust__logo { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 500; color: var(--lp-muted); letter-spacing: -0.07em; }
+.lp-trust__marquee { overflow: hidden; width: 100%; display: flex; position: relative; padding: 12px 0; }
+.lp-trust__marquee::before, .lp-trust__marquee::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 120px; z-index: 2; pointer-events: none;
+}
+.lp-trust__marquee::before { left: 0; background: linear-gradient(to right, var(--lp-bg), transparent); }
+.lp-trust__marquee::after { right: 0; background: linear-gradient(to left, var(--lp-bg), transparent); }
+.lp-trust__track { display: flex; gap: 80px; width: max-content; animation: lpMarquee 35s linear infinite; white-space: nowrap; }
+.lp-trust__logo { font-size: 18px; font-weight: 500; color: var(--lp-muted); flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
+@keyframes lpMarquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
 
 /* ═══════════════ FEATURES SMALL ═══════════════ */
 .lp-features-small { padding: 100px 24px; max-width: var(--lp-max-w); margin: 0 auto; }
@@ -282,12 +292,12 @@
 .lp-footer__bottom p { font-size: 13px; color: rgba(3, 32, 43, 0.7); }
 .lp-footer__socials { display: flex; gap: 12px; }
 .lp-footer__social {
-  width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--lp-border);
-  display: flex; align-items: center; justify-content: center; font-size: 0;
-  color: var(--lp-muted); transition: all 0.2s;
+  width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--lp-border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--lp-muted); transition: all 0.2s ease; background: var(--lp-bg);
 }
-.lp-footer__social::after { font-size: 10px; content: attr(data-label); }
-.lp-footer__social:hover { border-color: var(--lp-fg); color: var(--lp-fg); }
+.lp-footer__social svg { width: 18px; height: 18px; display: block; }
+.lp-footer__social:hover { border-color: var(--lp-fg); color: var(--lp-fg); background: var(--lp-surface); transform: translateY(-2px); }
 
 /* ═══════════════ ELEVATING STANDARDS ═══════════════ */
 .lp-elevating { padding: 100px 24px; max-width: var(--lp-max-w); margin: 0 auto; }

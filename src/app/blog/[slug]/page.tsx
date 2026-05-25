@@ -14,6 +14,24 @@ const LogoIcon = () => (
 const ArrowLeft = () => <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 8H3M7 12L3 8l4-4" /></svg>;
 const MenuIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>;
 const CloseIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+const LinkedInIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+    <rect x="2" y="9" width="4" height="12" />
+    <circle cx="4" cy="4" r="2" />
+  </svg>
+);
+const XIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 4l11.733 16h4.267l-11.733 -16z" />
+    <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
+  </svg>
+);
+const FacebookIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+  </svg>
+);
 
 const navLinks = [
   { label: "About", href: "/about" },
@@ -28,6 +46,7 @@ const blogPosts = [
     slug: "announcing-our-2-3m-seed-round-transforming-ozymorlab-work-management",
     title: "Announcing our $2.3M Seed Round to Transform Academic Assessment",
     content: `We are thrilled to announce that OzymorLab has raised a $2.3M Seed round to expand our explainable grading and rubric-grounding engine. The round is led by Y Combinator, with participation from leading institutional partners, academic controllers, and prominent angel investors in education technology.
+
 
 OzymorLab was started to solve a clear and growing challenge in academic systems: grading load is increasing, yet standard LLM-based solutions lack explainability, security, and integration with classical rubrics. 
 
@@ -45,6 +64,7 @@ We are deeply grateful to our pilot districts and user community. The future of 
     readTime: "4 min read",
     category: "Company",
     color: "#e0ff82",
+    imageUrl: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?q=80&w=600&auto=format&fit=crop",
   },
   {
     slug: "how-rubric-grounding-secures-grading-integrity",
@@ -56,6 +76,7 @@ In this article, we break down how OzymorLab uses explainable tracing and ground
     readTime: "6 min read",
     category: "Technology",
     color: "#e0f2fe",
+    imageUrl: "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?q=80&w=600&auto=format&fit=crop",
   },
   {
     slug: "transcribing-cursive-math-derivations-ocr-breakthrough",
@@ -67,6 +88,7 @@ OzymorLab's engineering team has optimized our OCR engine to parse cursive deriv
     readTime: "8 min read",
     category: "Engineering",
     color: "#fee2e2",
+    imageUrl: "https://images.unsplash.com/photo-1453733190148-c44698c26578?q=80&w=600&auto=format&fit=crop",
   },
   {
     slug: "ferpa-compliance-in-ai-driven-evaluation",
@@ -78,6 +100,7 @@ Here, we outline how OzymorLab secures student records, encrypts personal inform
     readTime: "5 min read",
     category: "Compliance",
     color: "#fef3c7",
+    imageUrl: "https://images.unsplash.com/photo-1450133064473-71024230f91b?q=80&w=600&auto=format&fit=crop",
   }
 ];
 
@@ -137,8 +160,10 @@ export default function ArticlePage() {
         <h1 className="lp-section-title" style={{ fontSize: "clamp(28px, 5vw, 42px)", marginBottom: 24, lineHeight: 1.2 }}>{post.title}</h1>
         
         {/* Banner banner decoration */}
-        <div style={{ background: post.color, height: 300, borderRadius: 16, marginBottom: 40, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <LogoIcon />
+        <div style={{ backgroundImage: `url(${post.imageUrl})`, backgroundSize: "cover", backgroundPosition: "center", height: 350, borderRadius: 16, marginBottom: 40, position: "relative" }}>
+          <div style={{ position: "absolute", bottom: 20, right: 20, background: "rgba(255,255,255,0.9)", padding: 8, borderRadius: 8, backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <LogoIcon />
+          </div>
         </div>
 
         {/* Content Body */}
@@ -182,7 +207,15 @@ export default function ArticlePage() {
           <div className="lp-footer__bottom">
             <p>&copy; {new Date().getFullYear()} OzymorLab. All rights reserved.</p>
             <div className="lp-footer__socials">
-              {["X","Li","Gh"].map(s => <a key={s} href="#" className="lp-footer__social" data-label={s} />)}
+              <a href="https://www.linkedin.com/company/118164239" target="_blank" rel="noopener noreferrer" className="lp-footer__social" aria-label="LinkedIn">
+                <LinkedInIcon />
+              </a>
+              <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="lp-footer__social" aria-label="X">
+                <XIcon />
+              </a>
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="lp-footer__social" aria-label="Facebook">
+                <FacebookIcon />
+              </a>
             </div>
           </div>
         </div>

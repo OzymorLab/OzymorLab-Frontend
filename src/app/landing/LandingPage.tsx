@@ -16,6 +16,24 @@ const ArrowRight = () => <svg width="16" height="16" viewBox="0 0 16 16" fill="n
 const CheckIcon = () => <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 8l3 3 5-5" /></svg>;
 const MenuIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>;
 const CloseIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+const LinkedInIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+    <rect x="2" y="9" width="4" height="12" />
+    <circle cx="4" cy="4" r="2" />
+  </svg>
+);
+const XIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 4l11.733 16h4.267l-11.733 -16z" />
+    <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
+  </svg>
+);
+const FacebookIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+  </svg>
+);
 
 /* ── Scroll-reveal hook ── */
 function useReveal() {
@@ -54,7 +72,18 @@ const featureCards = [
   { title: "Generate Evaluation Logs", desc: "Drive focus and progress with real-time explainable traces." },
 ];
 
-const trustedLogos = ["bluebird", "Galaxy", "berry", "Chameleon", "SHIP4450"];
+const trustedSchools = [
+  "Delhi Public School",
+  "Indian Institute of Technology",
+  "National Public School",
+  "The Doon School",
+  "Sanskriti School",
+  "St. Xavier's Academy",
+  "DAV Public School",
+  "Kendriya Vidyalaya",
+  "Ryan International School",
+  "Birla Institute of Technology"
+];
 
 const empowerCards = [
   { title: "Rubric Grounding", desc: "Align AI score calculations with precise school rubric constraints." },
@@ -152,17 +181,20 @@ export default function LandingPage() {
         <div className="lp-hero__content">
           <div className="lp-hero__badge lp-anim-fade" style={{ animationDelay: "0.2s" }}>
             <span className="lp-hero__badge-tag">New</span>
-            <span>Announcing our YC Winter &apos;22 Rubric-Grounding Engine</span>
+            <span>Announcing Rubric-Grounding Engine for India</span>
           </div>
           <h1 className="lp-hero__title lp-anim-fade" style={{ animationDelay: "0.3s" }}>
-            <span className="lp-highlight lp-highlight--underline">Say</span> hello to your academic assessment portal
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "16px", flexWrap: "wrap", justifyContent: "center" }}>
+              <LogoIcon />
+              <span><span className="lp-highlight lp-highlight--underline">Say</span> hello to your academic assessment portal</span>
+            </span>
           </h1>
           <p className="lp-hero__subtitle lp-anim-fade" style={{ animationDelay: "0.4s" }}>
             An academic assessment portal that works the way you do.
           </p>
           <div className="lp-hero__ctas lp-anim-fade" style={{ animationDelay: "0.5s" }}>
             <Link href="/pricing" className="lp-btn lp-btn--outline lp-btn--lg">Start Free Pilot</Link>
-            <Link href="/contact" className="lp-btn lp-btn--primary lp-btn--lg">Request Demo</Link>
+            <Link href="/contact" className="lp-btn lp-btn--primary lp-btn--lg text-white" style={{ color: "#ffffff" }}>Request Demo</Link>
           </div>
           {/* Hero UI Mock */}
           <div className="lp-hero__ui lp-anim-fade" style={{ animationDelay: "0.6s" }}>
@@ -202,8 +234,15 @@ export default function LandingPage() {
       <section className="lp-trust" id="about" ref={r1.ref}>
         <div className={r1.className}>
           <p className="lp-trust__label">1,200+ leading academic boards trust OzymorLab</p>
-          <div className="lp-trust__logos">
-            {trustedLogos.map(n => <div key={n} className="lp-trust__logo">{n}</div>)}
+          <div className="lp-trust__marquee">
+            <div className="lp-trust__track">
+              {[...trustedSchools, ...trustedSchools].map((n, i) => (
+                <div key={i} className="lp-trust__logo">
+                  <LogoIcon />
+                  <span>{n}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -215,7 +254,7 @@ export default function LandingPage() {
             <h2 className="lp-section-title">
               Everything you need, all in <span className="lp-highlight lp-highlight--box">one place</span>
             </h2>
-            <Link href="/contact" className="lp-btn lp-btn--primary lp-btn--icon">Request Demo <ArrowRight /></Link>
+            <Link href="/contact" className="lp-btn lp-btn--primary lp-btn--icon text-white" style={{ color: "#ffffff" }}>Request Demo <ArrowRight /></Link>
           </div>
           <div className="lp-features-small__grid">
             {featureCards.map((f, i) => (
@@ -425,7 +464,15 @@ export default function LandingPage() {
             <div className="lp-footer__bottom">
               <p>&copy; {new Date().getFullYear()} OzymorLab. All rights reserved.</p>
               <div className="lp-footer__socials">
-                {["X","Li","Gh"].map(s => <a key={s} href="#" className="lp-footer__social" data-label={s} />)}
+                <a href="https://www.linkedin.com/company/118164239" target="_blank" rel="noopener noreferrer" className="lp-footer__social" aria-label="LinkedIn">
+                  <LinkedInIcon />
+                </a>
+                <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="lp-footer__social" aria-label="X">
+                  <XIcon />
+                </a>
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="lp-footer__social" aria-label="Facebook">
+                  <FacebookIcon />
+                </a>
               </div>
             </div>
           </div>

@@ -14,6 +14,24 @@ const LogoIcon = () => (
 const ArrowRight = () => <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8h10M9 4l4 4-4 4" /></svg>;
 const MenuIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>;
 const CloseIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+const LinkedInIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+    <rect x="2" y="9" width="4" height="12" />
+    <circle cx="4" cy="4" r="2" />
+  </svg>
+);
+const XIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 4l11.733 16h4.267l-11.733 -16z" />
+    <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
+  </svg>
+);
+const FacebookIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+  </svg>
+);
 
 const navLinks = [
   { label: "About", href: "/about" },
@@ -33,6 +51,7 @@ const blogPosts = [
     category: "Company",
     color: "#e0ff82",
     featured: true,
+    imageUrl: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?q=80&w=600&auto=format&fit=crop",
   },
   {
     slug: "how-rubric-grounding-secures-grading-integrity",
@@ -42,6 +61,7 @@ const blogPosts = [
     readTime: "6 min read",
     category: "Technology",
     color: "#e0f2fe",
+    imageUrl: "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?q=80&w=600&auto=format&fit=crop",
   },
   {
     slug: "transcribing-cursive-math-derivations-ocr-breakthrough",
@@ -51,6 +71,7 @@ const blogPosts = [
     readTime: "8 min read",
     category: "Engineering",
     color: "#fee2e2",
+    imageUrl: "https://images.unsplash.com/photo-1453733190148-c44698c26578?q=80&w=600&auto=format&fit=crop",
   },
   {
     slug: "ferpa-compliance-in-ai-driven-evaluation",
@@ -60,6 +81,7 @@ const blogPosts = [
     readTime: "5 min read",
     category: "Compliance",
     color: "#fef3c7",
+    imageUrl: "https://images.unsplash.com/photo-1450133064473-71024230f91b?q=80&w=600&auto=format&fit=crop",
   }
 ];
 
@@ -111,7 +133,10 @@ export default function BlogPage() {
             <span>Latest news and engineering updates from OzymorLab</span>
           </div>
           <h1 className="lp-hero__title" style={{ fontSize: "clamp(36px, 5vw, 56px)", maxWidth: 800 }}>
-            Updates on <span className="lp-highlight lp-highlight--underline">grading integrity</span> and AI evaluation.
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
+              <LogoIcon />
+              <span>Updates on <span className="lp-highlight lp-highlight--underline">grading integrity</span> and AI evaluation.</span>
+            </span>
           </h1>
         </div>
       </section>
@@ -120,8 +145,8 @@ export default function BlogPage() {
       {featuredPost && (
         <section style={{ padding: "40px 24px 80px", maxWidth: 1200, margin: "0 auto" }}>
           <div className="lp-blog-featured-card">
-            <div className="lp-blog-featured-card__media" style={{ background: featuredPost.color }}>
-              <div className="lp-blog-featured-card__logo-wrapper">
+            <div className="lp-blog-featured-card__media" style={{ backgroundImage: `url(${featuredPost.imageUrl})`, backgroundSize: "cover", backgroundPosition: "center", position: "relative" }}>
+              <div className="lp-blog-featured-card__logo-wrapper" style={{ position: "absolute", bottom: 20, left: 20 }}>
                 <LogoIcon />
                 <span>OzymorLab News</span>
               </div>
@@ -149,8 +174,8 @@ export default function BlogPage() {
         <div className="lp-blog-grid">
           {regularPosts.map((post, i) => (
             <article key={i} className="lp-blog-card">
-              <div className="lp-blog-card__media" style={{ background: post.color }}>
-                <div className="lp-blog-card__logo-wrapper">
+              <div className="lp-blog-card__media" style={{ backgroundImage: `url(${post.imageUrl})`, backgroundSize: "cover", backgroundPosition: "center", position: "relative" }}>
+                <div className="lp-blog-card__logo-wrapper" style={{ position: "absolute", bottom: 12, right: 12 }}>
                   <LogoIcon />
                 </div>
               </div>
@@ -193,7 +218,15 @@ export default function BlogPage() {
           <div className="lp-footer__bottom">
             <p>&copy; {new Date().getFullYear()} OzymorLab. All rights reserved.</p>
             <div className="lp-footer__socials">
-              {["X","Li","Gh"].map(s => <a key={s} href="#" className="lp-footer__social" data-label={s} />)}
+              <a href="https://www.linkedin.com/company/118164239" target="_blank" rel="noopener noreferrer" className="lp-footer__social" aria-label="LinkedIn">
+                <LinkedInIcon />
+              </a>
+              <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="lp-footer__social" aria-label="X">
+                <XIcon />
+              </a>
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="lp-footer__social" aria-label="Facebook">
+                <FacebookIcon />
+              </a>
             </div>
           </div>
         </div>
