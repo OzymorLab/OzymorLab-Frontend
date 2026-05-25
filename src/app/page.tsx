@@ -1,31 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ozymorLabHtmlBase64 } from "./OzymorLabHtml";
-
-// Safe Base64 decoding for UTF-8 in both SSR and browser contexts
-const decodeBase64 = (str: string): string => {
-  try {
-    if (typeof window === "undefined") {
-      return Buffer.from(str, "base64").toString("utf-8");
-    }
-    const binary = atob(str);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    return new TextDecoder("utf-8").decode(bytes);
-  } catch (e) {
-    console.error("Failed to decode Base64 landing page:", e);
-    return "";
-  }
-};
+import { ozymorLabHtml } from "./OzymorLabHtml";
 
 export default function HomePage() {
   const [htmlContent, setHtmlContent] = useState<string>("");
 
   useEffect(() => {
-    setHtmlContent(decodeBase64(ozymorLabHtmlBase64));
+    setHtmlContent(ozymorLabHtml);
   }, []);
 
   if (!htmlContent) {
@@ -47,3 +29,4 @@ export default function HomePage() {
     />
   );
 }
+
