@@ -73,16 +73,15 @@ const featureCards = [
 ];
 
 const trustedSchools = [
-  "Delhi Public School",
-  "Indian Institute of Technology",
-  "National Public School",
-  "The Doon School",
-  "Sanskriti School",
-  "St. Xavier's Academy",
-  "DAV Public School",
-  "Kendriya Vidyalaya",
-  "Ryan International School",
-  "Birla Institute of Technology"
+  "D P S",
+  "V M School",
+  "N P S",
+  "T D School",
+  "S School",
+  "X Academy",
+  "DAV School",
+  "K V",
+  "R I School"
 ];
 
 const empowerCards = [
