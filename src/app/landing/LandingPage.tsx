@@ -153,8 +153,8 @@ export default function LandingPage() {
             {navLinks.map(l => <Link key={l.label} href={l.href} className="lp-nav__link">{l.label}</Link>)}
           </div>
           <div className="lp-nav__actions">
-            <Link href="/login" className="lp-btn lp-btn--outline transition-all duration-300 hover:-translate-y-1">Join Waitlist</Link>
-            <Link href="/login" className="lp-btn lp-btn--primary text-white transition-all duration-300 hover:-translate-y-1">Request Demo</Link>
+            <Link href="/waitlist" className="lp-btn lp-btn--outline transition-all duration-300 hover:-translate-y-1">Join Waitlist</Link>
+            <Link href="/waitlist" className="lp-btn lp-btn--primary text-white transition-all duration-300 hover:-translate-y-1">Request Demo</Link>
           </div>
           <button className="lp-nav__burger" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">{menuOpen ? <CloseIcon /> : <MenuIcon />}</button>
         </div>
@@ -163,12 +163,12 @@ export default function LandingPage() {
             {navLinks.map(l => <Link key={l.label} href={l.href} className="lp-mobile-menu__link" onClick={() => setMenuOpen(false)}>{l.label}</Link>)}
             <div className="lp-mobile-menu__actions">
               <Link
-                href="/login"
+                href="/waitlist"
                 className="lp-btn lp-btn--outline lp-btn--full transition-all duration-300 hover:-translate-y-1"
               >
                 Join Waitlist
               </Link>
-              <Link href="/login" className="lp-btn lp-btn--primary lp-btn--full text-white transition-all duration-300 hover:-translate-y-1">Request Demo</Link>
+              <Link href="/waitlist" className="lp-btn lp-btn--primary lp-btn--full text-white transition-all duration-300 hover:-translate-y-1">Request Demo</Link>
             </div>
           </div>
         )}
@@ -374,7 +374,7 @@ export default function LandingPage() {
               <div key={i} className={`lp-pricing-card ${p.featured ? "lp-pricing-card--featured" : ""}`}>
                 <h3 className="lp-pricing-card__tier">{p.tier}</h3>
                 <p className="lp-pricing-card__desc">{p.desc}</p>
-                <Link href="/login" className={`lp-btn ${p.featured ? "lp-btn--accent" : "lp-btn--outline"} lp-btn--full`}>{p.cta}</Link>
+                <Link href="/waitlist" className={`lp-btn ${p.featured ? "lp-btn--accent" : "lp-btn--outline"} lp-btn--full`}>{p.cta}</Link>
               </div>
             ))}
           </div>
@@ -430,7 +430,7 @@ export default function LandingPage() {
             <h2>Start Your Institutional Pilot Today.</h2>
             <p>Get real-time, explainable logs that scale securely. Visualize, moderate, and publish grades faster than ever.</p>
             <div className="lp-bottom-cta__row">
-              <Link href="/login" className="lp-btn lp-btn--accent lp-btn--lg">Grade with OzymorLab <ArrowRight /></Link>
+              <Link href="/waitlist" className="lp-btn lp-btn--accent lp-btn--lg">Grade with OzymorLab <ArrowRight /></Link>
             </div>
             <div className="lp-bottom-cta__badges">
               {["FERPA Ready", "SOC-2 Compliant", "Tailored for Canvas & Blackboard"].map(b =>
