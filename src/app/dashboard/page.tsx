@@ -8,7 +8,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.c
 
 interface Submission {
   id: string;
-  student_id: string;
+  student_id: string | null;
   file_name: string;
   status: string;
   created_at: string;
@@ -34,7 +34,9 @@ export default function DashboardPage() {
   const { fetchWithAuth } = useAuth();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [selectedSub, setSelectedSub] = useState<Submission | null>(null);
+  const [subDetail, setSubDetail] = useState<Submission | null>(null);
   const [gradeDetail, setGradeDetail] = useState<GradeDetail | null>(null);
+  const [activeTab, setActiveTab] = useState<"evaluation" | "student_answer">("evaluation");
   const [isUploading, setIsUploading] = useState(false);
   const [tasks, setTasks] = useState<Array<{ id: string; title: string; subject: string }>>([]);
   const [selectedTaskId, setSelectedTaskId] = useState<string>("");
@@ -70,13 +72,25 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (selectedSub && selectedSub.status === "GRADED") {
-      fetchWithAuth(`${API_BASE}/submissions/${selectedSub.id}/grade`)
+    if (selectedSub) {
+      // Fetch full submission details
+      fetchWithAuth(`${API_BASE}/submissions/${selectedSub.id}`)
         .then(res => res.json())
-        .then(json => { if (json.data) setGradeDetail(json.data); })
-        .catch(e => console.error("Grade fetch failed", e));
+        .then(json => { if (json.data) setSubDetail(json.data); })
+        .catch(e => console.error("Detail fetch failed", e));
+
+      if (selectedSub.status === "GRADED") {
+        fetchWithAuth(`${API_BASE}/submissions/${selectedSub.id}/grade`)
+          .then(res => res.json())
+          .then(json => { if (json.data) setGradeDetail(json.data); })
+          .catch(e => console.error("Grade fetch failed", e));
+      } else {
+        setGradeDetail(null);
+      }
     } else {
+      setSubDetail(null);
       setGradeDetail(null);
+      setActiveTab("evaluation");
     }
   }, [selectedSub]);
 
@@ -356,48 +370,107 @@ export default function DashboardPage() {
             </div>
             <div className="slide-body">
               <div className="flex items-center gap-3 mb-6">
-                <div className="avatar avatar-lg avatar-purple">{selectedSub.student_id.slice(-2)}</div>
+                <div className="avatar avatar-lg avatar-purple">{(selectedSub.student_id || '??').slice(-2)}</div>
                 <div>
-                  <div className="text-[16px] font-medium text-text-primary">{selectedSub.student_id}</div>
+                  <div className="text-[16px] font-medium text-text-primary">{selectedSub.student_id || 'Unknown Student'}</div>
                   <div className="font-mono text-[12px] text-text-tertiary">{selectedSub.id}</div>
                 </div>
               </div>
 
-              {selectedSub.status !== "GRADED" ? (
-                <div className="py-8 text-center text-text-tertiary flex flex-col items-center">
-                  <Activity className="animate-pulse mb-3" size={32} />
-                  <span>Evaluation in progress...</span>
-                </div>
-              ) : !gradeDetail ? (
-                <div className="py-8 text-center text-text-tertiary">Loading grade data...</div>
-              ) : (
-                <>
-                  <div className="score-display">
-                    <div className="score-num">{gradeDetail.grade}</div>
-                    <div className="score-max">/ {gradeDetail.max_grade}</div>
+              {/* Segmented Tab Control */}
+              <div className="flex border-b border-border-secondary mb-5">
+                <button
+                  type="button"
+                  className={`flex-1 pb-2.5 text-center font-medium text-[13px] transition-all relative ${
+                    activeTab === "evaluation"
+                      ? "text-primary border-b-2 border-primary font-semibold"
+                      : "text-text-tertiary hover:text-text-secondary"
+                  }`}
+                  onClick={() => setActiveTab("evaluation")}
+                >
+                  Evaluation Traces
+                </button>
+                <button
+                  type="button"
+                  className={`flex-1 pb-2.5 text-center font-medium text-[13px] transition-all relative ${
+                    activeTab === "student_answer"
+                      ? "text-primary border-b-2 border-primary font-semibold"
+                      : "text-text-tertiary hover:text-text-secondary"
+                  }`}
+                  onClick={() => setActiveTab("student_answer")}
+                >
+                  Student Answer
+                </button>
+              </div>
+
+              {activeTab === "evaluation" ? (
+                selectedSub.status !== "GRADED" ? (
+                  <div className="py-8 text-center text-text-tertiary flex flex-col items-center">
+                    <Activity className="animate-pulse mb-3" size={32} />
+                    <span>Evaluation in progress...</span>
                   </div>
-                  <div className="divider"></div>
-                  <div className="slide-section">
-                    <div className="slide-section-label">STEP TRACES</div>
-                    <div className="step-list">
-                      {gradeDetail.step_grades.map((step, idx) => (
-                        <div key={idx} className="step-card">
-                          <div className="step-card-top">
-                            <div className="step-name">Step {step.step_num}</div>
-                            <div className="step-marks">{step.marks_awarded} / {step.max_marks}</div>
-                          </div>
-                          <div className="step-justification">{step.justification}</div>
-                        </div>
-                      ))}
+                ) : !gradeDetail ? (
+                  <div className="py-8 text-center text-text-tertiary">Loading grade data...</div>
+                ) : (
+                  <>
+                    <div className="score-display">
+                      <div className="score-num">{gradeDetail.grade}</div>
+                      <div className="score-max">/ {gradeDetail.max_grade}</div>
                     </div>
+                    <div className="divider"></div>
+                    <div className="slide-section">
+                      <div className="slide-section-label">STEP TRACES</div>
+                      <div className="step-list">
+                        {gradeDetail.step_grades.map((step, idx) => (
+                          <div key={idx} className="step-card">
+                            <div className="step-card-top">
+                              <div className="step-name">Step {step.step_num}</div>
+                              <div className="step-marks">{step.marks_awarded} / {step.max_marks}</div>
+                            </div>
+                            <div className="step-justification">{step.justification}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="slide-section">
+                      <div className="slide-section-label">METADATA</div>
+                      <div className="meta-row"><span className="meta-key">Latency</span><span className="meta-val">{gradeDetail.latency_ms}ms</span></div>
+                      <div className="meta-row"><span className="meta-key">Confidence</span><span className="meta-val">{(gradeDetail.confidence * 100).toFixed(1)}%</span></div>
+                      <div className="meta-row"><span className="meta-key">Model</span><span className="meta-val truncate max-w-[150px]">{gradeDetail.model_used}</span></div>
+                    </div>
+                  </>
+                )
+              ) : (
+                !subDetail ? (
+                  <div className="py-8 text-center text-text-tertiary">Loading student answer...</div>
+                ) : subDetail.parsed_content?.steps && subDetail.parsed_content.steps.length > 0 ? (
+                  <div className="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-1">
+                    {subDetail.parsed_content.steps.map((step, idx) => (
+                      <div key={idx} className="bg-surface-secondary border border-border-secondary rounded-lg p-4 flex flex-col gap-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[12px] font-bold text-primary uppercase tracking-wider">Step {step.step_num}</span>
+                          <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase font-medium">{step.step_type}</span>
+                        </div>
+                        <p className="text-text-primary text-[13.5px] leading-relaxed">{step.text}</p>
+                        {step.equations && step.equations.length > 0 && (
+                          <div className="mt-1 flex flex-wrap gap-1.5">
+                            {step.equations.map((eq, eqIdx) => (
+                              <code key={eqIdx} className="bg-surface-hover text-text-secondary px-2 py-0.5 rounded text-[11.5px] font-mono border border-border-subtle">
+                                {eq}
+                              </code>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                  <div className="slide-section">
-                    <div className="slide-section-label">METADATA</div>
-                    <div className="meta-row"><span className="meta-key">Latency</span><span className="meta-val">{gradeDetail.latency_ms}ms</span></div>
-                    <div className="meta-row"><span className="meta-key">Confidence</span><span className="meta-val">{(gradeDetail.confidence * 100).toFixed(1)}%</span></div>
-                    <div className="meta-row"><span className="meta-key">Model</span><span className="meta-val truncate max-w-[150px]">{gradeDetail.model_used}</span></div>
+                ) : subDetail.raw_text ? (
+                  <div className="bg-surface-secondary border border-border-secondary rounded-lg p-4 font-mono text-[12.5px] text-text-secondary whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
+                    {subDetail.raw_text}
                   </div>
-                </>
+                ) : (
+                  <div className="text-center text-text-tertiary py-8">No student answer text parsed yet.</div>
+                )
               )}
             </div>
           </div>

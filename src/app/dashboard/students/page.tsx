@@ -9,7 +9,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.c
 
 interface Submission {
   id: string;
-  student_id: string;
+  student_id: string | null;
   file_name: string;
   status: string;
   created_at: string;
@@ -36,6 +36,7 @@ export default function StudentsPage() {
     const groups: { [key: string]: { list: Submission[]; gradesCount: number; gradesSum: number } } = {};
     
     subs.forEach((sub) => {
+      if (!sub.student_id) return;
       if (!groups[sub.student_id]) {
         groups[sub.student_id] = { list: [], gradesCount: 0, gradesSum: 0 };
       }
