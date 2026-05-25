@@ -124,46 +124,50 @@ export default function WaitlistPage() {
       {/* CSS overrides for premium inputs */}
       <style dangerouslySetInnerHTML={{ __html: `
         .waitlist-card {
-          background: rgba(31, 34, 35, 0.6);
-          border: 1px solid rgba(224, 255, 130, 0.15);
-          backdrop-filter: blur(16px);
-          border-radius: 20px;
+          background: #ffffff;
+          border: 1px solid #000000;
+          border-radius: 16px;
           padding: 40px;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-          transition: border-color 0.3s ease, box-shadow 0.3s ease;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+          transition: all 0.3s ease;
         }
         .waitlist-card:hover {
-          border-color: rgba(224, 255, 130, 0.3);
-          box-shadow: 0 20px 50px rgba(224, 255, 130, 0.05);
+          border-color: #000000;
+          box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
         }
         .waitlist-input {
           width: 100%;
-          padding: 14px 18px;
-          border-radius: 12px;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          color: #ffffff;
+          padding: 12px 16px;
+          border-radius: 8px;
+          background: #ffffff;
+          border: 1px solid #000000;
+          color: #000000;
           font-family: inherit;
           font-size: 14px;
           outline: none;
-          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: all 0.25s ease;
         }
         .waitlist-input:hover {
-          background: rgba(255, 255, 255, 0.05);
-          border-color: rgba(255, 255, 255, 0.15);
+          background: #fafafa;
+          border-color: #000000;
         }
         .waitlist-input:focus {
-          background: rgba(255, 255, 255, 0.07);
-          border-color: #e0ff82;
-          box-shadow: 0 0 12px rgba(224, 255, 130, 0.15);
+          background: #ffffff;
+          border-color: #000000;
+          box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
         }
         .waitlist-select {
           appearance: none;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
           background-repeat: no-repeat;
           background-position: right 16px center;
           background-size: 16px;
           padding-right: 40px;
+          color: #000000;
+        }
+        .waitlist-select option {
+          color: #000000;
+          background: #ffffff;
         }
       ` }} />
 
@@ -208,17 +212,19 @@ export default function WaitlistPage() {
             {submitted ? (
               <div style={{ textAlign: "center", padding: "20px 0" }}>
                 <CheckCircleIcon />
-                <h2 style={{ fontSize: 24, fontWeight: 600, color: "#ffffff", marginBottom: 12 }}>You&apos;re on the List!</h2>
-                <p style={{ fontSize: 15, color: "var(--lp-fg-alt)", lineHeight: 1.6, marginBottom: 28 }}>Thank you for requesting access. A regional coordinator will reach out to you at <strong>{email}</strong> shortly to discuss a customized free pilot program for your institution.</p>
-                <Link href="/" className="lp-btn lp-btn--primary" style={{ padding: "12px 30px", borderRadius: 10, display: "inline-flex", color: "#ffffff" }}>
-                  Return to Homepage
-                </Link>
+                <h2 style={{ fontSize: 24, fontWeight: 600, color: "#000000", marginBottom: 12 }}>You&apos;re on the List!</h2>
+                <p style={{ fontSize: 15, color: "#374151", lineHeight: 1.6, marginBottom: 28 }}>Thank you for requesting access. A regional coordinator will reach out to you at <strong>{email}</strong> shortly to discuss a customized free pilot program for your institution.</p>
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                  <Link href="/" className="lp-btn lp-btn--primary" style={{ padding: "10px 24px", borderRadius: 8, display: "inline-flex", color: "#ffffff", background: "#000000", border: "1px solid #000000" }}>
+                    Return to Homepage
+                  </Link>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
                   <div>
-                    <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: "var(--lp-fg-alt)", marginBottom: 8 }}>Full Name</label>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#000000", marginBottom: 8 }}>Full Name</label>
                     <input
                       type="text"
                       required
@@ -229,7 +235,7 @@ export default function WaitlistPage() {
                     />
                   </div>
                   <div>
-                    <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: "var(--lp-fg-alt)", marginBottom: 8 }}>Institutional Role</label>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#000000", marginBottom: 8 }}>Institutional Role</label>
                     <select
                       className="waitlist-input waitlist-select"
                       value={role}
@@ -245,7 +251,7 @@ export default function WaitlistPage() {
                 </div>
 
                 <div style={{ marginBottom: 20 }}>
-                  <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: "var(--lp-fg-alt)", marginBottom: 8 }}>School / Institution Name</label>
+                  <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#000000", marginBottom: 8 }}>School / Institution Name</label>
                   <input
                     type="text"
                     required
@@ -258,7 +264,7 @@ export default function WaitlistPage() {
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
                   <div>
-                    <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: "var(--lp-fg-alt)", marginBottom: 8 }}>Institutional Email</label>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#000000", marginBottom: 8 }}>Institutional Email</label>
                     <input
                       type="email"
                       required
@@ -269,7 +275,7 @@ export default function WaitlistPage() {
                     />
                   </div>
                   <div>
-                    <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: "var(--lp-fg-alt)", marginBottom: 8 }}>Mobile / Contact Number</label>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#000000", marginBottom: 8 }}>Mobile / Contact Number</label>
                     <input
                       type="tel"
                       required
@@ -287,24 +293,26 @@ export default function WaitlistPage() {
                   </div>
                 )}
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="lp-btn lp-btn--primary lp-btn--full"
-                  style={{ padding: "14px 20px", borderRadius: 12, fontSize: 15, fontWeight: 600, color: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: loading ? "not-allowed" : "pointer" }}
-                >
-                  {loading ? (
-                    <>
-                      <svg className="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ animation: "spin 1s linear infinite" }}>
-                        <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.2)" />
-                        <path d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" fill="currentColor" />
-                      </svg>
-                      Verifying details...
-                    </>
-                  ) : (
-                    "Submit Registration & Request Pilot"
-                  )}
-                </button>
+                <div style={{ display: "flex", justifyContent: "center", marginTop: 24 }}>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="lp-btn lp-btn--primary"
+                    style={{ padding: "10px 24px", borderRadius: 8, fontSize: 14, fontWeight: 600, color: "#ffffff", background: "#000000", border: "1px solid #000000", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: loading ? "not-allowed" : "pointer" }}
+                  >
+                    {loading ? (
+                      <>
+                        <svg className="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ animation: "spin 1s linear infinite" }}>
+                          <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.2)" />
+                          <path d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" fill="currentColor" />
+                        </svg>
+                        Verifying...
+                      </>
+                    ) : (
+                      "Submit Registration & Request Pilot"
+                    )}
+                  </button>
+                </div>
               </form>
             )}
           </div>
