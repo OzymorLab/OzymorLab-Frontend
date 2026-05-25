@@ -8,9 +8,24 @@
   --color-brand-600: #534AB7;
   --color-brand-800: #3C3489;
   --color-brand-900: #26215C;
+  
+  --color-modula-bg: #fafaf9;
+  --color-modula-card: #ffffff;
+  --color-modula-border: #f2f3f3;
+  --color-modula-lime: #e3ff8f;
+  --color-modula-dark: #1f2223;
+  --color-modula-slate: #415762;
 }
 
 :root {
+  /* ── Modula Theme ── */
+  --modula-bg: #fafaf9;
+  --modula-card: #ffffff;
+  --modula-border: #f2f3f3;
+  --modula-lime: #e3ff8f;
+  --modula-dark: #1f2223;
+  --modula-slate: #415762;
+
   /* ── Brand (Edexia Purple) ── */
   --brand-50:  #EEEDFE;
   --brand-100: #CECBF6;
