@@ -46,10 +46,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Restore session from Supabase on mount
   useEffect(() => {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-      const storedToken = typeof window !== "undefined" ? localStorage.getItem("edexia_token") : null;
+      const storedToken = typeof window !== "undefined" ? localStorage.getItem("ozymorlab_token") : null;
       if (storedToken) {
         setToken(storedToken);
-        setRefreshToken(typeof window !== "undefined" ? localStorage.getItem("edexia_refresh_token") : null);
+        setRefreshToken(typeof window !== "undefined" ? localStorage.getItem("ozymorlab_refresh_token") : null);
         
         fetch(`${API_BASE}/auth/me`, {
           headers: { Authorization: `Bearer ${storedToken}` },
@@ -64,8 +64,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           })
           .catch(() => {
             if (typeof window !== "undefined") {
-              localStorage.removeItem("edexia_token");
-              localStorage.removeItem("edexia_refresh_token");
+              localStorage.removeItem("ozymorlab_token");
+              localStorage.removeItem("ozymorlab_refresh_token");
             }
             setUser(null);
             setToken(null);
@@ -166,8 +166,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setToken(access_token);
         setRefreshToken(refresh_token);
         if (typeof window !== "undefined") {
-          localStorage.setItem("edexia_token", access_token);
-          localStorage.setItem("edexia_refresh_token", refresh_token);
+          localStorage.setItem("ozymorlab_token", access_token);
+          localStorage.setItem("ozymorlab_refresh_token", refresh_token);
         }
         
         // Fetch profile
@@ -249,8 +249,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRefreshToken(tokens.refresh_token);
         setUser(userProfile);
         if (typeof window !== "undefined") {
-          localStorage.setItem("edexia_token", tokens.access_token);
-          localStorage.setItem("edexia_refresh_token", tokens.refresh_token);
+          localStorage.setItem("ozymorlab_token", tokens.access_token);
+          localStorage.setItem("ozymorlab_refresh_token", tokens.refresh_token);
         }
         return { success: true };
       } catch (err: any) {
@@ -328,8 +328,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     if (typeof window !== "undefined") {
-      localStorage.removeItem("edexia_token");
-      localStorage.removeItem("edexia_refresh_token");
+      localStorage.removeItem("ozymorlab_token");
+      localStorage.removeItem("ozymorlab_refresh_token");
     }
     try {
       await supabase.auth.signOut();

@@ -90,8 +90,8 @@ function LoginPageContent() {
       <div className="auth-brand">
         <div className="auth-brand-content">
           <div className="landing-logo" style={{ marginBottom: 32 }}>
-            <div className="logo-mark" style={{ width: 36, height: 36, fontSize: 13 }}>Ex</div>
-            <span className="logo-name" style={{ fontSize: 18 }}>Edexia AIOS</span>
+            <div className="logo-mark" style={{ width: 36, height: 36, fontSize: 13 }}>Oz</div>
+            <span className="logo-name" style={{ fontSize: 18 }}>OzymorLab AIOS</span>
           </div>
           <h2 className="auth-brand-title">
             AI-Powered Multimodal<br />Evaluation Infrastructure

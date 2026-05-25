@@ -570,7 +570,7 @@ export default function SchoolAdminPage() {
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 text-[12.5px] text-green-600 font-medium bg-green-500/10 p-3 rounded-lg border border-green-500/20 mt-2">
-                      <CheckCircle2 size={16} /> All email addresses provisioned successfully! Provisional login password: <code className="font-mono bg-surface-secondary px-1 border rounded ml-1">edexia-temp-2026</code>
+                      <CheckCircle2 size={16} /> All email addresses provisioned successfully! Provisional login password: <code className="font-mono bg-surface-secondary px-1 border rounded ml-1">ozymorlab-temp-2026</code>
                     </div>
                   )}
                 </div>

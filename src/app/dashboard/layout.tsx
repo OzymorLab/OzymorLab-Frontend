@@ -59,9 +59,9 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <div className="logo-mark">Ex</div>
+          <div className="logo-mark">Oz</div>
           <div>
-            <div className="logo-name">Edexia AIOS</div>
+            <div className="logo-name">OzymorLab AIOS</div>
             <div className="logo-tagline">Assessment Engine</div>
           </div>
         </div>

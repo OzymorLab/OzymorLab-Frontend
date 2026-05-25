@@ -72,7 +72,7 @@ export default function ApiKeysPage() {
         <div className="card-body p-6">
           <div className="settings-desc">
             <p className="text-[13px] text-text-secondary mb-4 leading-relaxed">
-              Edexia allows you to provide your own Google Gemini API key for evaluating board examination answer sheets. 
+              OzymorLab allows you to provide your own Google Gemini API key for evaluating board examination answer sheets. 
               This gives your educational institution complete control over AI usage tiers, direct Google billing, and security credentials.
             </p>
             

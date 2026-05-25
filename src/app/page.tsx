@@ -1,41 +1,49 @@
 "use client";
 
-import React from "react";
-import { Header } from "./components/Header";
-import { Hero } from "./components/Hero";
-import { Marquee } from "./components/Marquee";
-import { Features } from "./components/Features";
-import { Pricing } from "./components/Pricing";
-import { CTA } from "./components/CTA";
-import { Footer } from "./components/Footer";
+import React, { useState, useEffect } from "react";
+import { ozymorLabHtmlBase64 } from "./OzymorLabHtml";
 
-export default function LandingPage() {
+// Safe Base64 decoding for UTF-8 in both SSR and browser contexts
+const decodeBase64 = (str: string): string => {
+  try {
+    if (typeof window === "undefined") {
+      return Buffer.from(str, "base64").toString("utf-8");
+    }
+    const binary = atob(str);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return new TextDecoder("utf-8").decode(bytes);
+  } catch (e) {
+    console.error("Failed to decode Base64 landing page:", e);
+    return "";
+  }
+};
+
+export default function HomePage() {
+  const [htmlContent, setHtmlContent] = useState<string>("");
+
+  useEffect(() => {
+    setHtmlContent(decodeBase64(ozymorLabHtmlBase64));
+  }, []);
+
+  if (!htmlContent) {
+    return <div className="w-full min-h-screen bg-black" />;
+  }
+
   return (
-    <div className="min-h-screen bg-[#fafaf9] text-[#1f2223] font-sans antialiased selection:bg-[#e3ff8f] selection:text-[#1f2223] scroll-smooth">
-      {/* Sticky Premium Navbar */}
-      <Header />
-
-      {/* Main Sections */}
-      <main>
-        {/* Hero Section & Dashboard Mockup */}
-        <Hero />
-
-        {/* Seamless Infinite Marquee Banner */}
-        <Marquee />
-
-        {/* Premium Grid Features Section */}
-        <Features />
-
-        {/* Tiered Comparison Pricing Plans */}
-        <Pricing />
-
-        {/* High-Impact CTA Banner */}
-        <CTA />
-      </main>
-
-      {/* Structured Multi-Column Footer */}
-      <Footer />
-    </div>
+    <iframe
+      srcDoc={htmlContent}
+      className="w-screen h-screen border-none m-0 p-0 block"
+      style={{
+        border: "none",
+        width: "100vw",
+        height: "100vh",
+        display: "block",
+        overflow: "hidden"
+      }}
+      title="OzymorLab Assessment AI Infrastructure"
+    />
   );
 }
-
