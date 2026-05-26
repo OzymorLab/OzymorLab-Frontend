@@ -121,51 +121,42 @@ export default function StudentsPage() {
   });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+    <div className="flex flex-col gap-6 w-full animate-fade-in relative z-10">
       {/* Header */}
-      <div>
-        <h1 className="text-[22px] font-medium text-text-primary flex items-center gap-2">
-          <Users size={22} className="text-brand-600" />
-          Students Directory
-        </h1>
-        <p className="text-[13px] text-text-tertiary mt-1">Monitor cohort learning trends, aggregated performance charts, and audit histories.</p>
+      <div className="relative overflow-hidden bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 flex flex-col justify-between gap-4 shadow-sm backdrop-blur-md bg-opacity-80">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-brand-600 uppercase bg-brand-50 dark:bg-brand-950/20 px-2 py-0.5 rounded-full w-max">
+            <Users size={11} className="animate-pulse" />
+            Roster & Cohorts
+          </div>
+          <h1 className="text-[20px] font-bold text-[var(--text-primary)] mt-2">Institutional Students Directory</h1>
+          <p className="text-[13px] text-[var(--text-secondary)]">
+            Monitor cohort learning trends, aggregated performance charts, and audit histories.
+          </p>
+        </div>
       </div>
 
       {/* Analytics Stat Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Total Students */}
-        <div style={{
-          ...cardBase,
-          padding: '20px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px',
-          transition: 'transform 0.2s, box-shadow 0.2s',
-          cursor: 'default',
-        }}>
-          <div style={iconWrap('linear-gradient(135deg, var(--brand-50), rgba(83,74,183,0.12))', 'var(--brand-600)')}>
+        <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-5 flex items-center gap-4 shadow-sm hover:scale-[1.01] transition-transform duration-200 backdrop-blur-md bg-opacity-80">
+          <div className="w-[42px] h-[42px] bg-brand-500/10 text-brand-600 rounded-xl flex items-center justify-center border border-brand-500/20">
             <Users size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-tertiary)', fontWeight: 500, marginBottom: '4px' }}>Total Students Registered</div>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1, letterSpacing: '-0.03em' }}>{students.length}</div>
+            <div className="text-[11.5px] text-[var(--text-secondary)] font-medium">Total Registered Students</div>
+            <div className="text-[24px] font-bold font-mono text-[var(--text-primary)] leading-none mt-1">{students.length}</div>
           </div>
         </div>
 
         {/* Average Grade */}
-        <div style={{
-          ...cardBase,
-          padding: '20px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px',
-        }}>
-          <div style={iconWrap('linear-gradient(135deg, var(--color-success-bg), rgba(99,153,34,0.12))', 'var(--color-success-border)')}>
+        <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-5 flex items-center gap-4 shadow-sm hover:scale-[1.01] transition-transform duration-200 backdrop-blur-md bg-opacity-80">
+          <div className="w-[42px] h-[42px] bg-emerald-500/10 text-emerald-600 rounded-xl flex items-center justify-center border border-emerald-500/20">
             <Award size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-tertiary)', fontWeight: 500, marginBottom: '4px' }}>Average Cohort Grade</div>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1, letterSpacing: '-0.03em' }}>
+            <div className="text-[11.5px] text-[var(--text-secondary)] font-medium">Average Cohort Grade</div>
+            <div className="text-[24px] font-bold font-mono text-emerald-600 leading-none mt-1">
               {students.length > 0 
                 ? (students.reduce((acc, curr) => acc + parseFloat(curr.averageGrade), 0) / students.length).toFixed(1) + "%"
                 : "N/A"}
@@ -174,88 +165,44 @@ export default function StudentsPage() {
         </div>
 
         {/* Anomalies */}
-        <div style={{
-          ...cardBase,
-          padding: '20px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px',
-        }}>
-          <div style={iconWrap('linear-gradient(135deg, var(--color-info-bg), rgba(55,138,221,0.12))', 'var(--color-info-text)')}>
+        <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-5 flex items-center gap-4 shadow-sm hover:scale-[1.01] transition-transform duration-200 backdrop-blur-md bg-opacity-80">
+          <div className="w-[42px] h-[42px] bg-blue-500/10 text-blue-600 rounded-xl flex items-center justify-center border border-blue-500/20">
             <TrendingUp size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-tertiary)', fontWeight: 500, marginBottom: '4px' }}>Anomalies/Flagged Submissions</div>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1, letterSpacing: '-0.03em' }}>0</div>
+            <div className="text-[11.5px] text-[var(--text-secondary)] font-medium">Anomalies Detected</div>
+            <div className="text-[24px] font-bold font-mono text-[var(--text-primary)] leading-none mt-1">0</div>
           </div>
         </div>
       </div>
 
       {/* Search & Filter Bar */}
-      <div style={{
-        ...cardBase,
-        padding: '12px 16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '16px',
-        flexWrap: 'wrap' as const,
-      }}>
+      <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm backdrop-blur-md bg-opacity-80">
         {/* Search */}
-        <div style={{ position: 'relative', flex: 1, minWidth: '260px', maxWidth: '500px' }}>
-          <Search 
-            size={15} 
-            style={{ 
-              position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', 
-              color: 'var(--text-tertiary)', pointerEvents: 'none',
-            }} 
-          />
+        <div className="relative w-full md:max-w-[400px]">
+          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] pointer-events-none" />
           <input
             type="text"
             placeholder="Search Student ID..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              background: 'var(--surface-secondary)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: '10px',
-              padding: '9px 14px 9px 36px',
-              fontSize: '13px',
-              fontFamily: 'var(--font-sans)',
-              color: 'var(--text-primary)',
-              outline: 'none',
-            }}
+            className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl py-2 pl-9 pr-4 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm font-medium"
           />
         </div>
 
         {/* Cohort Filter */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-          <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>Batch Filter:</span>
-          <div style={{
-            display: 'flex', gap: '4px',
-            background: 'var(--surface-secondary)',
-            border: '1px solid var(--border-subtle)',
-            borderRadius: '10px',
-            padding: '3px',
-          }}>
+        <div className="flex items-center gap-3 w-full md:w-auto shrink-0 justify-end">
+          <span className="text-[12px] font-bold text-[var(--text-secondary)] font-mono uppercase tracking-wider">Cohort:</span>
+          <div className="flex gap-1 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl p-1 shadow-inner">
             {["ALL", "Batch-A", "Batch-B"].map((cFilter) => (
               <button
                 key={cFilter}
                 onClick={() => setCohortFilter(cFilter)}
-                style={{
-                  padding: '5px 12px',
-                  borderRadius: '8px',
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  fontFamily: 'var(--font-sans)',
-                  letterSpacing: '0.04em',
-                  cursor: 'pointer',
-                  border: cohortFilter === cFilter ? '1px solid var(--border-subtle)' : '1px solid transparent',
-                  background: cohortFilter === cFilter ? 'var(--surface-primary)' : 'transparent',
-                  color: cohortFilter === cFilter ? 'var(--text-primary)' : 'var(--text-tertiary)',
-                  boxShadow: cohortFilter === cFilter ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
-                }}
+                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold tracking-wide transition-all cursor-pointer ${
+                  cohortFilter === cFilter 
+                    ? "bg-[var(--surface-primary)] text-brand-600 shadow-sm border border-[var(--border-subtle)]" 
+                    : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+                }`}
               >
                 {cFilter === "ALL" ? "All Cohorts" : cFilter}
               </button>
@@ -265,106 +212,57 @@ export default function StudentsPage() {
       </div>
 
       {/* Student Cards Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredStudents.map((student) => (
-          <div key={student.id} style={{
-            ...cardBase,
-            padding: '20px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px',
-            transition: 'transform 0.2s, border-color 0.2s, box-shadow 0.2s',
-            cursor: 'default',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = 'var(--brand-600)';
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 8px 24px rgba(83,74,183,0.1)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = 'var(--border-subtle)';
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
+          <div 
+            key={student.id} 
+            className="group relative bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-5 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:border-brand-500/30 hover:-translate-y-1 transition-all duration-300 backdrop-blur-md bg-opacity-70 dark:bg-opacity-50"
           >
             {/* Student Info Row */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{
-                  width: '42px', height: '42px', borderRadius: '50%',
-                  background: 'linear-gradient(135deg, var(--brand-50), rgba(83,74,183,0.18))',
-                  color: 'var(--brand-600)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontWeight: 700, fontSize: '14px',
-                  border: '1px solid rgba(83,74,183,0.2)',
-                  flexShrink: 0,
-                }}>
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-600/10 to-brand-400/5 text-brand-600 border border-brand-500/20 flex items-center justify-center font-bold text-[13.5px] shadow-sm">
                   {student.id.slice(-2)}
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', margin: 0, lineHeight: 1.3 }}>{student.id}</h3>
-                  <span style={{ fontSize: '11.5px', color: 'var(--text-tertiary)', fontWeight: 500 }}>{student.cohort}</span>
+                  <h3 className="text-[13px] font-bold text-[var(--text-primary)] leading-tight">{student.id}</h3>
+                  <span className="text-[11px] text-[var(--text-tertiary)] font-medium mt-0.5 block">{student.cohort}</span>
                 </div>
               </div>
-              <div style={{
-                background: 'var(--color-success-bg)',
-                color: 'var(--color-success-text)',
-                padding: '4px 10px',
-                borderRadius: '8px',
-                fontSize: '12px',
-                fontWeight: 700,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                border: '1px solid rgba(99,153,34,0.15)',
-              }}>
-                <Star size={11} style={{ fill: 'currentColor' }} />
+              
+              <div className="flex items-center gap-1 bg-emerald-500/10 text-emerald-600 border border-emerald-500/10 rounded-xl px-2.5 py-1 text-[11.5px] font-bold font-mono">
+                <Star size={11} className="fill-emerald-500" />
                 {student.averageGrade}%
               </div>
             </div>
 
             {/* Divider */}
-            <div style={{ height: 0, borderTop: '1px solid var(--border-subtle)' }} />
+            <div className="h-[0.5px] bg-[var(--border-subtle)]" />
 
             {/* Stats Row */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <BookOpen size={13} /> {student.totalSubmissions} runs
+            <div className="flex justify-between items-center text-[11.5px] text-[var(--text-secondary)]">
+              <span className="flex items-center gap-1.5 font-medium">
+                <BookOpen size={13} className="text-[var(--text-tertiary)]" /> {student.totalSubmissions} graded papers
               </span>
-              <span>Last Active: {new Date(student.lastActive).toLocaleDateString()}</span>
+              <span className="font-mono text-[10.5px] opacity-80">Active: {new Date(student.lastActive).toLocaleDateString()}</span>
             </div>
 
             {/* Action Button */}
-            <Link href="/dashboard/submissions" style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              padding: '9px 16px',
-              borderRadius: '10px',
-              fontSize: '12.5px',
-              fontWeight: 600,
-              border: '1px solid var(--border-subtle)',
-              background: 'var(--surface-secondary)',
-              color: 'var(--text-primary)',
-              textDecoration: 'none',
-              transition: 'all 0.15s',
-              cursor: 'pointer',
-            }}>
+            <Link 
+              href="/dashboard/submissions" 
+              className="flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] hover:border-brand-500 hover:bg-brand-500 hover:text-white transition-all duration-200 cursor-pointer shadow-sm"
+            >
               Audit Submissions <ArrowRight size={13} />
             </Link>
           </div>
         ))}
         {filteredStudents.length === 0 && (
-          <div style={{
-            gridColumn: '1 / -1',
-            ...cardBase,
-            padding: '48px 20px',
-            textAlign: 'center',
-            color: 'var(--text-tertiary)',
-            fontSize: '13px',
-          }}>
-            No students found matching your search.
+          <div className="col-span-full border border-dashed border-[var(--border-subtle)] rounded-2xl p-12 text-center bg-[var(--surface-secondary)] bg-opacity-50">
+            <div className="w-12 h-12 rounded-full bg-brand-500/10 text-brand-600 flex items-center justify-center mx-auto mb-3">
+              <Users size={22} />
+            </div>
+            <p className="text-[13px] font-medium text-[var(--text-primary)]">No students match your query</p>
+            <p className="text-[11.5px] text-[var(--text-tertiary)] mt-1">Try resetting the cohort batch filter or check search spelling.</p>
           </div>
         )}
       </div>

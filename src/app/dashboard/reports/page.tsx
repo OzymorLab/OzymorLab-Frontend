@@ -89,35 +89,38 @@ export default function ReportsPage() {
   });
 
   return (
-    <>
+    <div className="flex flex-col gap-6 w-full animate-fade-in relative z-10">
       {/* Title area */}
-      <div style={{ marginBottom: '24px' }}>
-        <h1 className="text-[22px] font-medium text-text-primary flex items-center gap-2">
-          <BarChart3 className="text-brand-500" size={22} />
-          Institutional Reports & Analytics Dashboard
-        </h1>
-        <p className="text-[13px] text-text-tertiary mt-1">
-          Aggregate student metrics, class standard averages, and download fully-formatted report card PDFs.
-        </p>
+      <div className="relative overflow-hidden bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 flex flex-col justify-between gap-4 shadow-sm backdrop-blur-md bg-opacity-80">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-500 uppercase bg-emerald-50 dark:bg-emerald-950/20 px-2 py-0.5 rounded-full w-max">
+            <Sparkles size={11} className="animate-pulse" />
+            Performance & Analytics
+          </div>
+          <h1 className="text-[20px] font-bold text-[var(--text-primary)] mt-2">Institutional Reports & Analytics Dashboard</h1>
+          <p className="text-[13px] text-[var(--text-secondary)] mt-0.5">
+            Aggregate student metrics, class standard averages, and download fully-formatted report card PDFs.
+          </p>
+        </div>
       </div>
 
       {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Active Institutional Roster', value: stats?.total_students_active || 0, delta: 'Provisioned Students', deltaColor: 'var(--brand-600)', icon: <GraduationCap size={18} />, bg: 'linear-gradient(135deg, var(--brand-50), rgba(83,74,183,0.12))' },
-          { label: 'AI Papers Evaluated', value: stats?.total_papers_evaluated || 0, delta: 'Parallel OCR Pipes active', deltaColor: '#16a34a', icon: <TrendingUp size={18} />, bg: 'linear-gradient(135deg, rgba(22,163,106,0.08), rgba(22,163,106,0.15))' },
-          { label: 'Overall Average Grade', value: `${(stats?.overall_average_percentage || 0).toFixed(1)}%`, delta: 'Institutional GPA Average', deltaColor: 'var(--brand-600)', icon: <BarChart3 size={18} />, bg: 'linear-gradient(135deg, rgba(55,138,221,0.08), rgba(55,138,221,0.15))' },
-          { label: 'Assessment Pass Percentage', value: `${(stats?.pass_percentage || 0).toFixed(0)}%`, delta: 'Above standard target', deltaColor: '#16a34a', icon: <CheckCircle size={18} />, bg: 'linear-gradient(135deg, rgba(22,163,106,0.08), rgba(22,163,106,0.15))' },
+          { label: 'Active Institutional Roster', value: stats?.total_students_active || 0, delta: 'Provisioned Students', deltaColor: 'text-brand-600', icon: <GraduationCap size={18} />, bg: 'bg-brand-500/10 text-brand-600 border border-brand-500/20' },
+          { label: 'AI Papers Evaluated', value: stats?.total_papers_evaluated || 0, delta: 'Parallel OCR Pipes active', deltaColor: 'text-emerald-600', icon: <TrendingUp size={18} />, bg: 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' },
+          { label: 'Overall Average Grade', value: `${(stats?.overall_average_percentage || 0).toFixed(1)}%`, delta: 'Institutional GPA Average', deltaColor: 'text-blue-600', icon: <BarChart3 size={18} />, bg: 'bg-blue-500/10 text-blue-600 border border-blue-500/20' },
+          { label: 'Pass Percentage', value: `${(stats?.pass_percentage || 0).toFixed(0)}%`, delta: 'Above standard target', deltaColor: 'text-emerald-600', icon: <CheckCircle size={18} />, bg: 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' },
         ].map((s, i) => (
-          <div key={i} style={{ background: 'var(--surface-primary)', border: '1px solid var(--border-subtle)', borderRadius: '16px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '12px', color: 'var(--text-tertiary)', fontWeight: 500 }}>{s.label}</span>
-              <div style={{ width: '32px', height: '32px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: s.bg, color: s.deltaColor }}>{s.icon}</div>
+          <div key={i} className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-5 flex flex-col gap-3 shadow-sm hover:scale-[1.01] transition-transform duration-200 backdrop-blur-md bg-opacity-80">
+            <div className="flex items-center justify-between">
+              <span className="text-[11.5px] text-[var(--text-secondary)] font-medium">{s.label}</span>
+              <div className={`w-[32px] h-[32px] rounded-lg flex items-center justify-center ${s.bg}`}>{s.icon}</div>
             </div>
-            <div style={{ fontSize: '26px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1, letterSpacing: '-0.03em' }}>
+            <div className="text-[24px] font-bold font-mono text-[var(--text-primary)] leading-none mt-1">
               {isLoading ? <Loader2 className="animate-spin text-brand-500" size={20} /> : s.value}
             </div>
-            <span style={{ fontSize: '11px', fontWeight: 500, color: s.deltaColor, display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span className={`text-[11px] font-bold ${s.deltaColor} flex items-center gap-1`}>
               {i === 1 && <TrendingUp size={11} />}
               {i === 3 && <CheckCircle size={11} />}
               {s.delta}
@@ -127,24 +130,27 @@ export default function ReportsPage() {
       </div>
 
       {/* Report listing and interactive search/filter card */}
-      <div style={{ background: 'var(--surface-primary)', border: '1px solid var(--border-subtle)', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' as const, gap: '12px' }}>
-          <div style={{ fontWeight: 600, fontSize: '14px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm backdrop-blur-md bg-opacity-80 overflow-hidden flex flex-col">
+        <div className="border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-opacity-50">
+          <div className="font-bold text-[13.5px] text-[var(--text-primary)] flex items-center gap-2">
             <FileText size={16} className="text-brand-600" />
             Student Performance Registry
           </div>
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' as const }}>
-            <input 
-              type="text" 
-              placeholder="Search Student ID/Name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '10px', padding: '7px 12px', fontSize: '12px', fontFamily: 'var(--font-sans)', color: 'var(--text-primary)', outline: 'none', width: '180px' }}
-            />
+          <div className="flex gap-2 w-full md:w-auto shrink-0 justify-end">
+            <div className="relative w-full max-w-[200px]">
+              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] pointer-events-none" />
+              <input 
+                type="text" 
+                placeholder="Search Student..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl py-1.5 pl-8 pr-3 text-[11.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm"
+              />
+            </div>
             <select 
               value={classFilter}
               onChange={(e) => setClassFilter(e.target.value)}
-              style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '10px', padding: '7px 12px', fontSize: '12px', fontFamily: 'var(--font-sans)', color: 'var(--text-primary)', outline: 'none' }}
+              className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl py-1.5 px-3 text-[11.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm"
             >
               <option value="">All Classes</option>
               <option value="Class 12">Class 12</option>
@@ -155,52 +161,52 @@ export default function ReportsPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="data-table">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr>
-                <th>Student ID</th>
-                <th>Student Name</th>
-                <th>Class / Section</th>
-                <th>Total Papers</th>
-                <th>Overall Grade Average</th>
-                <th className="w-[180px] text-right">Report Card PDF</th>
+              <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] bg-opacity-30">
+                <th className="px-6 py-3.5 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Student ID</th>
+                <th className="px-6 py-3.5 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Student Name</th>
+                <th className="px-6 py-3.5 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Class / Section</th>
+                <th className="px-6 py-3.5 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Total Papers</th>
+                <th className="px-6 py-3.5 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Overall Grade</th>
+                <th className="px-6 py-3.5 text-right text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">PDF Report Card</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-[var(--border-subtle)]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-text-tertiary">
+                  <td colSpan={6} className="text-center py-16 text-[var(--text-secondary)]">
                     <Loader2 className="animate-spin mx-auto mb-2 text-brand-500" size={24} />
                     Calculating grade distributions...
                   </td>
                 </tr>
               ) : filteredReports.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-text-tertiary text-[13px]">
+                  <td colSpan={6} className="text-center py-12 text-[var(--text-secondary)] text-[12.5px] font-medium bg-[var(--surface-secondary)] bg-opacity-10">
                     No report card data found. Run evaluations to populate.
                   </td>
                 </tr>
               ) : (
                 filteredReports.map((r) => (
-                  <tr key={r.student_id}>
-                    <td className="col-primary font-mono text-[12.5px]">{r.student_id}</td>
-                    <td>{r.student_name}</td>
-                    <td>{r.class_name} - {r.section_name}</td>
-                    <td className="font-semibold text-text-primary">{r.total_exams} papers</td>
-                    <td>
-                      <div className="grade-bar-cell">
-                        <div className="grade-track">
+                  <tr key={r.student_id} className="hover:bg-brand-500/5 transition-colors duration-150 group">
+                    <td className="px-6 py-4 font-mono text-[12px] text-[var(--text-primary)] font-bold">{r.student_id}</td>
+                    <td className="px-6 py-4 text-[13px] text-[var(--text-primary)] font-semibold">{r.student_name}</td>
+                    <td className="px-6 py-4 text-[12.5px] text-[var(--text-secondary)] font-medium">{r.class_name} - {r.section_name}</td>
+                    <td className="px-6 py-4 font-semibold text-[12px] text-[var(--text-primary)]">{r.total_exams} papers</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-[100px] h-2 bg-[var(--surface-secondary)] rounded-full overflow-hidden border border-[var(--border-subtle)]">
                           <div 
-                            className="grade-fill" 
+                            className="bg-brand-600 h-full rounded-full"
                             style={{ width: `${r.average_percentage}%` }}
                           />
                         </div>
-                        <span className="grade-num">{r.average_percentage.toFixed(0)}%</span>
+                        <span className="font-mono text-[11.5px] font-bold text-[var(--text-primary)]">{r.average_percentage.toFixed(0)}%</span>
                       </div>
                     </td>
-                    <td className="text-right">
+                    <td className="px-6 py-4 text-right">
                       <button 
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 12px', borderRadius: '8px', fontSize: '11.5px', fontWeight: 500, fontFamily: 'var(--font-sans)', cursor: 'pointer', border: '1px solid var(--border-subtle)', background: 'var(--surface-secondary)', color: 'var(--text-secondary)', marginLeft: 'auto' }}
+                        className="inline-flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-[11.5px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] hover:border-brand-500 hover:bg-brand-500 hover:text-white transition-all cursor-pointer shadow-sm disabled:opacity-50"
                         onClick={() => handleDownloadPdf(r.student_id, r.student_name)}
                         disabled={isDownloadingPdf === r.student_id}
                       >
@@ -224,6 +230,6 @@ export default function ReportsPage() {
           </table>
         </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -248,22 +248,23 @@ export default function ReviewsPage() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="flex flex-col gap-6 w-full animate-fade-in relative z-10">
       {/* Title block */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' as const }}>
-        <div>
-          <h1 className="text-[22px] font-medium text-text-primary flex items-center gap-2">
-            <ShieldAlert size={22} className="text-brand-600" />
-            Institutional Moderation & Approval Center
-          </h1>
-          <p className="text-[13px] text-text-tertiary mt-1">
+      <div className="relative overflow-hidden bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm backdrop-blur-md bg-opacity-80">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-amber-600 dark:text-amber-500 uppercase bg-amber-50 dark:bg-amber-950/20 px-2 py-0.5 rounded-full w-max">
+            <ShieldAlert size={11} className="animate-pulse" />
+            Security & Oversight
+          </div>
+          <h1 className="text-[20px] font-bold text-[var(--text-primary)] mt-2">Institutional Moderation & Approval Center</h1>
+          <p className="text-[13px] text-[var(--text-secondary)] mt-0.5">
             Resolve grading drifts, approve rubrics, and release institutional assessments.
           </p>
         </div>
         <button 
           onClick={() => { fetchPendingReviews(); if (isAdminOrHOD) fetchPendingRubrics(); }}
           disabled={isLoadingReviews || isLoadingRubrics}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '10px', fontSize: '12.5px', fontWeight: 600, cursor: 'pointer', border: '1px solid var(--border-subtle)', background: 'var(--surface-primary)', color: 'var(--text-primary)', whiteSpace: 'nowrap' as const, flexShrink: 0, fontFamily: 'var(--font-sans)' }}
+          className="flex items-center justify-center gap-1.5 py-2 px-4 rounded-xl text-[12px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] hover:border-brand-500 hover:bg-brand-500 hover:text-white transition-all duration-200 cursor-pointer shadow-sm"
         >
           <RefreshCw size={13} className={isLoadingReviews || isLoadingRubrics ? "animate-spin" : ""} />
           Refresh Lists
@@ -272,170 +273,194 @@ export default function ReviewsPage() {
 
       {/* ── State Machine Rubric Approvals (HOD / Admin only) ── */}
       {isAdminOrHOD && (
-        <div style={{ background: 'var(--surface-primary)', border: '1px solid var(--border-subtle)', borderRadius: '16px', overflow: 'hidden' }}>
-          <div style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--surface-secondary)', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontWeight: 600, fontSize: '13.5px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm backdrop-blur-md bg-opacity-80 overflow-hidden">
+          <div className="border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] px-6 py-4 flex justify-between items-center bg-opacity-50">
+            <div className="font-bold text-[13.5px] text-[var(--text-primary)] flex items-center gap-2">
               <ShieldCheck size={16} className="text-brand-600" />
-              Teacher Rubrics Awaiting Approval ({pendingRubrics.length} Pending)
+              Teacher Rubrics Awaiting Approval
+              <span className="text-[10px] font-mono bg-brand-500/10 text-brand-600 border border-brand-500/20 px-2 py-0.5 rounded-full ml-1 font-bold">
+                {pendingRubrics.length} Pending
+              </span>
             </div>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--brand-600)', padding: '3px 10px', borderRadius: '6px', background: 'rgba(83,74,183,0.08)', border: '1px solid rgba(83,74,183,0.15)' }}>HOD Approval Gate</span>
+            <span className="text-[11px] font-bold text-brand-600 bg-brand-50 dark:bg-brand-950/20 px-2.5 py-1 rounded-lg border border-brand-500/15">
+              HOD Approval Gate
+            </span>
           </div>
 
-          <div className="card-body p-0">
-            <div className="overflow-x-auto">
-              <table className="data-table w-full">
-                <thead>
-                  <tr className="bg-surface-secondary/40">
-                    <th className="px-6 py-3">Subject Paper</th>
-                    <th className="px-6 py-3">Set</th>
-                    <th className="px-6 py-3">Grade Level</th>
-                    <th className="px-6 py-3">Max Marks</th>
-                    <th className="px-6 py-3 text-right">Moderation</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {isLoadingRubrics ? (
-                    <tr>
-                      <td colSpan={5} className="text-center py-8 text-text-tertiary">
-                        <Loader2 className="animate-spin mx-auto mb-2 text-brand-500" size={20} />
-                        Fetching pending rubrics...
-                      </td>
-                    </tr>
-                  ) : pendingRubrics.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="text-center py-8 text-text-tertiary text-[12.5px]">
-                        No teacher rubrics currently pending approval.
-                      </td>
-                    </tr>
-                  ) : (
-                    pendingRubrics.map((r) => (
-                      <tr key={r.id} onClick={() => setSelectedRubric(r)} className="hover:bg-brand-500/5 cursor-pointer">
-                        <td className="px-6 py-3 font-semibold text-text-primary">{r.subject} - {r.title}</td>
-                        <td className="px-6 py-3 font-mono text-[11px]">{r.paper_set || "A"}</td>
-                        <td className="px-6 py-3">{r.grade_level || "Class 12"}</td>
-                        <td className="px-6 py-3 font-semibold text-text-primary">{r.max_marks} marks</td>
-                        <td className="px-6 py-3 text-right">
-                          <button className="btn btn-brand py-1 px-3 text-[11px] flex items-center gap-1 ml-auto">
-                            Review Rubric <ChevronRight size={12} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Submissions Flagged for Human Review ── */}
-      <div style={{ background: 'var(--surface-primary)', border: '1px solid var(--border-subtle)', borderRadius: '16px', overflow: 'hidden' }}>
-        <div style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--surface-secondary)', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' as const, gap: '8px' }}>
-          <div style={{ fontWeight: 500, fontSize: '13.5px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ShieldAlert size={16} style={{ color: 'var(--color-danger-border)' }} />
-            Submissions Requiring Moderator Review ({reviews.length} Flagged)
-          </div>
-          <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Triggered when confidence score drifts or fails rubric parameters</span>
-        </div>
-
-        <div className="card-body p-0">
           <div className="overflow-x-auto">
-            <table className="data-table w-full">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-surface-secondary">
-                  <th className="px-6 py-4">Student ID</th>
-                  <th className="px-6 py-4">Subject Exam</th>
-                  <th className="px-6 py-4">Flagged Reason</th>
-                  <th className="px-6 py-4">Current Score</th>
-                  <th className="px-6 py-4 text-right">Action</th>
+                <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] bg-opacity-30">
+                  <th className="px-6 py-3.5 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Subject Paper</th>
+                  <th className="px-6 py-3.5 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Set</th>
+                  <th className="px-6 py-3.5 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Grade Level</th>
+                  <th className="px-6 py-3.5 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Max Marks</th>
+                  <th className="px-6 py-3.5 text-right text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Moderation</th>
                 </tr>
               </thead>
-              <tbody>
-                {isLoadingReviews ? (
+              <tbody className="divide-y divide-[var(--border-subtle)]">
+                {isLoadingRubrics ? (
                   <tr>
-                    <td colSpan={5} className="text-center py-12 text-text-tertiary">
+                    <td colSpan={5} className="text-center py-12 text-[var(--text-secondary)]">
                       <Loader2 className="animate-spin mx-auto mb-2 text-brand-500" size={24} />
-                      Loading flagged evaluation queues...
+                      Fetching pending rubrics...
                     </td>
                   </tr>
-                ) : reviews.length === 0 ? (
+                ) : pendingRubrics.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="text-center py-12 text-text-tertiary text-[13px]">
-                      Excellent! Zero submissions currently require moderation review.
+                    <td colSpan={5} className="text-center py-10 text-[var(--text-secondary)] text-[12.5px] font-medium bg-[var(--surface-secondary)] bg-opacity-10">
+                      No teacher rubrics currently pending approval.
                     </td>
                   </tr>
                 ) : (
-                  reviews.map((r) => {
-                    const reason = r.review_reasons && r.review_reasons.length > 0 
-                      ? r.review_reasons.join(", ") 
-                      : "Low Confidence drift score (< 80%)";
-                    return (
-                      <tr key={r.submission_id} onClick={() => setSelectedSub(r)} className="hover:bg-surface-secondary cursor-pointer">
-                        <td className="px-6 py-4 font-mono text-[12px] text-text-primary font-bold">{r.student_id}</td>
-                        <td className="px-6 py-4 text-[12.5px] text-text-secondary">{r.task_title}</td>
-                        <td className="px-6 py-4 text-[12px] text-color-danger-border font-medium">
-                          <div className="flex items-center gap-1.5">
-                            <AlertCircle size={13} />
-                            {reason}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 font-semibold text-text-primary">{r.grade} / {r.max_grade}</td>
-                        <td className="px-6 py-4 text-right">
-                          <button className="btn btn-secondary py-1 px-3 text-[11.5px] flex items-center gap-1 ml-auto">
-                            Inspect Verdict <ChevronRight size={12} />
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })
+                  pendingRubrics.map((r) => (
+                    <tr 
+                      key={r.id} 
+                      onClick={() => setSelectedRubric(r)} 
+                      className="hover:bg-brand-500/5 cursor-pointer transition-colors duration-150 group"
+                    >
+                      <td className="px-6 py-4 font-bold text-[13px] text-[var(--text-primary)] group-hover:text-brand-600 transition-colors">
+                        {r.subject} - {r.title}
+                      </td>
+                      <td className="px-6 py-4 font-mono text-[11.5px] text-[var(--text-secondary)]">{r.paper_set || "A"}</td>
+                      <td className="px-6 py-4 text-[12px] text-[var(--text-secondary)] font-medium">{r.grade_level || "Class 12"}</td>
+                      <td className="px-6 py-4 font-semibold font-mono text-[12px] text-[var(--text-primary)]">{r.max_marks} marks</td>
+                      <td className="px-6 py-4 text-right">
+                        <button className="inline-flex items-center justify-center gap-1 py-1.5 px-3.5 rounded-lg text-[11.5px] font-bold bg-brand-500 hover:bg-brand-600 text-white transition-all cursor-pointer shadow-sm">
+                          Review Rubric <ChevronRight size={12} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
                 )}
               </tbody>
             </table>
           </div>
         </div>
+      )}
+
+      {/* ── Submissions Flagged for Human Review ── */}
+      <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm backdrop-blur-md bg-opacity-80 overflow-hidden">
+        <div className="border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-2 bg-opacity-50">
+          <div className="font-bold text-[13.5px] text-[var(--text-primary)] flex items-center gap-2">
+            <ShieldAlert size={16} className="text-red-500" />
+            Submissions Requiring Moderator Review
+            <span className="text-[10px] font-mono bg-red-500/10 text-red-600 border border-red-500/20 px-2 py-0.5 rounded-full ml-1 font-bold">
+              {reviews.length} Flagged
+            </span>
+          </div>
+          <span className="text-[11px] text-[var(--text-tertiary)] font-medium italic">
+            Triggered when confidence score drifts or fails rubric parameters
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] bg-opacity-30">
+                <th className="px-6 py-4 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Student ID</th>
+                <th className="px-6 py-4 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Subject Exam</th>
+                <th className="px-6 py-4 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Flagged Reason</th>
+                <th className="px-6 py-4 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Current Score</th>
+                <th className="px-6 py-4 text-right text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--border-subtle)]">
+              {isLoadingReviews ? (
+                <tr>
+                  <td colSpan={5} className="text-center py-16 text-[var(--text-secondary)]">
+                    <Loader2 className="animate-spin mx-auto mb-2 text-brand-500" size={24} />
+                    Loading flagged evaluation queues...
+                  </td>
+                </tr>
+              ) : reviews.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="text-center py-12 text-[var(--text-secondary)] text-[12.5px] font-medium bg-[var(--surface-secondary)] bg-opacity-10">
+                    Excellent! Zero submissions currently require moderation review.
+                  </td>
+                </tr>
+              ) : (
+                reviews.map((r) => {
+                  const reason = r.review_reasons && r.review_reasons.length > 0 
+                    ? r.review_reasons.join(", ") 
+                    : "Low Confidence drift score (< 80%)";
+                  return (
+                    <tr 
+                      key={r.submission_id} 
+                      onClick={() => setSelectedSub(r)} 
+                      className="hover:bg-red-500/5 cursor-pointer transition-colors duration-150 group"
+                    >
+                      <td className="px-6 py-4 font-mono text-[12px] text-[var(--text-primary)] font-bold">{r.student_id}</td>
+                      <td className="px-6 py-4 text-[12.5px] text-[var(--text-secondary)] font-medium">{r.task_title}</td>
+                      <td className="px-6 py-4 text-[12px] text-red-500 font-semibold">
+                        <div className="flex items-center gap-1.5 bg-red-500/5 border border-red-500/10 rounded-lg px-2.5 py-1 w-max">
+                          <AlertCircle size={13} className="shrink-0" />
+                          {reason}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 font-bold font-mono text-[12px] text-[var(--text-primary)]">{r.grade} / {r.max_grade}</td>
+                      <td className="px-6 py-4 text-right">
+                        <button className="inline-flex items-center justify-center gap-1.5 py-1.5 px-3.5 rounded-lg text-[11.5px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] group-hover:border-red-500 group-hover:bg-red-500 group-hover:text-white transition-all cursor-pointer shadow-sm">
+                          Inspect Verdict <ChevronRight size={12} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Moderation Inspect Overlay Slider */}
       {selectedSub && (
-        <div className="slide-overlay" onClick={() => setSelectedSub(null)}>
-          <div className="slide-panel animate-slide-r" style={{ width: "520px" }} onClick={(e) => e.stopPropagation()}>
-            <div className="slide-header border-b border-border-subtle bg-surface-secondary">
-              <div className="slide-title flex items-center gap-2 font-semibold text-text-primary">
-                <ShieldAlert size={16} className="text-color-warning-border" />
-                Moderator Verdict Audit
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 transition-opacity flex justify-end" onClick={() => setSelectedSub(null)}>
+          <div 
+            className="w-full max-w-[550px] bg-[var(--surface-primary)] border-l border-[var(--border-subtle)] h-full flex flex-col shadow-2xl relative animate-slide-in-right overflow-hidden" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-5 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] bg-opacity-50 flex items-center justify-between">
+              <div className="flex items-center gap-2 font-bold text-[14px] text-[var(--text-primary)]">
+                <ShieldAlert size={16} className="text-amber-500 animate-pulse" />
+                Moderator Verdict Audit Center
               </div>
-              <button className="slide-close" onClick={() => setSelectedSub(null)}>×</button>
+              <button 
+                onClick={() => setSelectedSub(null)}
+                className="w-8 h-8 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] hover:border-brand-500 hover:text-brand-500 flex items-center justify-center font-bold text-[16px] cursor-pointer transition-all shadow-sm"
+              >
+                &times;
+              </button>
             </div>
             
-            <div className="slide-body p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="avatar avatar-lg bg-brand-500/10 text-brand-600 w-12 h-12 rounded-full flex items-center justify-center font-bold">
+            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+              <div className="flex items-center gap-3 bg-[var(--surface-secondary)] bg-opacity-40 border border-[var(--border-subtle)] p-4 rounded-xl">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-brand-600/10 to-brand-400/5 text-brand-600 border border-brand-500/20 flex items-center justify-center font-bold text-[14.5px] shadow-sm">
                   {(selectedSub.student_id || '??').slice(-2)}
                 </div>
                 <div>
-                  <div className="text-[16px] font-semibold text-text-primary">{selectedSub.student_id || 'Unknown Student'}</div>
-                  <div className="font-mono text-[11px] text-text-tertiary">{selectedSub.submission_id}</div>
+                  <div className="text-[14.5px] font-bold text-[var(--text-primary)]">{selectedSub.student_id || 'Unknown Student'}</div>
+                  <div className="font-mono text-[10.5px] text-[var(--text-tertiary)] mt-0.5">{selectedSub.submission_id}</div>
                 </div>
               </div>
 
               {isLoadingDetail ? (
-                <div className="py-12 text-center text-text-tertiary flex flex-col items-center">
-                  <Loader2 className="animate-spin mb-2" size={24} />
-                  Loading grade breakdown...
+                <div className="py-16 text-center text-[var(--text-secondary)] flex flex-col items-center justify-center">
+                  <Loader2 className="animate-spin mb-3 text-brand-500" size={28} />
+                  <span className="font-medium text-[13px]">Loading grading breakdown audit...</span>
                 </div>
               ) : !reviewDetail ? (
-                <div className="py-8 text-center text-text-tertiary">Failed to retrieve grade detail.</div>
+                <div className="py-12 text-center text-red-500 font-medium">Failed to retrieve grade detail logs.</div>
               ) : (
-                <div className="flex flex-col gap-5">
+                <div className="flex flex-col gap-6">
                   {/* Segmented Tab Control */}
-                  <div className="flex border-b border-border-secondary mb-2">
+                  <div className="flex border-b border-[var(--border-subtle)] p-0.5 bg-[var(--surface-secondary)] rounded-xl">
                     <button
                       type="button"
-                      className={`flex-1 pb-2.5 text-center font-medium text-[13px] transition-all relative ${
+                      className={`flex-1 py-2 text-center font-bold text-[12px] transition-all rounded-lg cursor-pointer ${
                         activeTab === "evaluation"
-                          ? "text-primary border-b-2 border-primary font-semibold"
-                          : "text-text-tertiary hover:text-text-secondary"
+                          ? "bg-[var(--surface-primary)] text-brand-600 shadow-sm border border-[var(--border-subtle)]"
+                          : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
                       }`}
                       onClick={() => setActiveTab("evaluation")}
                     >
@@ -443,78 +468,82 @@ export default function ReviewsPage() {
                     </button>
                     <button
                       type="button"
-                      className={`flex-1 pb-2.5 text-center font-medium text-[13px] transition-all relative ${
+                      className={`flex-1 py-2 text-center font-bold text-[12px] transition-all rounded-lg cursor-pointer ${
                         activeTab === "student_answer"
-                          ? "text-primary border-b-2 border-primary font-semibold"
-                          : "text-text-tertiary hover:text-text-secondary"
+                          ? "bg-[var(--surface-primary)] text-brand-600 shadow-sm border border-[var(--border-subtle)]"
+                          : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
                       }`}
                       onClick={() => setActiveTab("student_answer")}
                     >
-                      Student Answer
+                      Student Answer File
                     </button>
                   </div>
 
                   {activeTab === "evaluation" ? (
                     <div className="flex flex-col gap-6">
                       {/* Current Score Display */}
-                      <div className="bg-surface-secondary border border-border-subtle p-4 rounded-lg flex justify-between items-center">
+                      <div className="grid grid-cols-2 gap-4 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] p-4 rounded-xl">
                         <div>
-                          <span className="text-[11.5px] text-text-tertiary uppercase tracking-wider block mb-1">AI Proposed Grade</span>
+                          <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-bold tracking-wider block mb-1">AI Proposed Grade</span>
                           <div className="flex items-baseline gap-1">
-                            <span className="text-[28px] font-bold text-text-primary">{reviewDetail.grade}</span>
-                            <span className="text-[14px] text-text-tertiary">/ {reviewDetail.max_grade}</span>
+                            <span className="text-[26px] font-bold font-mono text-[var(--text-primary)]">{reviewDetail.grade}</span>
+                            <span className="text-[12px] text-[var(--text-tertiary)]">/ {reviewDetail.max_grade}</span>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <span className="text-[11.5px] text-text-tertiary uppercase tracking-wider block mb-1">AI Confidence</span>
-                          <span className="text-[14px] font-semibold text-color-warning-border bg-warning-bg px-2.5 py-1 rounded-md">
-                            {(reviewDetail.confidence * 100).toFixed(0)}%
+                        <div className="border-l border-[var(--border-subtle)] pl-4">
+                          <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-bold tracking-wider block mb-1">AI Confidence</span>
+                          <span className="inline-block text-[13px] font-bold font-mono text-amber-500 bg-amber-500/10 border border-amber-500/10 rounded-lg px-2.5 py-1 mt-1">
+                            {(reviewDetail.confidence * 100).toFixed(0)}% Match
                           </span>
                         </div>
                       </div>
 
                       {/* Actions Grid */}
-                      <div className="flex flex-col gap-4 border border-border-subtle p-4 rounded-lg bg-surface-primary">
-                        <h3 className="text-[13px] font-semibold text-text-primary flex items-center gap-1.5">
+                      <div className="flex flex-col gap-4 border border-[var(--border-subtle)] p-5 rounded-xl bg-[var(--surface-primary)] relative shadow-sm overflow-hidden">
+                        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-brand-500 to-amber-500" />
+                        <h3 className="text-[12.5px] font-bold text-[var(--text-primary)] flex items-center gap-1.5 uppercase tracking-wider font-mono">
                           <ShieldCheck size={14} className="text-brand-600" />
-                          Human-in-the-Loop Moderation Form
+                          Human-in-the-Loop Verdict
                         </h3>
 
                         {/* Grade override input */}
-                        <form onSubmit={handleOverrideGrade} className="flex flex-col gap-3 mt-2">
-                          <div className="flex gap-4">
-                            <div className="flex-1 flex flex-col gap-1">
-                              <label className="text-[11px] font-semibold text-text-secondary uppercase">Corrected Score</label>
+                        <form onSubmit={handleOverrideGrade} className="flex flex-col gap-4 mt-2">
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-[10.5px] font-bold text-[var(--text-secondary)] uppercase font-mono">Corrected Score override</label>
+                            <div className="relative">
                               <input 
                                 type="number"
                                 min="0"
                                 max={reviewDetail.max_grade}
-                                className="input-field py-2 text-[13px]"
+                                className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl py-2 px-3 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 font-mono font-bold"
                                 value={newGrade === "" ? "" : newGrade}
                                 onChange={(e) => setNewGrade(e.target.value === "" ? "" : Number(e.target.value))}
                               />
+                              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[11px] font-mono font-bold text-[var(--text-tertiary)]">
+                                max: {reviewDetail.max_grade}
+                              </span>
                             </div>
                           </div>
 
-                          <div className="flex flex-col gap-1">
-                            <label className="text-[11px] font-semibold text-text-secondary uppercase">Moderation notes / rationale</label>
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-[10.5px] font-bold text-[var(--text-secondary)] uppercase font-mono">Moderator Verdict Rationale</label>
                             <textarea 
-                              className="input-field min-h-[70px] text-[12.5px]"
-                              placeholder="Why are you approving or overriding this grade?"
+                              className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl py-2 px-3 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 min-h-[80px]"
+                              placeholder="Describe your reasoning or comments for releasing this grade override..."
                               value={moderationNotes}
                               onChange={(e) => setModerationNotes(e.target.value)}
                             />
                           </div>
 
                           {actionSuccess ? (
-                            <div className="p-3 bg-success-bg text-success-text rounded-md text-[12px] flex items-center gap-1.5 font-semibold mt-1">
-                              <CheckCircle2 size={14} /> Moderation action committed successfully!
+                            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 rounded-xl text-[12px] flex items-center justify-center gap-1.5 font-bold mt-1">
+                              <CheckCircle2 size={14} className="animate-bounce" /> Action successfully synchronized!
                             </div>
                           ) : (
                             <div className="grid grid-cols-2 gap-3 mt-2">
                               <button 
                                 type="button"
-                                className="btn btn-secondary py-2 justify-center text-[12.5px]"
+                                className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[12px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] hover:border-emerald-500 hover:bg-emerald-500 hover:text-white transition-all cursor-pointer"
                                 onClick={handleApproveGrade}
                                 disabled={isSubmittingAction}
                               >
@@ -522,7 +551,7 @@ export default function ReviewsPage() {
                               </button>
                               <button 
                                 type="submit"
-                                className="btn btn-brand py-2 justify-center text-[12.5px]"
+                                className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[12px] font-bold bg-brand-500 text-white hover:bg-brand-600 transition-all cursor-pointer"
                                 disabled={isSubmittingAction || newGrade === "" || !moderationNotes.trim()}
                               >
                                 {isSubmittingAction ? <Loader2 className="animate-spin" size={14} /> : "Override AI Grade"}
@@ -534,15 +563,17 @@ export default function ReviewsPage() {
 
                       {/* Component step breakdowns */}
                       <div className="flex flex-col gap-3">
-                        <h4 className="text-[11.5px] font-semibold tracking-wider text-text-tertiary uppercase">Component Step Audit traces</h4>
+                        <h4 className="text-[10px] font-bold tracking-wider text-[var(--text-tertiary)] uppercase font-mono">Component Step Audit traces</h4>
                         <div className="flex flex-col gap-3">
                           {(reviewDetail.step_grades || []).map((step, idx) => (
-                            <div key={idx} className="step-card bg-surface-secondary border border-border-subtle p-3 rounded-lg">
-                              <div className="step-card-top flex justify-between font-medium text-[12px] text-text-primary mb-1">
+                            <div key={idx} className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] p-4 rounded-xl hover:border-brand-500/30 transition-all duration-200">
+                              <div className="flex justify-between font-bold text-[12px] text-[var(--text-primary)] mb-2 font-mono">
                                 <span>Step {step.step_num} ({step.component_type || "text"})</span>
-                                <span className="font-semibold">{step.marks_awarded || step.awarded} / {step.max_marks || step.max}</span>
+                                <span className="text-brand-600 bg-brand-500/10 border border-brand-500/20 px-2 py-0.5 rounded">
+                                  {step.marks_awarded || step.awarded} / {step.max_marks || step.max} pts
+                                </span>
                               </div>
-                              <p className="step-justification text-[11.5px] text-text-secondary leading-relaxed mt-1">
+                              <p className="text-[12px] text-[var(--text-secondary)] leading-relaxed mt-1">
                                 {step.justification}
                               </p>
                             </div>
@@ -555,16 +586,16 @@ export default function ReviewsPage() {
                       {reviewDetail.parsed_content?.steps && reviewDetail.parsed_content.steps.length > 0 ? (
                         <div className="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-1">
                           {reviewDetail.parsed_content.steps.map((step: any, idx: number) => (
-                            <div key={idx} className="bg-surface-secondary border border-border-secondary rounded-lg p-4 flex flex-col gap-2">
-                              <div className="flex justify-between items-center">
-                                <span className="text-[12px] font-bold text-primary uppercase tracking-wider">Step {step.step_num}</span>
-                                <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase font-medium">{step.step_type}</span>
+                            <div key={idx} className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl p-4 flex flex-col gap-2">
+                              <div className="flex justify-between items-center border-b border-[var(--border-subtle)] pb-2 mb-1">
+                                <span className="text-[11px] font-bold text-brand-600 uppercase tracking-wider font-mono">Step {step.step_num}</span>
+                                <span className="text-[10px] bg-brand-500/10 text-brand-600 px-2 py-0.5 rounded-full uppercase font-bold">{step.step_type}</span>
                               </div>
-                              <p className="text-text-primary text-[13.5px] leading-relaxed">{step.text}</p>
+                              <p className="text-[var(--text-primary)] text-[12.5px] leading-relaxed">{step.text}</p>
                               {step.equations && step.equations.length > 0 && (
                                 <div className="mt-1 flex flex-wrap gap-1.5">
                                   {step.equations.map((eq: string, eqIdx: number) => (
-                                    <code key={eqIdx} className="bg-surface-hover text-text-secondary px-2 py-0.5 rounded text-[11.5px] font-mono border border-border-subtle">
+                                    <code key={eqIdx} className="bg-[var(--surface-primary)] text-[var(--text-secondary)] px-2.5 py-1 rounded text-[11px] font-mono border border-[var(--border-subtle)] shadow-sm">
                                       {eq}
                                     </code>
                                   ))}
@@ -574,11 +605,11 @@ export default function ReviewsPage() {
                           ))}
                         </div>
                       ) : reviewDetail.raw_text ? (
-                        <div className="bg-surface-secondary border border-border-secondary rounded-lg p-4 font-mono text-[12.5px] text-text-secondary whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
+                        <div className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl p-4 font-mono text-[12px] text-[var(--text-secondary)] whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
                           {reviewDetail.raw_text}
                         </div>
                       ) : (
-                        <div className="text-center text-text-tertiary py-8">No student answer text parsed yet.</div>
+                        <div className="text-center text-[var(--text-tertiary)] py-12">No student answer text parsed yet.</div>
                       )}
                     </div>
                   )}
@@ -591,41 +622,49 @@ export default function ReviewsPage() {
 
       {/* Rubric Approval Detail Slider */}
       {selectedRubric && (
-        <div className="slide-overlay" onClick={() => setSelectedRubric(null)}>
-          <div className="slide-panel animate-slide-r" style={{ width: "520px" }} onClick={(e) => e.stopPropagation()}>
-            <div className="slide-header border-b border-border-subtle bg-surface-secondary">
-              <div className="slide-title flex items-center gap-2 font-semibold text-brand-800">
-                <ShieldCheck size={16} className="text-brand-600" />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 transition-opacity flex justify-end" onClick={() => setSelectedRubric(null)}>
+          <div 
+            className="w-full max-w-[550px] bg-[var(--surface-primary)] border-l border-[var(--border-subtle)] h-full flex flex-col shadow-2xl relative animate-slide-in-right overflow-hidden" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-5 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] bg-opacity-50 flex items-center justify-between">
+              <div className="flex items-center gap-2 font-bold text-[14px] text-brand-800">
+                <ShieldCheck size={16} className="text-brand-600 animate-pulse" />
                 HOD Rubric Audit Gate
               </div>
-              <button className="slide-close" onClick={() => setSelectedRubric(null)}>×</button>
+              <button 
+                onClick={() => setSelectedRubric(null)}
+                className="w-8 h-8 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] hover:border-brand-500 hover:text-brand-500 flex items-center justify-center font-bold text-[16px] cursor-pointer transition-all shadow-sm"
+              >
+                &times;
+              </button>
             </div>
 
-            <div className="slide-body p-6">
-              <div className="flex flex-col gap-2 mb-6">
-                <span className="text-[11px] text-brand-600 font-bold uppercase">Pending Institutional Rubric</span>
-                <h3 className="text-[18px] font-bold text-text-primary">{selectedRubric.subject} - {selectedRubric.title}</h3>
-                <div className="grid grid-cols-2 gap-2 text-[12px] text-text-secondary mt-2 bg-surface-secondary p-3 rounded-lg border">
-                  <div>Grade Level: <strong>{selectedRubric.grade_level}</strong></div>
-                  <div>Paper Set: <strong>{selectedRubric.paper_set || "A"}</strong></div>
-                  <div>Max Marks: <strong>{selectedRubric.max_marks} marks</strong></div>
+            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+              <div className="flex flex-col gap-2 bg-[var(--surface-secondary)] bg-opacity-40 border border-[var(--border-subtle)] p-4 rounded-xl">
+                <span className="text-[10px] text-brand-600 font-bold uppercase tracking-wider font-mono">Pending Institutional Rubric</span>
+                <h3 className="text-[16.5px] font-bold text-[var(--text-primary)] mt-1">{selectedRubric.subject} - {selectedRubric.title}</h3>
+                <div className="grid grid-cols-2 gap-3 text-[12px] text-[var(--text-secondary)] mt-3 pt-3 border-t border-[var(--border-subtle)] font-mono">
+                  <div>Grade Level: <strong className="text-[var(--text-primary)]">{selectedRubric.grade_level}</strong></div>
+                  <div>Paper Set: <strong className="text-[var(--text-primary)]">{selectedRubric.paper_set || "A"}</strong></div>
+                  <div className="col-span-2 mt-1">Max Marks: <strong className="text-[var(--text-primary)]">{selectedRubric.max_marks} marks</strong></div>
                 </div>
               </div>
 
               {/* Rubric steps details */}
-              <div className="flex flex-col gap-3 mb-6">
-                <h4 className="text-[11.5px] font-bold tracking-wider text-text-tertiary uppercase">Rubric Decomposed Steps</h4>
-                <div className="flex flex-col gap-3 max-h-[250px] overflow-y-auto pr-1">
+              <div className="flex flex-col gap-3">
+                <h4 className="text-[10px] font-bold tracking-wider text-[var(--text-tertiary)] uppercase font-mono">Rubric Decomposed Steps</h4>
+                <div className="flex flex-col gap-3 max-h-[300px] overflow-y-auto pr-1">
                   {(selectedRubric.steps || []).map((step: any, idx: number) => (
-                    <div key={idx} className="bg-surface-secondary border p-3 rounded-lg">
-                      <div className="flex-between text-[12px] font-semibold text-text-primary mb-1">
+                    <div key={idx} className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] p-4 rounded-xl">
+                      <div className="flex justify-between items-center text-[12px] font-bold text-[var(--text-primary)] mb-2 font-mono">
                         <span>Step {step.step_num} ({step.component_type})</span>
-                        <span>{step.marks} marks</span>
+                        <span className="text-brand-600 bg-brand-500/10 border border-brand-500/20 px-2.5 py-0.5 rounded">{step.marks} marks</span>
                       </div>
-                      <div className="text-[11.5px] text-text-secondary">{step.description}</div>
+                      <div className="text-[12px] text-[var(--text-secondary)] leading-relaxed">{step.description}</div>
                       {step.expected_exprs && step.expected_exprs.length > 0 && (
-                        <div className="text-[10px] font-mono text-brand-600 mt-1 bg-brand-500/5 p-1 rounded">
-                          Expected Math: {step.expected_exprs.join(", ")}
+                        <div className="text-[10.5px] font-mono text-brand-600 mt-2 bg-brand-500/5 p-2 rounded-lg border border-brand-500/10">
+                          Expected Math Syntax: {step.expected_exprs.join(", ")}
                         </div>
                       )}
                     </div>
@@ -634,13 +673,14 @@ export default function ReviewsPage() {
               </div>
 
               {/* Action Form */}
-              <div className="flex flex-col gap-4 border border-border-subtle p-4 rounded-lg bg-surface-primary">
-                <h3 className="text-[13px] font-bold text-text-primary">Approve or Reject Rubric Schema</h3>
+              <div className="flex flex-col gap-4 border border-[var(--border-subtle)] p-5 rounded-xl bg-[var(--surface-primary)] relative shadow-sm overflow-hidden">
+                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-red-500 to-emerald-500" />
+                <h3 className="text-[12.5px] font-bold text-[var(--text-primary)] uppercase tracking-wider font-mono">Approve or Reject Rubric Schema</h3>
                 
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10.5px] font-semibold text-text-secondary uppercase">Rejection notes (Required only for rejection)</label>
+                <div className="flex flex-col gap-1.5 mt-2">
+                  <label className="text-[10.5px] font-bold text-[var(--text-secondary)] uppercase font-mono">Rejection notes (Required to send back)</label>
                   <textarea 
-                    className="input-field min-h-[70px] text-[12px]"
+                    className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl py-2 px-3 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 min-h-[80px]"
                     placeholder="Provide specific notes if rejecting this rubric schema..."
                     value={rejectionNotes}
                     onChange={(e) => setRejectionNotes(e.target.value)}
@@ -649,18 +689,18 @@ export default function ReviewsPage() {
 
                 <div className="grid grid-cols-2 gap-3 mt-2">
                   <button 
-                    className="btn btn-danger py-2 justify-center text-[12.5px] flex items-center gap-1"
+                    className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[12px] font-bold border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all cursor-pointer"
                     onClick={() => handleRubricApproval("reject")}
                     disabled={isRubricActioning}
                   >
                     <X size={14} /> Reject & Send Back
                   </button>
                   <button 
-                    className="btn btn-brand py-2 justify-center text-[12.5px] bg-green-600 border-green-600 hover:bg-green-700 text-white flex items-center gap-1"
+                    className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[12px] font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-all cursor-pointer"
                     onClick={() => handleRubricApproval("approve")}
                     disabled={isRubricActioning}
                   >
-                    <Check size={14} /> Approve Rubric Schema
+                    <Check size={14} /> Approve Rubric
                   </button>
                 </div>
               </div>

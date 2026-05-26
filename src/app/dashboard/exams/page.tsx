@@ -440,89 +440,116 @@ export default function ExamsPage() {
   };
 
   return (
-    <>
+    <div className="flex flex-col gap-6 w-full animate-fade-in relative z-10">
       {/* Title Area */}
-      <div className="dash-header">
-        <div className="dash-header-content">
-          <div className="dash-header-badge">
-            <Sparkles size={12} />
-            <span>Assessment Engine</span>
+      <div className="relative overflow-hidden bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 flex flex-col justify-between gap-4 shadow-sm backdrop-blur-md bg-opacity-80">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-brand-600 uppercase bg-brand-50 dark:bg-brand-950/20 px-2 py-0.5 rounded-full w-max">
+            <Sparkles size={11} className="animate-pulse" />
+            Assessment Engine
           </div>
-          <h1 className="dash-header-title">Institutional Exam & Assessment Engine</h1>
-          <p className="dash-header-subtitle">
+          <h1 className="text-[20px] font-bold text-[var(--text-primary)] mt-2">Institutional Exam & Assessment Engine</h1>
+          <p className="text-[13px] text-[var(--text-secondary)]">
             Group subject papers under institutional exam cycles, configure math/diagram rubrics, and run bulk graded evaluations.
           </p>
         </div>
-        <div className="dash-header-glow" />
+        <div className="absolute right-0 top-0 w-[200px] h-full bg-gradient-to-l from-brand-500/5 to-transparent pointer-events-none" />
       </div>
 
       {/* Steps Indicator */}
       {step > 0 && (
-        <div className="steps-container mb-8">
+        <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-5 shadow-sm backdrop-blur-md bg-opacity-80 flex justify-between items-center gap-4">
           {[
             { num: 1, label: "Question Paper" },
             { num: 2, label: "Rubric & Approvals" },
             { num: 3, label: "Bulk answer sheets" },
             { num: 4, label: "Live evaluation queue" }
           ].map((s) => (
-            <div key={s.num} className={`step-item ${step === s.num ? "active" : ""} ${step > s.num ? "completed" : ""}`}>
-              <div className="step-number">
+            <div key={s.num} className="flex-1 flex items-center gap-3 relative">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold border transition-all duration-300 ${
+                step === s.num 
+                  ? "bg-brand-600 border-brand-600 text-white shadow-lg shadow-brand-500/20" 
+                  : step > s.num 
+                    ? "bg-emerald-500/10 border-emerald-500 text-emerald-600" 
+                    : "bg-[var(--surface-secondary)] border-[var(--border-subtle)] text-[var(--text-tertiary)]"
+              }`}>
                 {step > s.num ? <Check size={14} className="stroke-[3]" /> : s.num}
               </div>
-              <div className="step-label">{s.label}</div>
-              {s.num < 4 && <div className="step-connector" />}
+              <div className="flex flex-col">
+                <span className={`text-[11px] font-mono uppercase tracking-wider font-bold ${
+                  step === s.num ? "text-brand-600" : step > s.num ? "text-emerald-600" : "text-[var(--text-tertiary)]"
+                }`}>Step 0{s.num}</span>
+                <span className={`text-[12.5px] font-medium leading-none mt-0.5 ${
+                  step === s.num ? "text-[var(--text-primary)] font-semibold" : "text-[var(--text-secondary)]"
+                }`}>{s.label}</span>
+              </div>
+              {s.num < 4 && (
+                <div className={`hidden md:block flex-1 h-[2px] mx-4 transition-all duration-300 ${
+                  step > s.num ? "bg-emerald-500/30" : "bg-[var(--border-subtle)]"
+                }`} />
+              )}
             </div>
           ))}
         </div>
       )}
 
       {/* Wizard Body */}
-      <div className="dash-card" style={{ padding: '24px' }}>
+      <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 shadow-xl backdrop-blur-md bg-opacity-80">
         
         {/* ── Step 0: Cycle Selection ── */}
         {step === 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Cycle Selection Panel */}
             <div className="lg:col-span-2 flex flex-col gap-5">
-              <h3 className="text-[16px] font-semibold text-text-primary flex items-center gap-2">
+              <h3 className="text-[15px] font-bold text-[var(--text-primary)] flex items-center gap-2">
                 <div className="dash-card-title-icon brand" style={{width: '28px', height: '28px'}}>
                   <Layers size={15} />
                 </div>
                 Select Institutional Exam Cycle
               </h3>
-              <p className="text-[12.5px] text-text-tertiary">
+              <p className="text-[12.5px] text-[var(--text-secondary)] -mt-2">
                 Choose an active exam cycle to upload and decompose a new subject paper.
               </p>
 
               {isLoadingCycles ? (
-                <div className="py-12 text-center text-text-tertiary">
+                <div className="py-12 text-center text-[var(--text-secondary)]">
                   <Loader2 className="animate-spin mx-auto mb-2 text-brand-500" size={24} />
                   Fetching exam cycles...
                 </div>
               ) : cycles.length === 0 ? (
-                <div className="dash-empty-state" style={{padding: '48px 20px', border: '2px dashed var(--border-default)', borderRadius: '14px', background: 'var(--surface-secondary)'}}>
-                  <div className="dash-empty-icon">
-                    <Layers size={28} />
+                <div className="dash-empty-state border border-dashed border-[var(--border-subtle)] rounded-2xl p-12 text-center bg-[var(--surface-secondary)] bg-opacity-50">
+                  <div className="w-12 h-12 rounded-full bg-brand-500/10 text-brand-600 flex items-center justify-center mx-auto mb-3">
+                    <Layers size={22} />
                   </div>
-                  No active exam cycles found. Create one on the right to get started.
+                  <p className="text-[13px] font-medium text-[var(--text-primary)]">No active exam cycles found</p>
+                  <p className="text-[11.5px] text-[var(--text-tertiary)] mt-1">Create one on the right to get started.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {cycles.map((c) => (
                     <div 
                       key={c.id} 
-                      className={`border rounded-xl p-5 cursor-pointer transition-all ${selectedCycleId === c.id ? "border-brand-500 bg-brand-500/5 shadow-sm" : "border-border-default hover:border-border-strong bg-surface-primary"}`}
+                      className={`border rounded-2xl p-5 cursor-pointer transition-all duration-200 hover:scale-[1.01] ${
+                        selectedCycleId === c.id 
+                          ? "border-brand-500 bg-brand-500/5 shadow-md shadow-brand-500/5" 
+                          : "border-[var(--border-subtle)] bg-[var(--surface-primary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-secondary)]/50"
+                      }`}
                       onClick={() => setSelectedCycleId(c.id)}
                     >
-                      <div className="flex-between mb-2">
-                        <span className="text-[13.5px] font-bold text-text-primary">{c.name}</span>
-                        <span className={`pill ${c.status === "ACTIVE" ? "pill-success" : "pill-info"}`}>{c.status}</span>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-[13.5px] font-bold text-[var(--text-primary)]">{c.name}</span>
+                        <span className={`pill text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          c.status === "ACTIVE" 
+                            ? "bg-emerald-500/10 text-emerald-600" 
+                            : "bg-blue-500/10 text-blue-600"
+                        }`}>{c.status}</span>
                       </div>
-                      <div className="text-[11.5px] text-text-secondary flex items-center gap-2">
-                        <Calendar size={13} className="text-text-tertiary" />
+                      <div className="text-[11.5px] text-[var(--text-secondary)] flex items-center gap-2">
+                        <Calendar size={13} className="text-[var(--text-tertiary)]" />
                         {c.start_date ? new Date(c.start_date).toLocaleDateString() : "TBD"} - {c.end_date ? new Date(c.end_date).toLocaleDateString() : "TBD"}
                       </div>
-                      <div className="text-[11.5px] text-brand-600 font-semibold mt-3">
+                      <div className="text-[11.5px] text-brand-600 font-semibold mt-3 flex items-center gap-1.5">
+                        <div className="w-1.5 h-1.5 bg-brand-500 rounded-full" />
                         {c.task_count} subject papers linked
                       </div>
                     </div>
@@ -531,30 +558,30 @@ export default function ExamsPage() {
               )}
 
               {selectedCycleId && (
-                <div className="mt-6 border-t border-border-subtle pt-6">
-                  <h4 className="text-[14px] font-semibold text-text-primary mb-3 flex items-center gap-2">
+                <div className="mt-6 border-t border-[var(--border-subtle)] pt-6">
+                  <h4 className="text-[13.5px] font-bold text-[var(--text-primary)] mb-3 flex items-center gap-2">
                     <FileText size={15} className="text-brand-600" />
                     Existing Subject Papers in this Cycle:
                   </h4>
                   {isLoadingTasks ? (
-                    <div className="py-4 text-center text-text-tertiary">
+                    <div className="py-4 text-center text-[var(--text-secondary)]">
                       <Loader2 className="animate-spin inline-block mr-2 text-brand-500" size={16} />
                       Loading papers...
                     </div>
                   ) : selectedCycleTasks.length === 0 ? (
-                    <p className="text-[12px] text-text-tertiary">No subject papers created yet in this cycle. Select & proceed below to upload one.</p>
+                    <p className="text-[12px] text-[var(--text-tertiary)]">No subject papers created yet in this cycle. Select & proceed below to upload one.</p>
                   ) : (
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2.5">
                       {selectedCycleTasks.map((t) => (
-                        <div key={t.id} className="border border-border-default rounded-lg p-3 bg-surface-secondary/40 flex justify-between items-center hover:border-brand-500/50 transition-all">
+                        <div key={t.id} className="border border-[var(--border-subtle)] rounded-xl p-4 bg-[var(--surface-secondary)]/50 flex justify-between items-center hover:border-brand-500/30 hover:bg-[var(--surface-secondary)] transition-all duration-200">
                           <div>
-                            <div className="text-[13px] font-bold text-text-primary">{t.title}</div>
-                            <div className="text-[11px] text-text-secondary">
-                              Subject: {t.subject} | Grade: {t.grade_level} | Set: {t.paper_set} | Max Marks: {t.max_marks}
+                            <div className="text-[13px] font-bold text-[var(--text-primary)]">{t.title}</div>
+                            <div className="text-[11px] text-[var(--text-secondary)] mt-0.5">
+                              Subject: <strong className="text-[var(--text-primary)]">{t.subject}</strong> | Grade: <strong>{t.grade_level}</strong> | Set: <strong>{t.paper_set}</strong> | Max Marks: <strong>{t.max_marks}</strong>
                             </div>
                           </div>
                           <button
-                            className="btn btn-brand btn-sm flex items-center gap-1.5"
+                            className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-3 py-1.5 text-[11.5px] font-semibold transition-all duration-200 flex items-center gap-1.5 shadow-sm shadow-brand-500/10 cursor-pointer"
                             onClick={() => {
                               setTaskId(t.id);
                               setTitle(t.title);
@@ -577,9 +604,9 @@ export default function ExamsPage() {
               )}
 
               {cycles.length > 0 && (
-                <div className="flex justify-end pt-4 border-t border-border-subtle mt-6">
+                <div className="flex justify-end pt-4 border-t border-[var(--border-subtle)] mt-6">
                   <button 
-                    className="btn btn-brand btn-lg flex items-center gap-1.5"
+                    className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-5 py-2.5 text-[13px] font-bold transition-all duration-200 flex items-center gap-1.5 shadow-lg shadow-brand-500/10 cursor-pointer"
                     onClick={() => {
                       const cycle = cycles.find(c => c.id === selectedCycleId);
                       if (cycle) {
@@ -596,8 +623,8 @@ export default function ExamsPage() {
             </div>
 
             {/* Create Cycle Panel */}
-            <div className="lg:col-span-1 pl-0 lg:pl-8" style={{borderLeft: '1px solid var(--border-subtle)'}}>
-              <h3 className="text-[15px] font-semibold text-text-primary mb-5 flex items-center gap-2">
+            <div className="lg:col-span-1 pl-0 lg:pl-8 border-t lg:border-t-0 lg:border-l border-[var(--border-subtle)] pt-6 lg:pt-0">
+              <h3 className="text-[14px] font-bold text-[var(--text-primary)] mb-5 flex items-center gap-2">
                 <div className="dash-card-title-icon brand" style={{width: '26px', height: '26px'}}>
                   <Plus size={14} />
                 </div>
@@ -605,31 +632,31 @@ export default function ExamsPage() {
               </h3>
 
               <form onSubmit={handleCreateCycle} className="flex flex-col gap-4">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-medium text-text-secondary uppercase">Cycle Title</label>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase">Cycle Title</label>
                   <input 
                     type="text" 
-                    className="input-field" 
+                    className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm w-full font-medium"
                     placeholder="e.g. Mid-Term Oct 2026"
                     value={newCycleName}
                     onChange={(e) => setNewCycleName(e.target.value)}
                     required
                   />
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-medium text-text-secondary uppercase">Start Date</label>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase">Start Date</label>
                   <input 
                     type="date" 
-                    className="input-field" 
+                    className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm w-full font-medium"
                     value={newCycleStart}
                     onChange={(e) => setNewCycleStart(e.target.value)}
                   />
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-medium text-text-secondary uppercase">End Date</label>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase">End Date</label>
                   <input 
                     type="date" 
-                    className="input-field" 
+                    className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm w-full font-medium"
                     value={newCycleEnd}
                     onChange={(e) => setNewCycleEnd(e.target.value)}
                   />
@@ -637,8 +664,7 @@ export default function ExamsPage() {
 
                 <button 
                   type="submit" 
-                  className="btn btn-brand w-full flex justify-center items-center gap-2"
-                  style={{padding: '10px 16px', borderRadius: '10px', fontWeight: 600, fontSize: '13px'}}
+                  className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-4 py-2.5 text-[12.5px] font-bold transition-all duration-200 flex justify-center items-center gap-2 shadow-md shadow-brand-500/10 cursor-pointer mt-2"
                   disabled={isCreatingCycle}
                 >
                   {isCreatingCycle ? (
@@ -659,18 +685,18 @@ export default function ExamsPage() {
 
         {/* ── Step 1: Upload Question Paper ── */}
         {step === 1 && (
-          <div className="animate-fade-in">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div className="animate-fade-in flex flex-col gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-2 flex flex-col gap-4">
-                <h3 className="text-[16px] font-medium text-text-primary">Exam Metadata</h3>
+                <h3 className="text-[14.5px] font-bold text-[var(--text-primary)]">Exam Metadata</h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[11px] font-medium text-text-secondary uppercase">Subject Paper Title</label>
-                    <input type="text" className="input-field" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Physics Grade 12" />
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase">Subject Paper Title</label>
+                    <input type="text" className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm w-full font-medium" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Physics Grade 12" />
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[11px] font-medium text-text-secondary uppercase">Subject</label>
-                    <select className="input-field" value={subject} onChange={(e) => setSubject(e.target.value)}>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase">Subject</label>
+                    <select className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm w-full font-medium" value={subject} onChange={(e) => setSubject(e.target.value)}>
                       <option value="Physics">Physics</option>
                       <option value="Chemistry">Chemistry</option>
                       <option value="Biology">Biology</option>
@@ -681,81 +707,81 @@ export default function ExamsPage() {
                 </div>
 
                 <div className="grid grid-cols-4 gap-4">
-                  <div className="flex flex-col gap-1 col-span-1">
-                    <label className="text-[11px] font-medium text-text-secondary uppercase">Paper Set</label>
-                    <select className="input-field" value={paperSet} onChange={(e) => setPaperSet(e.target.value)}>
+                  <div className="flex flex-col gap-1.5 col-span-1">
+                    <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase">Paper Set</label>
+                    <select className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm w-full font-medium" value={paperSet} onChange={(e) => setPaperSet(e.target.value)}>
                       <option value="A">Set A</option>
                       <option value="B">Set B</option>
                       <option value="C">Set C</option>
                       <option value="None">None</option>
                     </select>
                   </div>
-                  <div className="flex flex-col gap-1 col-span-1">
-                    <label className="text-[11px] font-medium text-text-secondary uppercase">Board</label>
-                    <select className="input-field" value={board} onChange={(e) => setBoard(e.target.value)}>
+                  <div className="flex flex-col gap-1.5 col-span-1">
+                    <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase">Board</label>
+                    <select className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm w-full font-medium" value={board} onChange={(e) => setBoard(e.target.value)}>
                       <option value="CBSE">CBSE</option>
                       <option value="ICSE">ICSE</option>
                       <option value="State Board">State Board</option>
                     </select>
                   </div>
-                  <div className="flex flex-col gap-1 col-span-1">
-                    <label className="text-[11px] font-medium text-text-secondary uppercase">Grade Level</label>
-                    <input type="text" className="input-field" value={gradeLevel} onChange={(e) => setGradeLevel(e.target.value)} />
+                  <div className="flex flex-col gap-1.5 col-span-1">
+                    <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase">Grade Level</label>
+                    <input type="text" className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm w-full font-medium" value={gradeLevel} onChange={(e) => setGradeLevel(e.target.value)} />
                   </div>
-                  <div className="flex flex-col gap-1 col-span-1">
-                    <label className="text-[11px] font-medium text-text-secondary uppercase">Max Marks</label>
-                    <input type="number" className="input-field" value={isNaN(maxMarks) ? "" : maxMarks} onChange={(e) => {
+                  <div className="flex flex-col gap-1.5 col-span-1">
+                    <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase">Max Marks</label>
+                    <input type="number" className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm w-full font-medium font-mono" value={isNaN(maxMarks) ? "" : maxMarks} onChange={(e) => {
                       const val = parseInt(e.target.value);
                       setMaxMarks(isNaN(val) ? 0 : val);
                     }} />
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-1">
-                  <label className="text-[11px] font-medium text-text-secondary uppercase">Exam Description</label>
-                  <textarea className="input-field min-h-[80px]" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional exam description, sections details..." />
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase">Exam Description</label>
+                  <textarea className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm w-full font-medium min-h-[80px]" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional exam description, sections details..." />
                 </div>
               </div>
 
               {/* Question Paper File Dropzone */}
               <div className="flex flex-col gap-4">
-                <h3 className="text-[16px] font-medium text-text-primary">Question Paper PDF</h3>
-                <div className="relative flex-1 min-h-[180px] border border-dashed border-border-secondary rounded-lg flex flex-col justify-center items-center p-4 hover:border-brand-500 transition-colors cursor-pointer bg-surface-secondary/40">
+                <h3 className="text-[14.5px] font-bold text-[var(--text-primary)]">Question Paper PDF</h3>
+                <div className="relative flex-1 min-h-[180px] border border-dashed border-[var(--border-subtle)] rounded-2xl flex flex-col justify-center items-center p-6 hover:border-brand-500/50 transition-colors cursor-pointer bg-[var(--surface-secondary)] bg-opacity-50">
                   <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handlePaperUpload} />
-                  <UploadCloud className="text-brand-500 mb-2" size={36} />
+                  <UploadCloud className="text-brand-500 mb-3" size={40} />
                   {qpaperFile ? (
                     <div className="text-center">
-                      <p className="text-[13px] font-medium text-text-primary max-w-[200px] truncate">{qpaperFile.name}</p>
-                      <p className="text-[11px] text-text-tertiary">{(qpaperFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                      <p className="text-[13px] font-semibold text-[var(--text-primary)] max-w-[200px] truncate">{qpaperFile.name}</p>
+                      <p className="text-[11px] text-[var(--text-tertiary)] font-mono mt-0.5">{(qpaperFile.size / (1024 * 1024)).toFixed(2)} MB</p>
                     </div>
                   ) : (
                     <div className="text-center">
-                      <p className="text-[13px] font-medium text-text-secondary">Click or drag Question Paper</p>
-                      <p className="text-[11px] text-text-tertiary">PDF or High-res scan</p>
+                      <p className="text-[13px] font-bold text-[var(--text-secondary)]">Click or drag Question Paper</p>
+                      <p className="text-[11px] text-[var(--text-tertiary)] mt-0.5">Supports PDF, High-res JPG, PNG</p>
                     </div>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-between pt-4 border-t border-border-secondary">
-              <button className="btn btn-lg flex items-center gap-2" onClick={() => setStep(0)}>
-                <ArrowLeft size={16} /> Change Cycle
+            <div className="flex justify-between pt-4 border-t border-[var(--border-subtle)] mt-4">
+              <button className="bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-[var(--text-primary)] rounded-xl px-4 py-2 text-[12.5px] font-bold border border-[var(--border-subtle)] transition-all duration-200 flex items-center gap-1.5 cursor-pointer" onClick={() => setStep(0)}>
+                <ArrowLeft size={15} /> Change Cycle
               </button>
               <button 
-                className="btn btn-brand btn-lg flex items-center gap-2" 
+                className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-5 py-2 text-[12.5px] font-bold transition-all duration-200 flex items-center gap-1.5 shadow-lg shadow-brand-500/10 cursor-pointer" 
                 onClick={processQuestionPaper} 
                 disabled={isProcessingPaper || !qpaperFile}
               >
                 {isProcessingPaper ? (
                   <>
-                    <Loader2 className="animate-spin" size={16} />
+                    <Loader2 className="animate-spin" size={15} />
                     AI Decomposing Paper...
                   </>
                 ) : (
                   <>
                     Decompose with Gemini
-                    <ArrowRight size={16} />
+                    <ArrowRight size={15} />
                   </>
                 )}
               </button>
@@ -765,45 +791,48 @@ export default function ExamsPage() {
 
         {/* ── Step 2: Review & Edit Rubric + Approvals ── */}
         {step === 2 && (
-          <div className="animate-fade-in">
+          <div className="animate-fade-in flex flex-col gap-6">
             {/* Top info and Approval Status panel */}
-            <div className="flex flex-col gap-3 mb-6 pb-4 border-b border-border-secondary">
-              <div className="flex-between flex-wrap gap-4">
+            <div className="flex flex-col gap-3 pb-4 border-b border-[var(--border-subtle)]">
+              <div className="flex justify-between items-center flex-wrap gap-4">
                 <div>
-                  <h3 className="text-[16px] font-medium text-text-primary">Gemini-Generated Rubric Structure</h3>
-                  <p className="text-[12px] text-text-tertiary mt-1 flex items-center gap-2">
+                  <h3 className="text-[15px] font-bold text-[var(--text-primary)]">Gemini-Generated Rubric Structure</h3>
+                  <p className="text-[12px] text-[var(--text-secondary)] mt-1 flex items-center gap-2 font-medium">
                     <BrainCircuit className="text-brand-500" size={14} />
-                    AI confidence: {(aiConfidence * 100).toFixed(0)}% • Verify marks allocation before proceeding.
+                    AI confidence: <strong className="text-brand-600 font-mono">{(aiConfidence * 100).toFixed(0)}%</strong> • Verify marks allocation before proceeding.
                   </p>
                 </div>
                 
                 {/* Approval Status Badge */}
                 <div className="flex items-center gap-3">
-                  <span className="text-[12px] font-medium text-text-secondary">Approval Status:</span>
-                  <span className={`pill font-bold py-1 px-3 ${
-                    rubricApprovalStatus === "APPROVED" ? "pill-success" : 
-                    rubricApprovalStatus === "PENDING_APPROVAL" ? "pill-warning" : "pill-danger"
+                  <span className="text-[12px] font-medium text-[var(--text-secondary)]">Approval Status:</span>
+                  <span className={`text-[11px] font-bold py-1 px-3 rounded-full ${
+                    rubricApprovalStatus === "APPROVED" 
+                      ? "bg-emerald-500/10 text-emerald-600" 
+                      : rubricApprovalStatus === "PENDING_APPROVAL" 
+                        ? "bg-amber-500/10 text-amber-600" 
+                        : "bg-red-500/10 text-red-600"
                   }`}>
                     {rubricApprovalStatus}
                   </span>
                   
                   {/* Action buttons inside the wizard */}
                   {!taskId ? (
-                    <button className="btn btn-brand py-1 px-3 text-[12px]" onClick={confirmRubric} disabled={isCreatingTask}>
+                    <button className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-3 py-1.5 text-[12px] font-bold shadow-md shadow-brand-500/5 cursor-pointer" onClick={confirmRubric} disabled={isCreatingTask}>
                       {isCreatingTask ? <Loader2 className="animate-spin" size={12} /> : "Save Rubric Schema"}
                     </button>
                   ) : (
                     <div className="flex gap-2">
                       {rubricApprovalStatus === "DRAFT" && (
-                        <button className="btn btn-brand py-1 px-3 text-[12px] flex items-center gap-1" onClick={submitForApproval}>
-                          <ShieldCheck size={13} />
+                        <button className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-3 py-1.5 text-[12px] font-bold shadow-md shadow-brand-500/5 flex items-center gap-1.5 cursor-pointer" onClick={submitForApproval}>
+                          <ShieldCheck size={14} />
                           Submit for HOD Approval
                         </button>
                       )}
                       {(user?.role === "hod" || user?.role === "principal" || user?.role === "admin") && 
                        rubricApprovalStatus === "PENDING_APPROVAL" && (
-                        <button className="btn btn-brand py-1 px-3 text-[12px] bg-green-600 hover:bg-green-700 border-green-600 text-white flex items-center gap-1" onClick={approveRubric}>
-                          <UserCheck size={13} />
+                        <button className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-3 py-1.5 text-[12px] font-bold shadow-md shadow-emerald-500/5 flex items-center gap-1.5 cursor-pointer" onClick={approveRubric}>
+                          <UserCheck size={14} />
                           Approve Rubric
                         </button>
                       )}
@@ -814,10 +843,10 @@ export default function ExamsPage() {
             </div>
 
             {/* Rubric General Grading Notes */}
-            <div className="flex flex-col gap-1 mb-6">
-              <label className="text-[11px] font-medium text-text-secondary uppercase">General Grading Guidelines</label>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase">General Grading Guidelines</label>
               <textarea 
-                className="input-field min-h-[60px] font-mono text-[12px]" 
+                className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm w-full font-mono min-h-[60px]" 
                 value={gradingNotes} 
                 onChange={(e) => setGradingNotes(e.target.value)} 
                 placeholder="Board-level instructions for evaluators..."
@@ -825,33 +854,33 @@ export default function ExamsPage() {
             </div>
 
             {/* Steps List */}
-            <div className="flex flex-col gap-4 mb-6 max-h-[350px] overflow-y-auto pr-2">
+            <div className="flex flex-col gap-4 max-h-[350px] overflow-y-auto pr-2">
               {rubricSteps.map((s, idx) => (
-                <div key={s.step_num} className="border border-border-secondary rounded-lg p-4 bg-surface-secondary/20 flex flex-col gap-3">
-                  <div className="flex-between">
-                    <span className="text-[12px] font-semibold text-brand-600 bg-brand-500/10 px-2 py-0.5 rounded">
+                <div key={s.step_num} className="border border-[var(--border-subtle)] rounded-xl p-4 bg-[var(--surface-secondary)]/30 hover:border-brand-500/20 transition-all duration-200 flex flex-col gap-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[11px] font-bold text-brand-600 bg-brand-500/10 px-2.5 py-1 rounded-lg">
                       Step {s.step_num}
                     </span>
-                    <button className="text-text-tertiary hover:text-red-500 transition-colors" onClick={() => removeRubricStep(s.step_num)}>
+                    <button className="text-[var(--text-tertiary)] hover:text-red-500 transition-colors cursor-pointer" onClick={() => removeRubricStep(s.step_num)}>
                       <Trash2 size={16} />
                     </button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="md:col-span-2 flex flex-col gap-1">
-                      <label className="text-[10px] font-medium text-text-secondary uppercase">Question / Task Description</label>
+                    <div className="md:col-span-2 flex flex-col gap-1.5">
+                      <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase">Question / Task Description</label>
                       <input 
                         type="text" 
-                        className="input-field" 
+                        className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm w-full font-medium" 
                         value={s.description} 
                         onChange={(e) => updateStepValue(s.step_num, "description", e.target.value)} 
                       />
                     </div>
                     
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-medium text-text-secondary uppercase">Component Type</label>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase">Component Type</label>
                       <select 
-                        className="input-field" 
+                        className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm w-full font-medium" 
                         value={s.component_type} 
                         onChange={(e) => updateStepValue(s.step_num, "component_type", e.target.value)}
                       >
@@ -862,11 +891,11 @@ export default function ExamsPage() {
                       </select>
                     </div>
 
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-medium text-text-secondary uppercase">Marks Allocated</label>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase">Marks Allocated</label>
                       <input 
                         type="number" 
-                        className="input-field" 
+                        className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm w-full font-mono" 
                         value={isNaN(s.marks) ? "" : s.marks} 
                         onChange={(e) => {
                           const val = parseInt(e.target.value);
@@ -877,21 +906,21 @@ export default function ExamsPage() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-medium text-text-secondary uppercase">SymPy Formula Expectation</label>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase">SymPy Formula Expectation</label>
                       <input 
                         type="text" 
-                        className="input-field font-mono text-[11px]" 
+                        className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm w-full font-mono" 
                         value={s.expected_exprs.join(", ")} 
                         onChange={(e) => updateStepValue(s.step_num, "expected_exprs", e.target.value.split(",").map(t => t.trim()))} 
                         placeholder="e.g. F = k * q1 * q2 / r**2"
                       />
                     </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-medium text-text-secondary uppercase">Specific Step Marking Notes</label>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase">Specific Step Marking Notes</label>
                       <input 
                         type="text" 
-                        className="input-field" 
+                        className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm w-full font-medium" 
                         value={s.marking_notes} 
                         onChange={(e) => updateStepValue(s.step_num, "marking_notes", e.target.value)} 
                         placeholder="Expected keywords, alternative equations..."
@@ -902,20 +931,19 @@ export default function ExamsPage() {
               ))}
             </div>
 
-            <div className="flex-between pt-4 border-t border-border-secondary">
-              <button className="btn btn-lg flex items-center gap-2" onClick={() => setStep(1)}>
-                <ArrowLeft size={16} /> Back
+            <div className="flex justify-between pt-4 border-t border-[var(--border-subtle)]">
+              <button className="bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-[var(--text-primary)] rounded-xl px-4 py-2 text-[12.5px] font-bold border border-[var(--border-subtle)] transition-all duration-200 flex items-center gap-1.5 cursor-pointer" onClick={() => setStep(1)}>
+                <ArrowLeft size={15} /> Back
               </button>
               
-              {/* Unlock only if rubric is approved */}
               <button 
-                className="btn btn-brand btn-lg flex items-center gap-2" 
+                className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-5 py-2 text-[12.5px] font-bold transition-all duration-200 flex items-center gap-1.5 shadow-lg shadow-brand-500/10 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
                 onClick={() => setStep(3)}
                 disabled={rubricApprovalStatus !== "APPROVED"}
                 title={rubricApprovalStatus !== "APPROVED" ? "HOD/Principal must approve the rubric before evaluations can begin." : ""}
               >
                 Proceed to Bulk Evaluation
-                <ArrowRight size={16} />
+                <ArrowRight size={15} />
               </button>
             </div>
           </div>
@@ -923,54 +951,56 @@ export default function ExamsPage() {
 
         {/* ── Step 3: Bulk Answer Sheet Upload ── */}
         {step === 3 && (
-          <div className="animate-fade-in">
-            <h3 className="text-[16px] font-medium text-text-primary mb-2">Upload Student Answer Sheets</h3>
-            <p className="text-[12px] text-text-tertiary mb-6">
-              Drop all student papers (PDF, JPEG) at once. The system will auto-extract text and queue them for evaluation under <strong>{title}</strong>.
-            </p>
+          <div className="animate-fade-in flex flex-col gap-6">
+            <div>
+              <h3 className="text-[14.5px] font-bold text-[var(--text-primary)] mb-1">Upload Student Answer Sheets</h3>
+              <p className="text-[12.5px] text-[var(--text-secondary)]">
+                Drop all student papers (PDF, JPEG) at once. The system will auto-extract text and queue them for evaluation under <strong>{title}</strong>.
+              </p>
+            </div>
 
             {/* Answer files upload dropzone */}
-            <div className="relative border border-dashed border-border-secondary rounded-lg min-h-[160px] flex flex-col justify-center items-center p-6 bg-surface-secondary/40 hover:border-brand-500 transition-colors mb-6">
+            <div className="relative border border-dashed border-[var(--border-subtle)] rounded-2xl min-h-[160px] flex flex-col justify-center items-center p-6 bg-[var(--surface-secondary)] bg-opacity-50 hover:border-brand-500/50 transition-colors cursor-pointer">
               <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleAnswersDrop} />
-              <FileSpreadsheet className="text-brand-500 mb-2" size={40} />
+              <FileSpreadsheet className="text-brand-500 mb-3 animate-bounce" size={40} />
               <div className="text-center">
-                <p className="text-[14px] font-medium text-text-secondary">Drag & Drop All Student Answer Sheets</p>
-                <p className="text-[11px] text-text-tertiary mt-1">Supports bulk upload up to 100 files simultaneously</p>
+                <p className="text-[13.5px] font-bold text-[var(--text-secondary)]">Drag & Drop All Student Answer Sheets</p>
+                <p className="text-[11.5px] text-[var(--text-tertiary)] mt-0.5">Supports bulk upload up to 100 files simultaneously</p>
               </div>
             </div>
 
             {/* Files List Table */}
             {answerFiles.length > 0 && (
-              <div className="mb-6">
-                <div className="flex-between mb-2">
-                  <span className="text-[12px] font-medium text-text-secondary">{answerFiles.length} files selected</span>
-                  <button className="text-[11px] text-red-500 font-semibold" onClick={() => { setAnswerFiles([]); setCustomStudentIds([]); }}>Clear All</button>
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-[12px] font-semibold text-[var(--text-secondary)] font-mono">{answerFiles.length} files selected</span>
+                  <button className="text-[11px] text-red-500 font-bold hover:underline cursor-pointer" onClick={() => { setAnswerFiles([]); setCustomStudentIds([]); }}>Clear All</button>
                 </div>
-                <div className="border border-border-secondary rounded-lg overflow-hidden max-h-[300px] overflow-y-auto">
-                  <table className="data-table">
+                <div className="border border-[var(--border-subtle)] rounded-2xl overflow-hidden max-h-[300px] overflow-y-auto bg-[var(--surface-primary)]">
+                  <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr>
-                        <th>Filename</th>
-                        <th>Auto-assigned Student ID</th>
-                        <th>File Size</th>
-                        <th className="w-[50px] text-center">Action</th>
+                      <tr className="bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)]">
+                        <th className="px-4 py-3 text-[11.5px] font-bold text-[var(--text-secondary)] uppercase">Filename</th>
+                        <th className="px-4 py-3 text-[11.5px] font-bold text-[var(--text-secondary)] uppercase">Auto-assigned Student ID</th>
+                        <th className="px-4 py-3 text-[11.5px] font-bold text-[var(--text-secondary)] uppercase">File Size</th>
+                        <th className="px-4 py-3 text-[11.5px] font-bold text-[var(--text-secondary)] uppercase text-center w-[80px]">Action</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-[var(--border-subtle)]">
                       {answerFiles.map((file, idx) => (
-                        <tr key={idx}>
-                          <td className="text-[12px] max-w-[200px] truncate">{file.name}</td>
-                          <td>
+                        <tr key={idx} className="hover:bg-[var(--surface-secondary)]/50 transition-colors">
+                          <td className="px-4 py-2.5 text-[12.5px] max-w-[200px] truncate text-[var(--text-primary)] font-medium">{file.name}</td>
+                          <td className="px-4 py-2.5">
                             <input 
                               type="text" 
-                              className="input-field py-1 font-mono text-[12px]" 
+                              className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-lg px-2.5 py-1 text-[12px] text-[var(--text-primary)] font-mono focus:outline-none focus:border-brand-500 shadow-sm w-full font-bold" 
                               value={customStudentIds[idx] || ""} 
                               onChange={(e) => updateStudentId(idx, e.target.value)} 
                             />
                           </td>
-                          <td className="text-[11px] text-text-tertiary">{(file.size / (1024 * 1024)).toFixed(2)} MB</td>
-                          <td className="text-center">
-                            <button className="text-text-tertiary hover:text-red-500 transition-colors" onClick={() => removeAnswerFile(idx)}>
+                          <td className="px-4 py-2.5 text-[11px] text-[var(--text-tertiary)] font-mono">{(file.size / (1024 * 1024)).toFixed(2)} MB</td>
+                          <td className="px-4 py-2.5 text-center">
+                            <button className="text-[var(--text-tertiary)] hover:text-red-500 transition-colors cursor-pointer" onClick={() => removeAnswerFile(idx)}>
                               <Trash2 size={14} />
                             </button>
                           </td>
@@ -982,24 +1012,24 @@ export default function ExamsPage() {
               </div>
             )}
 
-            <div className="flex-between pt-4 border-t border-border-secondary">
-              <button className="btn btn-lg flex items-center gap-2" onClick={() => setStep(2)}>
-                <ArrowLeft size={16} /> Back
+            <div className="flex justify-between pt-4 border-t border-[var(--border-subtle)]">
+              <button className="bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-[var(--text-primary)] rounded-xl px-4 py-2 text-[12.5px] font-bold border border-[var(--border-subtle)] transition-all duration-200 flex items-center gap-1.5 cursor-pointer" onClick={() => setStep(2)}>
+                <ArrowLeft size={15} /> Back
               </button>
               <button 
-                className="btn btn-brand btn-lg flex items-center gap-2" 
+                className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-5 py-2 text-[12.5px] font-bold transition-all duration-200 flex items-center gap-1.5 shadow-lg shadow-brand-500/10 cursor-pointer disabled:opacity-50" 
                 onClick={uploadAndStartGrading} 
                 disabled={isUploadingAnswers || answerFiles.length === 0}
               >
                 {isUploadingAnswers ? (
                   <>
-                    <Loader2 className="animate-spin" size={16} />
+                    <Loader2 className="animate-spin" size={15} />
                     Uploading Answer Sheets...
                   </>
                 ) : (
                   <>
                     Upload & Start Evaluating
-                    <Play size={16} />
+                    <Play size={15} />
                   </>
                 )}
               </button>
@@ -1009,53 +1039,59 @@ export default function ExamsPage() {
 
         {/* ── Step 4: Live Grading Progress ── */}
         {step === 4 && (
-          <div className="animate-fade-in text-center py-8">
-            <Activity className="animate-pulse text-brand-500 mx-auto mb-4" size={48} />
-            <h3 className="text-[18px] font-semibold text-text-primary mb-2">Asynchronous Evaluation Queue Active</h3>
-            <p className="text-[13px] text-text-tertiary max-w-[450px] mx-auto mb-8">
+          <div className="animate-fade-in text-center py-8 flex flex-col items-center">
+            <div className="w-16 h-16 rounded-2xl bg-brand-500/10 text-brand-600 flex items-center justify-center mb-4 border border-brand-500/20 shadow-lg shadow-brand-500/5">
+              <Activity className="animate-pulse" size={32} />
+            </div>
+            <h3 className="text-[16.5px] font-bold text-[var(--text-primary)] mb-1">Asynchronous Evaluation Queue Active</h3>
+            <p className="text-[12.5px] text-[var(--text-secondary)] max-w-[450px] mb-8">
               All student answer sheets are being transferred to Supabase Storage. Once completed, the parallel evaluation pipelines will execute synchronously.
             </p>
 
             {runStatus ? (
-              <div className="max-w-[500px] mx-auto border border-border-secondary rounded-lg p-6 bg-surface-secondary/10 flex flex-col gap-4 text-left">
-                <div className="flex-between pb-2 border-b border-border-secondary">
-                  <span className="text-[12px] font-semibold uppercase text-text-secondary">Evaluation Run Status</span>
-                  <span className={`pill ${runStatus.status === "COMPLETED" ? "pill-success" : "pill-info"}`}>{runStatus.status}</span>
+              <div className="w-full max-w-[500px] border border-[var(--border-subtle)] rounded-2xl p-6 bg-[var(--surface-secondary)]/30 backdrop-blur-sm flex flex-col gap-4 text-left shadow-md">
+                <div className="flex justify-between items-center pb-2.5 border-b border-[var(--border-subtle)]">
+                  <span className="text-[11.5px] font-bold font-mono uppercase tracking-wider text-[var(--text-secondary)]">Evaluation Run Status</span>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    runStatus.status === "COMPLETED" 
+                      ? "bg-emerald-500/10 text-emerald-600" 
+                      : "bg-brand-500/10 text-brand-600"
+                  }`}>{runStatus.status}</span>
                 </div>
                 
-                <div className="flex flex-col gap-2">
-                  <div className="flex-between text-[13px]">
-                    <span className="text-text-secondary">Total student papers:</span>
-                    <span className="font-semibold text-text-primary">{runStatus.total_submissions}</span>
+                <div className="flex flex-col gap-2.5 text-[13px]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[var(--text-secondary)] font-medium">Total student papers:</span>
+                    <span className="font-bold text-[var(--text-primary)] font-mono">{runStatus.total_submissions}</span>
                   </div>
-                  <div className="flex-between text-[13px]">
-                    <span className="text-text-secondary">Graded successfully:</span>
-                    <span className="font-semibold text-green-600">{runStatus.graded_count}</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[var(--text-secondary)] font-medium">Graded successfully:</span>
+                    <span className="font-bold text-emerald-600 font-mono">{runStatus.graded_count}</span>
                   </div>
-                  <div className="flex-between text-[13px]">
-                    <span className="text-text-secondary">Failures/drift flags:</span>
-                    <span className="font-semibold text-red-500">{runStatus.failed_count}</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[var(--text-secondary)] font-medium">Failures/drift flags:</span>
+                    <span className="font-bold text-red-500 font-mono">{runStatus.failed_count}</span>
                   </div>
                 </div>
 
-                <div className="w-full bg-border-secondary h-2 rounded-full overflow-hidden mt-2">
+                <div className="w-full bg-[var(--surface-secondary)] h-2 rounded-full overflow-hidden mt-2 border border-[var(--border-subtle)]">
                   <div 
-                    className="bg-brand-500 h-full transition-all duration-500" 
+                    className="bg-brand-500 h-full transition-all duration-500 rounded-full" 
                     style={{ width: `${runStatus.total_submissions > 0 ? (runStatus.graded_count / runStatus.total_submissions) * 100 : 0}%` }}
                   />
                 </div>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-4">
-                <p className="text-[13px] text-text-tertiary">Waiting for upload task to trigger evaluations...</p>
-                <button className="btn flex items-center gap-2" onClick={startGradingManual}>
+                <p className="text-[12.5px] text-[var(--text-tertiary)]">Waiting for upload task to trigger evaluations...</p>
+                <button className="bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-xl px-4 py-2 text-[12.5px] font-bold transition-all duration-200 flex items-center gap-2 cursor-pointer shadow-sm" onClick={startGradingManual}>
                   <Loader2 className="animate-spin" size={14} /> Start Grading Manually
                 </button>
               </div>
             )}
 
-            <div className="mt-8 pt-6 border-t border-border-secondary flex justify-center">
-              <a href="/dashboard" className="btn btn-brand btn-lg flex items-center gap-2">
+            <div className="mt-8 pt-6 border-t border-[var(--border-subtle)] w-full flex justify-center">
+              <a href="/dashboard" className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-5 py-2.5 text-[13px] font-bold transition-all duration-200 flex items-center gap-1.5 shadow-lg shadow-brand-500/10">
                 Go to Evaluation Queue Dashboard
                 <ArrowRight size={16} />
               </a>
@@ -1064,6 +1100,6 @@ export default function ExamsPage() {
         )}
 
       </div>
-    </>
+    </div>
   );
 }
