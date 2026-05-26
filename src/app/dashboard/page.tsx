@@ -368,7 +368,7 @@ export default function DashboardPage() {
                   </span>
                   <span className="dash-status-name">INTELLIGENT VISION OCR</span>
                 </div>
-                <span className="dash-status-value">BYOK Online</span>
+                <span className="dash-status-value">Active</span>
               </div>
               <div className="dash-status-row last">
                 <div className="dash-status-left">

@@ -113,10 +113,6 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
           <div className="divider"></div>
 
           <div className="nav-section-label">ACCOUNT</div>
-          <Link href="/dashboard/api-keys" className={`nav-item ${pathname.startsWith("/dashboard/api-keys") ? "active" : ""}`}>
-            <Key className="nav-item-icon" />
-            API Keys
-          </Link>
           <Link href="/dashboard/settings" className={`nav-item ${pathname === "/dashboard/settings" ? "active" : ""}`}>
             <Settings className="nav-item-icon" />
             Settings
