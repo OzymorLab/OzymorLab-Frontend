@@ -6,7 +6,7 @@ import {
   Settings, LogOut, Search, Bell, Sparkles, AlertTriangle, 
   CheckCircle2, ChevronRight, MessageSquare, Send, RefreshCw, 
   ArrowLeftRight, HelpCircle, Check, X, ShieldAlert, FileText,
-  User, Play, Award, HelpCircle as QuestionIcon
+  User, Play, Award, HelpCircle as QuestionIcon, Upload, Loader2, Plus
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth, AuthProvider } from "../context/AuthContext";
@@ -54,8 +54,8 @@ interface Question {
 function AnalysisHUDPageContent() {
   const { user, fetchWithAuth } = useAuth();
 
-  // Mode switcher: "teacher" | "student"
-  const [viewMode, setViewMode] = useState<"teacher" | "student">("teacher");
+  // Mode switcher: "teacher" | "student" | "self-eval"
+  const [viewMode, setViewMode] = useState<"teacher" | "student" | "self-eval">("teacher");
 
   useEffect(() => {
     if (user) {
@@ -66,6 +66,121 @@ function AnalysisHUDPageContent() {
       }
     }
   }, [user]);
+
+  // Student Self-Evaluation States
+  interface PracticeAttempt {
+    id: string;
+    title: string;
+    date: string;
+    rubricName: string;
+    score: number;
+    maxScore: number;
+    steps: Array<{
+      stepNum: number;
+      type: string;
+      latex: string;
+      text: string;
+      marks: number;
+      maxMarks: number;
+      justification: string;
+      sympyValid: boolean | null;
+      errorType?: string;
+    }>;
+    ocrText?: string;
+  }
+
+  const [practiceHistory, setPracticeHistory] = useState<PracticeAttempt[]>([
+    {
+      id: "P01",
+      title: "Practice: Physics Electrostatics",
+      date: "May 25, 2026",
+      rubricName: "CBSE Physics Class 12 - Electrostatics (15 Marks)",
+      score: 11.5,
+      maxScore: 15,
+      ocrText: "E = q / (4 * pi * epsilon_0 * r^2)\nIntegrating E.dA = q_enc / epsilon_0\nHence E = 0 inside conductor.",
+      steps: [
+        {
+          stepNum: 1,
+          type: "formula",
+          latex: "E = \\frac{q}{4 \\pi \\epsilon_0 r^2}",
+          text: "Coulomb's Law statement for point charge",
+          marks: 4,
+          maxMarks: 4,
+          justification: "Correct application of Coulomb's Law formula for a point charge.",
+          sympyValid: true
+        },
+        {
+          stepNum: 2,
+          type: "integration",
+          latex: "\\oint E \\cdot dA = \\frac{q_{enc}}{\\epsilon_0}",
+          text: "Gauss Law surface area integration",
+          marks: 5,
+          maxMarks: 5,
+          justification: "Correct mathematical integration of Gauss's Law across the surface area.",
+          sympyValid: true
+        },
+        {
+          stepNum: 3,
+          type: "conclusion",
+          latex: "E = 0",
+          text: "Inside ideal spherical conductor",
+          marks: 2.5,
+          maxMarks: 6,
+          justification: "Logical error: Charge density outside must be balanced by external surface distribution. SymPy flagged inconsistency in boundary conditions.",
+          sympyValid: false,
+          errorType: "Boundary Conditions Missed"
+        }
+      ]
+    },
+    {
+      id: "P02",
+      title: "Practice: Kinematics Retardation",
+      date: "May 22, 2026",
+      rubricName: "CBSE Physics Class 12 - Kinematics (10 Marks)",
+      score: 10,
+      maxScore: 10,
+      ocrText: "v^2 = u^2 + 2as\n0 = 20^2 + 2 * a * 50\na = -4 m/s^2\nF = m*a = 1000 * -4 = -4000 N",
+      steps: [
+        {
+          stepNum: 1,
+          type: "formula",
+          latex: "v^2 = u^2 + 2as",
+          text: "Third equation of motion",
+          marks: 3,
+          maxMarks: 3,
+          justification: "Correct third equation of motion applied.",
+          sympyValid: true
+        },
+        {
+          stepNum: 2,
+          type: "algebra",
+          latex: "a = -4 \\text{ m/s}^2",
+          text: "Constant retardation deceleration",
+          marks: 4,
+          maxMarks: 4,
+          justification: "Correct algebraic derivation of constant acceleration.",
+          sympyValid: true
+        },
+        {
+          stepNum: 3,
+          type: "conclusion",
+          latex: "F = -4000 \\text{ N}",
+          text: "Newton Second Law force product",
+          marks: 3,
+          maxMarks: 3,
+          justification: "Correct force calculation using Newton's Second Law.",
+          sympyValid: true
+        }
+      ]
+    }
+  ]);
+
+  const [selectedPracticeId, setSelectedPracticeId] = useState<string>("P01");
+  const [isCreatingPractice, setIsCreatingPractice] = useState<boolean>(false);
+  const [practiceRubric, setPracticeRubric] = useState<string>("CBSE Physics Class 12 - Electrostatics (15 Marks)");
+  const [customRubricText, setCustomRubricText] = useState<string>("");
+  const [practiceFile, setPracticeFile] = useState<File | null>(null);
+  const [isGradingPractice, setIsGradingPractice] = useState<boolean>(false);
 
   // Selected states
   const [tasks, setTasks] = useState<any[]>([]);
@@ -191,8 +306,24 @@ function AnalysisHUDPageContent() {
     loadDetail();
   }, [selectedStudentId]);
 
+  // Find active practice attempt
+  const activePractice = practiceHistory.find(p => p.id === selectedPracticeId) || practiceHistory[0];
+
+  // Resolve active elements based on viewMode
+  const isSelfEval = viewMode === "self-eval";
+
   // Find active data elements
-  const activeQuestion = tasks.find(t => t.id === selectedQuestionId) || {
+  const activeQuestion = isSelfEval ? {
+    id: activePractice.id,
+    title: activePractice.title,
+    topic: "Self Evaluation",
+    difficulty: "Self-Guided",
+    avgClassScore: 0,
+    avgLatency: "0.8s",
+    confidence: 100,
+    maxMarks: activePractice.maxScore,
+    questionText: activePractice.ocrText || "Private Self Evaluation Workspace"
+  } : (tasks.find(t => t.id === selectedQuestionId) || {
     id: selectedQuestionId,
     title: "Loading Question...",
     topic: "Calculus",
@@ -202,21 +333,29 @@ function AnalysisHUDPageContent() {
     confidence: 0.96,
     maxMarks: 10,
     questionText: submissionDetail?.questionText || "Evaluate the math workspace..."
-  };
+  });
   
   // Resolve active student from roster or detail
-  const activeStudent = roster.find(r => r.id === selectedStudentId) || {
+  const activeStudent = isSelfEval ? {
+    id: activePractice.id,
+    name: "Self Practice",
+    avatar: "🎒",
+    score: activePractice.score,
+    maxScore: activePractice.maxScore,
+    flagColor: "white" as const,
+    submissionTime: activePractice.date
+  } : (roster.find(r => r.id === selectedStudentId) || {
     id: selectedStudentId,
     name: submissionDetail?.studentName || "Loading...",
     avatar: submissionDetail?.avatar || "?",
     score: submissionDetail?.score || 0,
     maxScore: submissionDetail?.maxScore || 10,
-    flagColor: "white",
+    flagColor: "white" as const,
     submissionTime: "N/A"
-  };
+  });
   
   // Steps
-  const activeSteps = submissionDetail?.steps || [];
+  const activeSteps = isSelfEval ? activePractice.steps : (submissionDetail?.steps || []);
 
   // Stepper marks override (Teacher mode)
   const adjustTotalMarks = async (amt: number) => {
@@ -253,6 +392,94 @@ function AnalysisHUDPageContent() {
     } catch (e) {
       console.error("Failed to override marks", e);
     }
+  };
+
+  // Run practice grading simulation
+  const handleRunPracticeGrading = () => {
+    setIsGradingPractice(true);
+    setTimeout(() => {
+      const isMath = practiceRubric.includes("Mathematics") || practiceRubric.includes("Calculus");
+      const newAttempt: PracticeAttempt = {
+        id: `P0${practiceHistory.length + 1}`,
+        title: `Practice: ${practiceRubric.split(" - ")[0]}`,
+        date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+        rubricName: practiceRubric,
+        score: isMath ? 17.5 : 13.5,
+        maxScore: isMath ? 20 : 15,
+        ocrText: isMath 
+          ? "f(x) = x^3 - 3x^2 + 4\nf'(x) = 3x^2 - 6x\nSetting f'(x) = 0 => 3x(x - 2) = 0\nCritical points at x=0, x=2."
+          : "E = q / (4 * pi * epsilon_0 * r^2)\nIntegrating E.dA = q_enc / epsilon_0\nHence E = 0 inside conductor.",
+        steps: isMath ? [
+          {
+            stepNum: 1,
+            type: "derivation",
+            latex: "f'(x) = 3x^2 - 6x",
+            text: "Differentiate polynomial term by term",
+            marks: 5,
+            maxMarks: 5,
+            justification: "Correct derivative calculated using power rule.",
+            sympyValid: true
+          },
+          {
+            stepNum: 2,
+            type: "algebra",
+            latex: "3x(x - 2) = 0",
+            text: "Factor quadratic derivative expression",
+            marks: 5,
+            maxMarks: 5,
+            justification: "Algebraic factorization verified successfully via SymPy.",
+            sympyValid: true
+          },
+          {
+            stepNum: 3,
+            type: "conclusion",
+            latex: "x = 0, x = 2",
+            text: "Identify critical extrema coordinate roots",
+            marks: 7.5,
+            maxMarks: 10,
+            justification: "Partially correct. Identified roots but did not perform the second derivative test to classify local extrema status.",
+            sympyValid: true,
+            errorType: "Extrema Classification Incomplete"
+          }
+        ] : [
+          {
+            stepNum: 1,
+            type: "formula",
+            latex: "E = \\frac{q}{4 \\pi \\epsilon_0 r^2}",
+            text: "Coulomb's Law statement for point charge",
+            marks: 4,
+            maxMarks: 4,
+            justification: "Correct application of Coulomb's Law formula for a point charge.",
+            sympyValid: true
+          },
+          {
+            stepNum: 2,
+            type: "integration",
+            latex: "\\oint E \\cdot dA = \\frac{q_{enc}}{\\epsilon_0}",
+            text: "Gauss Law surface area integration",
+            marks: 5,
+            maxMarks: 5,
+            justification: "Correct mathematical integration of Gauss's Law across the surface area.",
+            sympyValid: true
+          },
+          {
+            stepNum: 3,
+            type: "conclusion",
+            latex: "E = 0",
+            text: "Inside ideal spherical conductor",
+            marks: 4.5,
+            maxMarks: 6,
+            justification: "Handwriting OCR verified. Integration boundaries successfully converged under SymPy verification.",
+            sympyValid: true
+          }
+        ]
+      };
+      setPracticeHistory([newAttempt, ...practiceHistory]);
+      setSelectedPracticeId(newAttempt.id);
+      setIsCreatingPractice(false);
+      setIsGradingPractice(false);
+      setPracticeFile(null);
+    }, 2000);
   };
 
   // Submit chat queries
@@ -352,17 +579,49 @@ function AnalysisHUDPageContent() {
             </div>
           </Link>
 
-          {/* VIEW MODE TOGGLE (Sleek Glass Segmented Button) */}
-          {user?.role !== "student" && (
-            <div className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] p-0.5 rounded-lg flex items-center">
+          {/* ROLE-AWARE VIEW MODE TOGGLE (Sleek Glass Segmented Button) */}
+          {user?.role === "student" ? (
+            <div className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] p-0.5 rounded-lg flex items-center shadow-sm">
+              <button
+                onClick={() => {
+                  setViewMode("student");
+                  setHighlightedStep(null);
+                  setIsCreatingPractice(false);
+                }}
+                className={`px-3 py-1 text-[11.5px] font-medium rounded-md transition-all cursor-pointer ${
+                  viewMode === "student"
+                    ? "bg-[var(--surface-primary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                Teacher Evaluations
+              </button>
+              <button
+                onClick={() => {
+                  setViewMode("self-eval");
+                  setHighlightedStep(null);
+                  setIsCreatingPractice(false);
+                }}
+                className={`px-3 py-1 text-[11.5px] font-medium rounded-md transition-all cursor-pointer ${
+                  viewMode === "self-eval"
+                    ? "bg-[var(--surface-primary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                AI Self-Evaluation
+              </button>
+            </div>
+          ) : (
+            <div className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] p-0.5 rounded-lg flex items-center shadow-sm">
               <button
                 onClick={() => {
                   setViewMode("teacher");
                   setSelectedStudentId("S01");
                   setSelectedQuestionId("Q1");
                   setHighlightedStep(null);
+                  setIsCreatingPractice(false);
                 }}
-                className={`px-3 py-1 text-[11.5px] font-medium rounded-md transition-all ${
+                className={`px-3 py-1 text-[11.5px] font-medium rounded-md transition-all cursor-pointer ${
                   viewMode === "teacher"
                     ? "bg-[var(--surface-primary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold"
                     : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
@@ -376,14 +635,29 @@ function AnalysisHUDPageContent() {
                   setSelectedStudentId("S01");
                   setSelectedQuestionId("Q1");
                   setHighlightedStep(null);
+                  setIsCreatingPractice(false);
                 }}
-                className={`px-3 py-1 text-[11.5px] font-medium rounded-md transition-all ${
+                className={`px-3 py-1 text-[11.5px] font-medium rounded-md transition-all cursor-pointer ${
                   viewMode === "student"
                     ? "bg-[var(--surface-primary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold"
                     : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
                 Student View
+              </button>
+              <button
+                onClick={() => {
+                  setViewMode("self-eval");
+                  setHighlightedStep(null);
+                  setIsCreatingPractice(false);
+                }}
+                className={`px-3 py-1 text-[11.5px] font-medium rounded-md transition-all cursor-pointer ${
+                  viewMode === "self-eval"
+                    ? "bg-[var(--surface-primary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                Practice Sandbox
               </button>
             </div>
           )}
@@ -560,8 +834,8 @@ function AnalysisHUDPageContent() {
            ========================================== */}
         <aside className="w-[56px] bg-[var(--surface-secondary)] border-r border-[var(--border-subtle)] flex flex-col items-center py-4 gap-2.5 shrink-0 select-none">
           
-          <div className="text-[9px] font-mono text-[var(--text-tertiary)] uppercase font-semibold text-center mb-1 tracking-wider">
-            {viewMode === "teacher" ? "Roster" : "Exam"}
+          <div className="text-[9px] font-mono text-[var(--text-tertiary)] uppercase font-semibold text-center mb-1 tracking-wider leading-none">
+            {viewMode === "teacher" ? "Roster" : viewMode === "student" ? "Exam" : "Practice"}
           </div>
 
           {/* Teacher Sidebar: List of color-coded flags representing students */}
@@ -653,6 +927,59 @@ function AnalysisHUDPageContent() {
               );
             })
           )}
+
+          {/* Self-Evaluation Sidebar: List of practice attempts */}
+          {viewMode === "self-eval" && (
+            <>
+              {practiceHistory.map((practice, index) => {
+                const isSelected = selectedPracticeId === practice.id && !isCreatingPractice;
+                return (
+                  <button
+                    key={practice.id}
+                    onClick={() => {
+                      setSelectedPracticeId(practice.id);
+                      setIsCreatingPractice(false);
+                      setHighlightedStep(null);
+                    }}
+                    className={`w-[36px] h-[30px] rounded border flex items-center justify-center font-bold font-mono text-[11px] transition-all relative group cursor-pointer ${
+                      isSelected
+                        ? "bg-brand-600 border-brand-700 text-white ring-2 ring-brand-600 ring-offset-2 dark:ring-offset-zinc-950 scale-105"
+                        : "bg-[var(--surface-primary)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)]"
+                    }`}
+                  >
+                    P{index + 1}
+
+                    {/* Practice Tooltip */}
+                    <span className="absolute left-[48px] bg-slate-900 text-white text-[11px] p-2.5 rounded-lg border border-slate-800 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 z-50 pointer-events-none w-[180px]">
+                      <span className="font-semibold block text-slate-100">{practice.title}</span>
+                      <span className="text-[10px] text-slate-400 block font-mono">{practice.date}</span>
+                      <span className="h-[0.5px] bg-slate-800 block my-1" />
+                      <span className="flex justify-between items-center text-[10.5px] mt-1 font-mono">
+                        <span>Score:</span>
+                        <span className="font-bold text-brand-400">{practice.score} / {practice.maxScore}</span>
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+
+              {/* Create new practice icon */}
+              <button
+                onClick={() => {
+                  setIsCreatingPractice(true);
+                  setHighlightedStep(null);
+                }}
+                className={`w-[36px] h-[30px] rounded border border-dashed flex items-center justify-center transition-all cursor-pointer ${
+                  isCreatingPractice
+                    ? "border-brand-500 bg-brand-50 dark:bg-brand-950/20 text-brand-600 ring-2 ring-brand-600 ring-offset-2 dark:ring-offset-zinc-950 scale-105"
+                    : "border-[var(--border-subtle)] text-brand-600 bg-[var(--surface-primary)] hover:bg-brand-500/10 hover:border-brand-500"
+                }`}
+                title="Create New Practice Attempt"
+              >
+                <Plus size={14} className="stroke-[3]" />
+              </button>
+            </>
+          )}
         </aside>
 
         {/* ==========================================
@@ -681,75 +1008,164 @@ function AnalysisHUDPageContent() {
             {/* LEFT PANE: Digital Manuscript Viewport */}
             <div className="flex-1 border-r border-[var(--border-subtle)] bg-[var(--surface-secondary)] p-6 overflow-y-auto flex flex-col relative select-none">
               
-              {/* Question card */}
-              <div className="mb-4 bg-[var(--surface-primary)] p-4 rounded-xl border border-[var(--border-subtle)] shadow-sm">
-                <span className="text-[10px] font-mono text-[var(--text-tertiary)] uppercase block font-semibold mb-1">Assigned Formula Query</span>
-                <p className="text-[13.5px] leading-relaxed font-mono font-medium">{activeQuestion.questionText}</p>
-              </div>
-
-              {/* Scanned sheet layout mockup */}
-              <div className="flex-1 min-h-[300px] bg-amber-50/10 dark:bg-zinc-950/20 border border-[var(--border-subtle)] rounded-xl relative overflow-hidden flex flex-col shadow-inner" style={{ backgroundImage: "radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px)", backgroundSize: "16px 16px" }}>
-                
-                {/* Header branding on paper sheet */}
-                <div className="border-b border-[var(--border-subtle)] border-dashed py-2.5 px-4 flex justify-between items-center text-[10px] font-mono text-[var(--text-tertiary)] uppercase">
-                  <span>Sheet #{(selectedQuestionId === "Q1") ? "4102" : "7891"} - Edexia Multimodal OCR</span>
-                  <span className="text-brand-600 font-semibold">Manuscript Verified</span>
-                </div>
-
-                {/* Simulated Student Handwriting Math Formulas Canvas */}
-                <div className="flex-1 p-6 relative flex flex-col justify-around gap-6">
+              {isCreatingPractice ? (
+                /* New Practice Setup Form */
+                <div className="flex flex-col gap-5 p-5 bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-xl shadow-sm animate-fade-in">
+                  <div>
+                    <h3 className="text-[15px] font-bold text-brand-600 flex items-center gap-2">
+                      <Sparkles size={16} />
+                      Configure New Practice Attempt
+                    </h3>
+                    <p className="text-[11.5px] text-[var(--text-tertiary)] mt-1">
+                      Upload your answer sheet and select or paste a custom assessment rubric to grade privately.
+                    </p>
+                  </div>
                   
-                  {activeSteps.map((step: any) => {
-                    const isStepHighlighted = highlightedStep === step.stepNum;
-                    const isStepErroneous = step.sympyValid === false;
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">1. Select Assessment Rubric</label>
+                    <select 
+                      value={practiceRubric} 
+                      onChange={(e) => setPracticeRubric(e.target.value)}
+                      className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-lg px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm cursor-pointer"
+                    >
+                      <option value="CBSE Physics Class 12 - Electrostatics (15 Marks)">CBSE Physics Class 12 - Electrostatics (15 Marks)</option>
+                      <option value="CBSE Mathematics Class 12 - Calculus (20 Marks)">CBSE Mathematics Class 12 - Calculus (20 Marks)</option>
+                      <option value="Custom Rubric (Paste text below)">Custom Rubric (Paste text below)</option>
+                    </select>
+                  </div>
 
-                    return (
-                      <div
-                        key={step.stepNum}
-                        onClick={() => setHighlightedStep(step.stepNum)}
-                        className={`relative p-3 rounded-lg border border-dashed transition-all duration-300 cursor-pointer ${
-                          isStepHighlighted
-                            ? "bg-brand-50/40 dark:bg-brand-900/20 border-brand-500 shadow-md scale-[1.01]"
-                            : isStepErroneous
-                            ? "border-rose-300/60 bg-rose-500/5 hover:border-rose-400"
-                            : "border-transparent hover:border-[var(--border-default)] hover:bg-[var(--surface-secondary)]/50"
-                        }`}
-                      >
-                        {/* Interactive Bounding Box Indicator */}
-                        <div className="absolute -top-2 left-2 bg-slate-900 text-white font-mono text-[8px] px-1 py-0.2 rounded shadow uppercase tracking-wider z-20">
-                          Step {step.stepNum} (OCR)
+                  {practiceRubric.includes("Custom") && (
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">Paste Custom Rubric Criteria</label>
+                      <textarea 
+                        value={customRubricText}
+                        onChange={(e) => setCustomRubricText(e.target.value)}
+                        placeholder="e.g. Step 1: Coulomb's Law statement (2 marks)\nStep 2: Surface integration (3 marks)..."
+                        className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-lg px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm min-h-[80px] font-mono text-[12px]"
+                      />
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">2. Upload Your Answer Sheet</label>
+                    <div className="border border-dashed border-[var(--border-subtle)] hover:border-brand-500 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer transition-colors bg-[var(--surface-secondary)]/50 relative">
+                      <input 
+                        type="file" 
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) setPracticeFile(file);
+                        }}
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                      />
+                      <Upload className="text-brand-500 mb-2" size={28} />
+                      {practiceFile ? (
+                        <div className="text-center">
+                          <span className="text-[12px] font-semibold text-[var(--text-primary)] block truncate max-w-[200px]">{practiceFile.name}</span>
+                          <span className="text-[10px] text-[var(--text-tertiary)] block">{(practiceFile.size / 1024).toFixed(0)} KB</span>
                         </div>
-
-                        {/* Equation layout */}
-                        <div className="pl-4 py-1">
-                          <code className="text-[15px] font-mono font-bold tracking-tight text-[var(--text-primary)]">
-                            {step.latex}
-                          </code>
-                          <span className="text-[11.5px] text-[var(--text-tertiary)] italic block mt-0.5">
-                            {step.text}
-                          </span>
+                      ) : (
+                        <div className="text-center">
+                          <span className="text-[12px] font-semibold text-[var(--text-secondary)] block">Upload answer page photo or PDF</span>
+                          <span className="text-[10px] text-[var(--text-tertiary)] block">Support high-res handwriting scans</span>
                         </div>
+                      )}
+                    </div>
+                  </div>
 
-                        {/* SymPy logic quick indicator */}
-                        <div className="absolute right-2 top-2 flex items-center gap-1.5">
-                          {step.sympyValid === true && (
-                            <span className="w-5 h-5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 rounded flex items-center justify-center" title="SymPy Verified">
-                              <Check size={11} className="stroke-[3]" />
-                            </span>
-                          )}
-                          {step.sympyValid === false && (
-                            <span className="w-5 h-5 bg-rose-500/10 text-rose-600 border border-rose-500/20 rounded flex items-center justify-center animate-pulse" title="Logic Broken">
-                              <X size={11} className="stroke-[3]" />
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-
+                  <button
+                    onClick={handleRunPracticeGrading}
+                    disabled={isGradingPractice || !practiceFile}
+                    className="w-full flex items-center justify-center gap-1.5 text-[12.5px] py-2.5 font-semibold mt-2 rounded-xl text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50 transition-colors cursor-pointer"
+                  >
+                    {isGradingPractice ? (
+                      <>
+                        <Loader2 className="animate-spin text-white" size={14} />
+                        AI Analyzing Bounding Boxes...
+                      </>
+                    ) : (
+                      <>
+                        <Play size={13} />
+                        Run AI Practice Grading
+                      </>
+                    )}
+                  </button>
                 </div>
+              ) : (
+                /* Standard Digital Manuscript Panel */
+                <>
+                  {/* Question card */}
+                  <div className="mb-4 bg-[var(--surface-primary)] p-4 rounded-xl border border-[var(--border-subtle)] shadow-sm">
+                    <span className="text-[10px] font-mono text-[var(--text-tertiary)] uppercase block font-semibold mb-1">
+                      {isSelfEval ? "Practice Exercise Criteria" : "Assigned Formula Query"}
+                    </span>
+                    <p className="text-[13.5px] leading-relaxed font-mono font-medium">{activeQuestion.questionText}</p>
+                  </div>
 
-              </div>
+                  {/* Scanned sheet layout mockup */}
+                  <div className="flex-1 min-h-[300px] bg-amber-50/10 dark:bg-zinc-950/20 border border-[var(--border-subtle)] rounded-xl relative overflow-hidden flex flex-col shadow-inner" style={{ backgroundImage: "radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px)", backgroundSize: "16px 16px" }}>
+                    
+                    {/* Header branding on paper sheet */}
+                    <div className="border-b border-[var(--border-subtle)] border-dashed py-2.5 px-4 flex justify-between items-center text-[10px] font-mono text-[var(--text-tertiary)] uppercase">
+                      <span>Sheet #{(selectedQuestionId === "Q1") ? "4102" : "7891"} - Edexia Multimodal OCR</span>
+                      <span className="text-brand-600 font-semibold">Manuscript Verified</span>
+                    </div>
+
+                    {/* Simulated Student Handwriting Math Formulas Canvas */}
+                    <div className="flex-1 p-6 relative flex flex-col justify-around gap-6">
+                      
+                      {activeSteps.map((step: any) => {
+                        const isStepHighlighted = highlightedStep === step.stepNum;
+                        const isStepErroneous = step.sympyValid === false;
+
+                        return (
+                          <div
+                            key={step.stepNum}
+                            onClick={() => setHighlightedStep(step.stepNum)}
+                            className={`relative p-3 rounded-lg border border-dashed transition-all duration-300 cursor-pointer ${
+                              isStepHighlighted
+                                ? "bg-brand-50/40 dark:bg-brand-900/20 border-brand-500 shadow-md scale-[1.01]"
+                                : isStepErroneous
+                                ? "border-rose-300/60 bg-rose-500/5 hover:border-rose-400"
+                                : "border-transparent hover:border-[var(--border-default)] hover:bg-[var(--surface-secondary)]/50"
+                            }`}
+                          >
+                            {/* Interactive Bounding Box Indicator */}
+                            <div className="absolute -top-2 left-2 bg-slate-900 text-white font-mono text-[8px] px-1 py-0.2 rounded shadow uppercase tracking-wider z-20">
+                              Step {step.stepNum} (OCR)
+                            </div>
+
+                            {/* Equation layout */}
+                            <div className="pl-4 py-1">
+                              <code className="text-[15px] font-mono font-bold tracking-tight text-[var(--text-primary)]">
+                                {step.latex}
+                              </code>
+                              <span className="text-[11.5px] text-[var(--text-tertiary)] italic block mt-0.5">
+                                {step.text}
+                              </span>
+                            </div>
+
+                            {/* SymPy logic quick indicator */}
+                            <div className="absolute right-2 top-2 flex items-center gap-1.5">
+                              {step.sympyValid === true && (
+                                <span className="w-5 h-5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 rounded flex items-center justify-center" title="SymPy Verified">
+                                  <Check size={11} className="stroke-[3]" />
+                                </span>
+                              )}
+                              {step.sympyValid === false && (
+                                <span className="w-5 h-5 bg-rose-500/10 text-rose-600 border border-rose-500/20 rounded flex items-center justify-center animate-pulse" title="Logic Broken">
+                                  <X size={11} className="stroke-[3]" />
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                    </div>
+
+                  </div>
+                </>
+              )}
 
             </div>
 
