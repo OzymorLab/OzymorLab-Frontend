@@ -55,141 +55,176 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
     .toUpperCase();
 
   return (
-    <div className="app-shell">
+    <div className="app-shell relative min-h-screen w-screen overflow-hidden flex bg-[var(--surface-page)] text-[var(--text-primary)] font-sans transition-all duration-300">
+      
+      {/* Dynamic Background Glow Rings for "Cloudy" Aesthetics */}
+      <div className="absolute top-[-10%] left-[20%] w-[45vw] h-[45vw] rounded-full bg-gradient-to-tr from-brand-600/10 to-brand-400/5 blur-[120px] pointer-events-none z-0" />
+      <div className="absolute bottom-[-10%] right-[10%] w-[35vw] h-[35vw] rounded-full bg-gradient-to-tr from-brand-500/5 to-cyan-500/10 blur-[100px] pointer-events-none z-0" />
+
       {/* Sidebar */}
-      <aside className="sidebar">
-        <div className="sidebar-logo">
-          <div className="logo-mark">Oz</div>
+      <aside className="sidebar w-[220px] shrink-0 bg-[var(--surface-primary)] border-r border-[var(--border-subtle)] flex flex-col z-10 backdrop-blur-md bg-opacity-90 relative">
+        <div className="sidebar-logo px-6 py-5 border-b border-[var(--border-subtle)] flex items-center gap-3">
+          <div className="w-[30px] h-[30px] bg-gradient-to-br from-brand-600 to-brand-800 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-brand-600/20">
+            Oz
+          </div>
           <div>
-            <div className="logo-name">OzymorLab AIOS</div>
-            <div className="logo-tagline">Assessment Engine</div>
+            <div className="logo-name font-semibold text-[13.5px] tracking-tight text-[var(--text-primary)]">OzymorLab HUD</div>
+            <div className="logo-tagline text-[10.5px] text-[var(--text-tertiary)] block font-mono uppercase tracking-wider -mt-0.5">Multi-Modal</div>
           </div>
         </div>
 
-        <nav className="sidebar-nav">
-          <div className="nav-section-label">EVALUATION</div>
-          <Link href="/dashboard" className={`nav-item ${pathname === "/dashboard" ? "active" : ""}`}>
-            <LayoutDashboard className="nav-item-icon" />
+        <nav className="sidebar-nav flex-1 py-4 px-3 flex flex-col gap-0.5">
+          <div className="text-[10px] font-mono text-[var(--text-tertiary)] uppercase font-semibold px-3 mb-2 tracking-wider">EVALUATION</div>
+          
+          <Link href="/dashboard" className={`flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-medium rounded-lg transition-all cursor-pointer ${
+            pathname === "/dashboard" 
+              ? "bg-[var(--surface-secondary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold" 
+              : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)]/50 hover:text-[var(--text-primary)]"
+          }`}>
+            <LayoutDashboard size={15} />
             Dashboard
           </Link>
-          <Link href="/dashboard/exams" className={`nav-item ${pathname.startsWith("/dashboard/exams") ? "active" : ""}`}>
-            <GraduationCap className="nav-item-icon" />
+          <Link href="/dashboard/exams" className={`flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-medium rounded-lg transition-all cursor-pointer ${
+            pathname.startsWith("/dashboard/exams") 
+              ? "bg-[var(--surface-secondary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold" 
+              : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)]/50 hover:text-[var(--text-primary)]"
+          }`}>
+            <GraduationCap size={15} />
             Exams Setup
           </Link>
-          <Link href="/dashboard/submissions" className={`nav-item ${pathname.startsWith("/dashboard/submissions") ? "active" : ""}`}>
-            <BookOpen className="nav-item-icon" />
+          <Link href="/dashboard/submissions" className={`flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-medium rounded-lg transition-all cursor-pointer ${
+            pathname.startsWith("/dashboard/submissions") 
+              ? "bg-[var(--surface-secondary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold" 
+              : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)]/50 hover:text-[var(--text-primary)]"
+          }`}>
+            <BookOpen size={15} />
             Submissions
           </Link>
-          <Link href="/dashboard/students" className={`nav-item ${pathname.startsWith("/dashboard/students") ? "active" : ""}`}>
-            <Users className="nav-item-icon" />
+          <Link href="/dashboard/students" className={`flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-medium rounded-lg transition-all cursor-pointer ${
+            pathname.startsWith("/dashboard/students") 
+              ? "bg-[var(--surface-secondary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold" 
+              : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)]/50 hover:text-[var(--text-primary)]"
+          }`}>
+            <Users size={15} />
             Students
           </Link>
-          <Link href="/dashboard/reviews" className={`nav-item ${pathname.startsWith("/dashboard/reviews") ? "active" : ""}`}>
-            <Shield className="nav-item-icon" />
+          <Link href="/dashboard/reviews" className={`flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-medium rounded-lg transition-all cursor-pointer ${
+            pathname.startsWith("/dashboard/reviews") 
+              ? "bg-[var(--surface-secondary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold" 
+              : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)]/50 hover:text-[var(--text-primary)]"
+          }`}>
+            <Shield size={15} />
             Reviews
           </Link>
-          <Link href="/dashboard/reports" className={`nav-item ${pathname.startsWith("/dashboard/reports") ? "active" : ""}`}>
-            <BarChart3 className="nav-item-icon" />
+          <Link href="/dashboard/reports" className={`flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-medium rounded-lg transition-all cursor-pointer ${
+            pathname.startsWith("/dashboard/reports") 
+              ? "bg-[var(--surface-secondary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold" 
+              : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)]/50 hover:text-[var(--text-primary)]"
+          }`}>
+            <BarChart3 size={15} />
             Reports
           </Link>
-          <Link href="/analysis" className={`nav-item ${pathname.startsWith("/analysis") ? "active" : ""}`}>
-            <MessageSquare className="nav-item-icon" />
+          <Link href="/analysis" className={`flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-medium rounded-lg transition-all cursor-pointer ${
+            pathname.startsWith("/analysis") 
+              ? "bg-[var(--surface-secondary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold" 
+              : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)]/50 hover:text-[var(--text-primary)]"
+          }`}>
+            <MessageSquare size={15} />
             AI Copilot Chat
           </Link>
 
           {(isAdmin || isHOD) && (
             <>
-              <div className="divider"></div>
-              <div className="nav-section-label">ADMINISTRATION</div>
+              <div className="h-[0.5px] bg-[var(--border-subtle)] my-3 mx-3" />
+              <div className="text-[10px] font-mono text-[var(--text-tertiary)] uppercase font-semibold px-3 mb-2 tracking-wider">ADMINISTRATION</div>
               {isAdmin && (
-                <Link href="/dashboard/admin" className={`nav-item ${pathname.startsWith("/dashboard/admin") ? "active" : ""}`}>
-                  <ShieldCheck className="nav-item-icon" />
+                <Link href="/dashboard/admin" className={`flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-medium rounded-lg transition-all cursor-pointer ${
+                  pathname.startsWith("/dashboard/admin") 
+                    ? "bg-[var(--surface-secondary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold" 
+                    : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)]/50 hover:text-[var(--text-primary)]"
+                }`}>
+                  <ShieldCheck size={15} />
                   School Admin
                 </Link>
               )}
             </>
           )}
 
-          <div className="divider"></div>
+          <div className="h-[0.5px] bg-[var(--border-subtle)] my-3 mx-3" />
 
-          <div className="nav-section-label">ACCOUNT</div>
-          <Link href="/dashboard/settings" className={`nav-item ${pathname === "/dashboard/settings" ? "active" : ""}`}>
-            <Settings className="nav-item-icon" />
+          <div className="text-[10px] font-mono text-[var(--text-tertiary)] uppercase font-semibold px-3 mb-2 tracking-wider">ACCOUNT</div>
+          <Link href="/dashboard/settings" className={`flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-medium rounded-lg transition-all cursor-pointer ${
+            pathname === "/dashboard/settings" 
+              ? "bg-[var(--surface-secondary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold" 
+              : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)]/50 hover:text-[var(--text-primary)]"
+          }`}>
+            <Settings size={15} />
             Settings
           </Link>
         </nav>
 
         {/* Sidebar Footer with Theme Toggle */}
-        <div className="sidebar-footer" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <div className="sidebar-footer p-4 border-t border-[var(--border-subtle)] flex flex-col gap-3">
           {/* Theme Switcher Button */}
           <button 
             onClick={toggleTheme}
-            className="nav-item w-full"
-            style={{ 
-              background: "var(--surface-secondary)", 
-              border: "1px solid var(--border-subtle)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "6px 12px",
-              cursor: "pointer",
-              borderRadius: "var(--radius-md)"
-            }}
+            className="flex items-center justify-between px-3 py-2 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-lg cursor-pointer hover:border-brand-500 transition-all w-full text-[11.5px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              {theme === "dark" ? <Moon size={14} className="text-brand-600" /> : <Sun size={14} className="text-warning-text" />}
-              <span className="font-medium" style={{ fontSize: "11.5px" }}>
-                {theme === "dark" ? "Dark Theme" : "Light Theme"}
-              </span>
+            <div className="flex items-center gap-2">
+              {theme === "dark" ? <Moon size={13} className="text-brand-600 animate-pulse" /> : <Sun size={13} className="text-amber-500" />}
+              <span>{theme === "dark" ? "Dark Theme" : "Light Theme"}</span>
             </div>
-            <span style={{ fontSize: "10px", opacity: 0.6 }}>Toggle</span>
+            <span className="text-[9px] font-mono opacity-60 uppercase">Mode</span>
           </button>
 
-          <div className="user-row">
-            <div className="user-avatar">{initials}</div>
-            <div>
-              <div className="user-name">{user.full_name}</div>
-              <div className="user-role">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</div>
+          <div className="flex items-center gap-2.5 px-1 py-0.5">
+            <div className="w-[30px] h-[30px] rounded-full bg-brand-50 dark:bg-brand-950/20 text-brand-600 font-bold text-[11px] flex items-center justify-center border border-brand-500/20 shadow-sm select-none">
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[12.5px] font-semibold text-[var(--text-primary)] truncate leading-none">{user.full_name}</div>
+              <div className="text-[10px] text-[var(--text-tertiary)] uppercase font-mono mt-0.5 leading-none">{user.role}</div>
             </div>
             <button
               onClick={() => { logout(); router.push("/login"); }}
-              className="nav-item-icon ml-auto text-gray-400 cursor-pointer hover:text-brand-600"
+              className="text-[var(--text-tertiary)] hover:text-brand-600 transition-colors p-1"
               title="Logout"
               style={{ background: "none", border: "none" }}
             >
-              <LogOut size={16} />
+              <LogOut size={15} />
             </button>
           </div>
         </div>
       </aside>
 
       {/* Main Area */}
-      <div className="main-area">
-        <header className="topbar">
-          <div className="topbar-search">
-            <Search size={14} className="topbar-search-icon" />
+      <div className="main-area flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
+        <header className="h-[56px] px-6 bg-[var(--surface-primary)] border-b border-[var(--border-subtle)] flex items-center justify-between shrink-0 z-10 backdrop-blur-md bg-opacity-80">
+          <div className="flex items-center gap-3 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] px-3 py-1.5 rounded-lg w-[280px] hover:border-brand-500/60 focus-within:border-brand-600 transition-all duration-300">
+            <Search size={14} className="text-[var(--text-tertiary)]" />
             <input
               type="text"
-              placeholder="Search student ID, batch, or submission..."
-              className="topbar-search-input"
+              placeholder="Search student, batch, or key..."
+              className="bg-transparent border-none outline-none text-[12px] text-[var(--text-primary)] placeholder-[var(--text-tertiary)] w-full font-mono"
             />
-            <div className="topbar-search-kbd">
-              <kbd>⌘</kbd><kbd>K</kbd>
+            <div className="hidden sm:flex items-center gap-0.5 shrink-0 text-[10px] font-mono text-[var(--text-tertiary)] bg-[var(--surface-primary)] border border-[var(--border-subtle)] px-1 py-0.2 rounded shadow-sm">
+              <span>⌘K</span>
             </div>
           </div>
-          <div className="topbar-right">
-            <div className="topbar-user">
-              <span className="topbar-user-name">{user.full_name}</span>
-              <span className="topbar-user-role">{user.role}</span>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <span className="block text-[12.5px] font-semibold text-[var(--text-primary)] leading-none">{user.full_name}</span>
+              <span className="text-[10px] text-[var(--text-tertiary)] font-mono uppercase tracking-wider block mt-0.5">{user.role}</span>
             </div>
-            <div className="topbar-notif">
-              <Bell size={16} />
-              <span className="topbar-notif-dot" />
+            <div className="w-[34px] h-[34px] border border-[var(--border-subtle)] rounded-lg bg-[var(--surface-secondary)] flex items-center justify-center cursor-pointer hover:bg-[var(--surface-primary)] hover:border-brand-500 transition-all relative">
+              <Bell size={15} />
+              <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-brand-600 rounded-full animate-ping" />
+              <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-brand-600 rounded-full" />
             </div>
           </div>
         </header>
 
-        <main className="content">
+        <main className="flex-1 overflow-y-auto p-6 relative">
           {children}
         </main>
       </div>

@@ -137,104 +137,125 @@ export default function DashboardPage() {
   const queueCount = submissions.filter(s => s.status !== 'GRADED').length;
 
   return (
-    <>
+    <div className="flex flex-col gap-6 w-full animate-fade-in relative z-10">
+      
       {/* Dashboard Header */}
-      <div className="dash-header">
-        <div className="dash-header-content">
-          <div className="dash-header-badge">
-            <Zap size={12} />
-            <span>Live Engine</span>
+      <div className="relative overflow-hidden bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm backdrop-blur-md bg-opacity-80">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-brand-600 uppercase bg-brand-50 dark:bg-brand-950/20 px-2 py-0.5 rounded-full w-max">
+            <Zap size={11} className="animate-pulse" />
+            Live grading active
           </div>
-          <h1 className="dash-header-title">Evaluation Engine</h1>
-          <p className="dash-header-subtitle">Real-time asynchronous assessment pipeline</p>
+          <h1 className="text-[20px] font-bold text-[var(--text-primary)] mt-2">OzymorLab Grading HUD</h1>
+          <p className="text-[13px] text-[var(--text-secondary)]">Asynchronous multi-modal OCR assessment and SymPy trace validation console</p>
         </div>
-        <div className="dash-header-glow" />
+        
+        {/* Dynamic task picker */}
+        <div className="flex flex-col gap-1.5 w-full md:w-[240px]">
+          <label className="text-[9.5px] font-bold font-mono text-[var(--text-tertiary)] uppercase flex items-center gap-1">
+            <Sparkles size={11} className="text-brand-600" />
+            Selected Exam Task
+          </label>
+          <select 
+            className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm cursor-pointer w-full font-medium"
+            value={selectedTaskId}
+            onChange={(e) => setSelectedTaskId(e.target.value)}
+          >
+            <option value="" disabled>Select an exam task...</option>
+            {tasks.map(t => (
+              <option key={t.id} value={t.id}>{t.subject} - {t.title}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="dash-stats-grid">
-        <div className="dash-stat-card dash-stat-success">
-          <div className="dash-stat-icon-wrap">
-            <CheckCircle2 size={20} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-5 flex items-center gap-4 shadow-sm hover:scale-[1.02] transition-transform duration-200 relative group overflow-hidden">
+          <div className="w-[42px] h-[42px] bg-emerald-500/10 text-emerald-600 rounded-xl flex items-center justify-center border border-emerald-500/20">
+            <CheckCircle2 size={20} className="stroke-[2.5]" />
           </div>
-          <div className="dash-stat-content">
-            <div className="dash-stat-number">{processedCount}</div>
-            <div className="dash-stat-label">Total Processed</div>
+          <div className="flex-1">
+            <div className="text-[24px] font-bold font-mono leading-none">{processedCount}</div>
+            <div className="text-[11.5px] text-[var(--text-secondary)] font-medium mt-1">Total Processed</div>
           </div>
-          <div className="dash-stat-footer">
-            <span className="dash-stat-live-dot" />
-            <span>Live updating</span>
+          <div className="absolute right-3 bottom-3 flex items-center gap-1.5 text-[9px] font-mono text-emerald-500 font-bold uppercase">
+            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
+            Live
           </div>
-          <div className="dash-stat-shimmer" />
         </div>
 
-        <div className="dash-stat-card dash-stat-warning">
-          <div className="dash-stat-icon-wrap">
-            <AlertTriangle size={20} />
+        <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-5 flex items-center gap-4 shadow-sm hover:scale-[1.02] transition-transform duration-200 relative group overflow-hidden">
+          <div className="w-[42px] h-[42px] bg-amber-500/10 text-amber-600 rounded-xl flex items-center justify-center border border-amber-500/20">
+            <AlertTriangle size={20} className="stroke-[2.5]" />
           </div>
-          <div className="dash-stat-content">
-            <div className="dash-stat-number">{queueCount}</div>
-            <div className="dash-stat-label">In Queue</div>
+          <div className="flex-1">
+            <div className="text-[24px] font-bold font-mono leading-none">{queueCount}</div>
+            <div className="text-[11.5px] text-[var(--text-secondary)] font-medium mt-1">In Grading Queue</div>
           </div>
-          <div className="dash-stat-footer">
-            <Activity size={12} className="dash-stat-pulse" />
-            <span>Processing...</span>
-          </div>
-          <div className="dash-stat-shimmer" />
+          {queueCount > 0 && (
+            <div className="absolute right-3 bottom-3 flex items-center gap-1.5 text-[9px] font-mono text-amber-500 font-bold uppercase">
+              <Activity size={10} className="animate-spin" />
+              Active
+            </div>
+          )}
         </div>
 
-        <div className="dash-stat-card dash-stat-info">
-          <div className="dash-stat-icon-wrap">
-            <Clock size={20} />
+        <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-5 flex items-center gap-4 shadow-sm hover:scale-[1.02] transition-transform duration-200 relative group overflow-hidden">
+          <div className="w-[42px] h-[42px] bg-blue-500/10 text-blue-600 rounded-xl flex items-center justify-center border border-blue-500/20">
+            <Clock size={20} className="stroke-[2.5]" />
           </div>
-          <div className="dash-stat-content">
-            <div className="dash-stat-number">1.4<span className="dash-stat-unit">s</span></div>
-            <div className="dash-stat-label">Avg Latency</div>
+          <div className="flex-1">
+            <div className="text-[24px] font-bold font-mono leading-none">1.4s</div>
+            <div className="text-[11.5px] text-[var(--text-secondary)] font-medium mt-1">Average Latency</div>
           </div>
-          <div className="dash-stat-footer">
-            <TrendingUp size={12} />
-            <span>per PDF submission</span>
+          <div className="absolute right-3 bottom-3 flex items-center gap-1 text-[9px] font-mono text-blue-500 font-bold uppercase">
+            <TrendingUp size={10} />
+            Fast
           </div>
-          <div className="dash-stat-shimmer" />
         </div>
 
-        <div className="dash-stat-card dash-stat-brand">
-          <div className="dash-stat-icon-wrap">
-            <Shield size={20} />
+        <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-5 flex items-center gap-4 shadow-sm hover:scale-[1.02] transition-transform duration-200 relative group overflow-hidden">
+          <div className="w-[42px] h-[42px] bg-brand-500/10 text-brand-600 rounded-xl flex items-center justify-center border border-brand-500/20">
+            <Shield size={20} className="stroke-[2.5]" />
           </div>
-          <div className="dash-stat-content">
-            <div className="dash-stat-number">0</div>
-            <div className="dash-stat-label">Drift Alerts</div>
+          <div className="flex-1">
+            <div className="text-[24px] font-bold font-mono leading-none">0</div>
+            <div className="text-[11.5px] text-[var(--text-secondary)] font-medium mt-1">Drift Alerts</div>
           </div>
-          <div className="dash-stat-footer">
-            <CheckCircle2 size={12} />
-            <span>No rubric drift</span>
+          <div className="absolute right-3 bottom-3 flex items-center gap-1 text-[9px] font-mono text-brand-500 font-bold uppercase">
+            <CheckCircle2 size={10} />
+            Secure
           </div>
-          <div className="dash-stat-shimmer" />
         </div>
+
       </div>
 
-      {/* Main Grid */}
-      <div className="dashboard-grid">
-        {/* Submission Queue Card */}
-        <div className="dash-card dash-card-main">
-          <div className="dash-card-header">
-            <div className="dash-card-title">
-              <div className="dash-card-title-icon">
-                <FileText size={16} />
-              </div>
-              <span>Submission Queue</span>
-            </div>
-            <div className="dash-card-badge">{submissions.length} total</div>
+      {/* Main Double-Pane Workspace Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* LEFT COLUMN: Interactive Submission Queue Card (takes 2/3 of grid) */}
+        <div className="lg:col-span-2 bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden shadow-sm flex flex-col min-h-[400px]">
+          
+          <div className="px-5 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
+            <h3 className="font-semibold text-[14px] flex items-center gap-2">
+              <FileText size={16} className="text-brand-600" />
+              Recent Paper Submissions
+            </h3>
+            <span className="text-[10px] font-mono text-[var(--text-tertiary)] uppercase bg-[var(--surface-secondary)] px-2.5 py-0.5 rounded font-bold">
+              {submissions.length} Total
+            </span>
           </div>
-          <div className="dash-table-wrap">
-            <table className="dash-table">
+
+          <div className="flex-1 overflow-x-auto">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr>
-                  <th>Student ID</th>
-                  <th>Filename</th>
-                  <th>Status</th>
-                  <th>Time</th>
+                <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)]">
+                  <th className="text-[10px] font-bold font-mono uppercase tracking-wider text-[var(--text-tertiary)] px-5 py-3">Student ID</th>
+                  <th className="text-[10px] font-bold font-mono uppercase tracking-wider text-[var(--text-tertiary)] px-5 py-3">Filename</th>
+                  <th className="text-[10px] font-bold font-mono uppercase tracking-wider text-[var(--text-tertiary)] px-5 py-3">Status</th>
+                  <th className="text-[10px] font-bold font-mono uppercase tracking-wider text-[var(--text-tertiary)] px-5 py-3">Uploaded Time</th>
                 </tr>
               </thead>
               <tbody>
@@ -248,94 +269,113 @@ export default function DashboardPage() {
                         setSelectedSub(sub);
                       }
                     }} 
-                    className="dash-table-row"
+                    className="border-b border-[var(--border-subtle)] hover:bg-[var(--surface-secondary)]/50 transition-colors cursor-pointer"
                   >
-                    <td className="col-primary font-mono text-[12px]">
-                      {sub.student_id || <span className="dash-extracting">Extracting Identity...</span>}
+                    <td className="px-5 py-3.5 font-mono text-[12px] font-bold text-brand-600">
+                      {sub.student_id || (
+                        <span className="text-[10.5px] italic text-[var(--text-tertiary)] animate-pulse">Extracting Student...</span>
+                      )}
                     </td>
-                    <td className="text-[12px] max-w-[150px] truncate">{sub.file_name}</td>
-                    <td>
-                      {sub.status === "GRADED" && <span className="dash-pill dash-pill-success"><span className="dash-pill-dot" />Graded</span>}
-                      {sub.status === "FAILED" && <span className="dash-pill dash-pill-danger"><span className="dash-pill-dot" />Failed</span>}
-                      {sub.status === "IDENTITY_EXTRACTED" && <span className="dash-pill dash-pill-info"><span className="dash-pill-dot" />Identity Found</span>}
-                      {sub.status === "GRADING" && <span className="dash-pill dash-pill-warning"><span className="dash-pill-dot" />Grading (AI)</span>}
-                      {sub.status !== "GRADED" && sub.status !== "FAILED" && sub.status !== "IDENTITY_EXTRACTED" && sub.status !== "GRADING" && <span className="dash-pill dash-pill-info"><span className="dash-pill-dot" />{sub.status}</span>}
+                    <td className="px-5 py-3.5 text-[12.5px] text-[var(--text-primary)] font-medium max-w-[180px] truncate">
+                      {sub.file_name}
                     </td>
-                    <td className="text-[11px] dash-time">{new Date(sub.created_at).toLocaleTimeString()}</td>
+                    <td className="px-5 py-3.5">
+                      {sub.status === "GRADED" && (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          Graded
+                        </span>
+                      )}
+                      {sub.status === "FAILED" && (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-rose-500/10 text-rose-600 border border-rose-500/20">
+                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                          Failed
+                        </span>
+                      )}
+                      {sub.status === "IDENTITY_EXTRACTED" && (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-cyan-500/10 text-cyan-600 border border-cyan-500/20">
+                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
+                          Verified
+                        </span>
+                      )}
+                      {sub.status === "GRADING" && (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-amber-500/10 text-amber-600 border border-amber-500/20 animate-pulse">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                          Grading
+                        </span>
+                      )}
+                      {sub.status !== "GRADED" && sub.status !== "FAILED" && sub.status !== "IDENTITY_EXTRACTED" && sub.status !== "GRADING" && (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-slate-500/10 text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                          {sub.status}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3.5 text-[11px] font-mono text-[var(--text-tertiary)]">
+                      {new Date(sub.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                    </td>
                   </tr>
                 ))}
                 {submissions.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="dash-empty-state">
-                      <div className="dash-empty-icon">
-                        <FileText size={32} />
+                    <td colSpan={4} className="py-12 text-center text-[var(--text-tertiary)]">
+                      <div className="flex flex-col items-center gap-2">
+                        <FileText size={32} className="stroke-[1.5] text-[var(--text-tertiary)]" />
+                        <span className="text-[12.5px] font-medium">No answer sheet submissions found in this portal yet.</span>
                       </div>
-                      <span>No submissions found. Drop a PDF to begin!</span>
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+
         </div>
 
-        {/* Right Rail */}
-        <div className="right-rail">
-          {/* Task Selector */}
-          <div className="dash-task-selector">
-            <label className="dash-task-label">
-              <Sparkles size={14} />
-              Select Exam Task
-            </label>
-            <select 
-              className="dash-task-select"
-              value={selectedTaskId}
-              onChange={(e) => setSelectedTaskId(e.target.value)}
-            >
-              <option value="" disabled>Select an exam to grade...</option>
-              {tasks.map(t => (
-                <option key={t.id} value={t.id}>{t.subject} - {t.title}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Upload Zone */}
-          <div className="dash-upload-wrapper">
-            <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="dash-upload-input" onChange={handleUpload} disabled={isUploading} />
-            <div className={`dash-upload-zone ${isUploading ? 'uploading' : ''}`}>
-              <div className="dash-upload-border" />
+        {/* RIGHT COLUMN: Drag-and-Drop Uploader & Command Center (takes 1/3 of grid) */}
+        <div className="flex flex-col gap-6">
+          
+          {/* File uploader workspace */}
+          <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-5 shadow-sm flex flex-col gap-4 relative">
+            <h4 className="font-semibold text-[13px] flex items-center gap-2">
+              <UploadCloud size={15} className="text-brand-600" />
+              Upload Student Answer Sheet
+            </h4>
+            
+            <div className="border border-dashed border-[var(--border-subtle)] hover:border-brand-500 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer transition-colors bg-[var(--surface-secondary)]/50 relative min-h-[140px]">
+              <input 
+                type="file" 
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={handleUpload} 
+                disabled={isUploading}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
               {isUploading ? (
-                <>
-                  <div className="dash-upload-spinner">
-                    <Activity size={24} />
-                  </div>
-                  <div className="dash-upload-title">Uploading to Storage...</div>
-                </>
+                <div className="flex flex-col items-center justify-center gap-2 text-center">
+                  <Activity className="animate-spin text-brand-600" size={24} />
+                  <span className="text-[12.5px] font-semibold text-[var(--text-primary)]">Parsing Handwriting OCR...</span>
+                  <span className="text-[10px] text-[var(--text-tertiary)]">Analyzing math structure coordinates</span>
+                </div>
               ) : (
-                <>
-                  <div className="dash-upload-icon-wrap">
-                    <UploadCloud size={28} />
-                  </div>
-                  <div className="dash-upload-title">Drop answer sheets here</div>
-                  <div className="dash-upload-subtitle">or <em>browse files</em> (PDF, JPG)</div>
-                </>
+                <div className="flex flex-col items-center justify-center gap-1.5 text-center">
+                  <UploadCloud className="text-brand-500 mb-1" size={26} />
+                  <span className="text-[12.5px] font-semibold text-[var(--text-secondary)]">Drop file or click to browse</span>
+                  <span className="text-[10px] text-[var(--text-tertiary)]">Supports PDF, JPG, PNG sheets</span>
+                </div>
               )}
             </div>
           </div>
 
-          {/* Evaluation Command Center */}
-          <div className="dash-card dash-command-center">
-            <div className="dash-card-header">
-              <div className="dash-card-title">
-                <div className="dash-card-title-icon brand">
-                  <BrainCircuit size={16} />
-                </div>
-                <span>Evaluation Command Center</span>
-              </div>
-            </div>
+          {/* Engine Status Command Center */}
+          <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-5 shadow-sm flex flex-col gap-4">
             
-            {/* Radar HUD */}
-            <div className="radar-container bg-surface-secondary">
+            <div className="flex items-center gap-2">
+              <BrainCircuit size={15} className="text-brand-600" />
+              <h4 className="font-semibold text-[13px]">Engine Command Center</h4>
+            </div>
+
+            {/* Radar Sweep HUD Mockup */}
+            <div className="radar-container bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl h-[90px] relative overflow-hidden flex items-center justify-center">
               <div className="radar-cross-h"></div>
               <div className="radar-cross-v"></div>
               <div className="radar-grid">
@@ -345,44 +385,40 @@ export default function DashboardPage() {
               
               <div className="radar-blip radar-blip-backend" title="FastAPI Engine Active"></div>
               <div className="radar-blip radar-blip-llm" title="Gemini Multi-Modal Active"></div>
-              <div className="radar-blip radar-blip-kb" title="Dynamic Ruleset Sync Active"></div>
+              <div className="radar-blip radar-blip-kb" title="SymPy Validation Rules Connected"></div>
             </div>
 
-            {/* System Status */}
-            <div className="dash-system-status">
-              <div className="dash-status-row">
-                <div className="dash-status-left">
-                  <span className="dash-status-indicator success">
-                    <span className="dash-status-ping" />
-                    <span className="dash-status-dot" />
-                  </span>
-                  <span className="dash-status-name">CORE</span>
-                </div>
-                <span className="dash-status-value">Connected (1.4s)</span>
+            {/* Core engine metrics status logs */}
+            <div className="flex flex-col gap-2.5">
+              <div className="flex justify-between items-center text-[12px]">
+                <span className="font-semibold text-[var(--text-secondary)] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
+                  CORE ENGINE
+                </span>
+                <span className="font-mono text-[11px] text-[var(--text-tertiary)]">CONNECTED (1.4s)</span>
               </div>
-              <div className="dash-status-row">
-                <div className="dash-status-left">
-                  <span className="dash-status-indicator brand">
-                    <span className="dash-status-ping" />
-                    <span className="dash-status-dot" />
-                  </span>
-                  <span className="dash-status-name">INTELLIGENT VISION OCR</span>
-                </div>
-                <span className="dash-status-value">Active</span>
+              <div className="h-[0.5px] bg-[var(--border-subtle)]" />
+              <div className="flex justify-between items-center text-[12px]">
+                <span className="font-semibold text-[var(--text-secondary)] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-brand-500 rounded-full" />
+                  VISION OCR
+                </span>
+                <span className="font-mono text-[11px] text-[var(--text-tertiary)]">ACTIVE</span>
               </div>
-              <div className="dash-status-row last">
-                <div className="dash-status-left">
-                  <span className="dash-status-indicator info">
-                    <span className="dash-status-ping" />
-                    <span className="dash-status-dot" />
-                  </span>
-                  <span className="dash-status-name">DYNAMIC RULES</span>
-                </div>
-                <span className="dash-status-value">Sync Complete</span>
+              <div className="h-[0.5px] bg-[var(--border-subtle)]" />
+              <div className="flex justify-between items-center text-[12px]">
+                <span className="font-semibold text-[var(--text-secondary)] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full" />
+                  SYMPY RULES
+                </span>
+                <span className="font-mono text-[11px] text-[var(--text-tertiary)]">SYNC COMPLETE</span>
               </div>
             </div>
+
           </div>
+
         </div>
+
       </div>
 
       {/* Detail Slide Panel */}
@@ -501,6 +537,6 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
