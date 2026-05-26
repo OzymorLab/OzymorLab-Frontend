@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { UploadCloud, CheckCircle2, AlertTriangle, FileText, Activity, BrainCircuit, Search, Zap, Clock, TrendingUp, Sparkles, ArrowUpRight, Shield } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -8,10 +9,23 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.c
 
 interface Submission {
   id: string;
+  task_id?: string;
   student_id: string | null;
   file_name: string;
   status: string;
   created_at: string;
+  raw_text?: string | null;
+  parsed_content?: {
+    steps: Array<{
+      step_num: number;
+      text: string;
+      equations: string[];
+      step_type: string;
+    }>;
+    detected_language: string;
+    has_diagrams: boolean;
+    parse_confidence: number;
+  } | null;
 }
 
 interface GradeDetail {
@@ -32,6 +46,7 @@ interface GradeDetail {
 
 export default function DashboardPage() {
   const { fetchWithAuth } = useAuth();
+  const router = useRouter();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [selectedSub, setSelectedSub] = useState<Submission | null>(null);
   const [subDetail, setSubDetail] = useState<Submission | null>(null);
@@ -224,7 +239,17 @@ export default function DashboardPage() {
               </thead>
               <tbody>
                 {submissions.map((sub) => (
-                  <tr key={sub.id} onClick={() => setSelectedSub(sub)} className="dash-table-row">
+                  <tr 
+                    key={sub.id} 
+                    onClick={() => {
+                      if (sub.status === "GRADED") {
+                        router.push(`/analysis?task_id=${sub.task_id || ""}&submission_id=${sub.id}`);
+                      } else {
+                        setSelectedSub(sub);
+                      }
+                    }} 
+                    className="dash-table-row"
+                  >
                     <td className="col-primary font-mono text-[12px]">
                       {sub.student_id || <span className="dash-extracting">Extracting Identity...</span>}
                     </td>

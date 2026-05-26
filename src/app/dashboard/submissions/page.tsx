@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { 
   FileText, Search, Filter, RefreshCw, CheckCircle2, 
   AlertTriangle, Clock, ArrowRight, Eye, Sparkles 
@@ -11,10 +12,23 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.c
 
 interface Submission {
   id: string;
+  task_id?: string;
   student_id: string | null;
   file_name: string;
   status: string;
   created_at: string;
+  raw_text?: string | null;
+  parsed_content?: {
+    steps: Array<{
+      step_num: number;
+      text: string;
+      equations: string[];
+      step_type: string;
+    }>;
+    detected_language: string;
+    has_diagrams: boolean;
+    parse_confidence: number;
+  } | null;
 }
 
 interface GradeDetail {
@@ -25,6 +39,8 @@ interface GradeDetail {
     step_num: number;
     awarded: number;
     max: number;
+    marks_awarded?: number;
+    max_marks?: number;
     justification: string;
     is_correct: boolean;
     step_type: string;
@@ -35,6 +51,7 @@ interface GradeDetail {
 
 export default function SubmissionsPage() {
   const { fetchWithAuth } = useAuth();
+  const router = useRouter();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [filteredSubmissions, setFilteredSubmissions] = useState<Submission[]>([]);
   const [selectedSub, setSelectedSub] = useState<Submission | null>(null);
@@ -243,7 +260,16 @@ export default function SubmissionsPage() {
             </thead>
             <tbody>
               {filteredSubmissions.map((sub) => (
-                <tr key={sub.id} onClick={() => setSelectedSub(sub)}>
+                <tr 
+                  key={sub.id} 
+                  onClick={() => {
+                    if (sub.status === "GRADED") {
+                      router.push(`/analysis?task_id=${sub.task_id || ""}&submission_id=${sub.id}`);
+                    } else {
+                      setSelectedSub(sub);
+                    }
+                  }}
+                >
                   <td className="col-primary font-mono text-[12px]">{sub.student_id || '—'}</td>
                   <td className="text-[12.5px] max-w-[200px] truncate" style={{ color: 'var(--text-secondary)' }}>{sub.file_name}</td>
                   <td className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>{new Date(sub.created_at).toLocaleString()}</td>

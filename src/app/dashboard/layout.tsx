@@ -4,7 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, Settings, BookOpen, LogOut, Key,
-  Bell, Search, Shield, GraduationCap, Sun, Moon, BarChart3, ShieldCheck
+  Bell, Search, Shield, GraduationCap, Sun, Moon, BarChart3, ShieldCheck, MessageSquare
 } from "lucide-react";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import Link from "next/link";
@@ -91,6 +91,10 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
           <Link href="/dashboard/reports" className={`nav-item ${pathname.startsWith("/dashboard/reports") ? "active" : ""}`}>
             <BarChart3 className="nav-item-icon" />
             Reports
+          </Link>
+          <Link href="/analysis" className={`nav-item ${pathname.startsWith("/analysis") ? "active" : ""}`}>
+            <MessageSquare className="nav-item-icon" />
+            AI Copilot Chat
           </Link>
 
           {(isAdmin || isHOD) && (

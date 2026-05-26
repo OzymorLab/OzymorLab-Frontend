@@ -5,6 +5,37 @@ import { supabase } from "../../lib/supabaseClient";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.com/api/v1";
 
+const safeFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
+  if (url.includes(",")) {
+    const parts = url.split(",");
+    const firstBase = parts[0];
+    const rest = parts.slice(1).join(",");
+    
+    // Resolve path from secondary base dynamically
+    const secondBase = "https://edeziav2.onrender.com/api/v1";
+    let path = "";
+    if (rest.startsWith(secondBase)) {
+      path = rest.substring(secondBase.length);
+    } else {
+      const idx = rest.indexOf("/api/v1");
+      if (idx !== -1) {
+        path = rest.substring(idx + "/api/v1".length);
+      }
+    }
+    
+    const url1 = `${firstBase}${path}`;
+    const url2 = rest;
+    
+    try {
+      return await fetch(url1, options);
+    } catch (err) {
+      console.warn(`Local API offline at ${url1}, falling back to remote production at ${url2}`, err);
+      return await fetch(url2, options);
+    }
+  }
+  return fetch(url, options);
+};
+
 interface User {
   id: string;
   email: string;
@@ -51,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setToken(storedToken);
         setRefreshToken(typeof window !== "undefined" ? localStorage.getItem("ozymorlab_refresh_token") : null);
         
-        fetch(`${API_BASE}/auth/me`, {
+        safeFetch(`${API_BASE}/auth/me`, {
           headers: { Authorization: `Bearer ${storedToken}` },
         })
           .then((res) => {
@@ -84,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRefreshToken(session.refresh_token || null);
         
         // Validate token and sync profile with Edexia backend
-        fetch(`${API_BASE}/auth/me`, {
+        safeFetch(`${API_BASE}/auth/me`, {
           headers: { Authorization: `Bearer ${session.access_token}` },
         })
           .then((res) => {
@@ -119,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRefreshToken(session.refresh_token || null);
         
         try {
-          const res = await fetch(`${API_BASE}/auth/me`, {
+          const res = await safeFetch(`${API_BASE}/auth/me`, {
             headers: { Authorization: `Bearer ${session.access_token}` },
           });
           if (res.ok) {
@@ -152,7 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
       try {
-        const res = await fetch(`${API_BASE}/auth/login`, {
+        const res = await safeFetch(`${API_BASE}/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
@@ -171,7 +202,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         
         // Fetch profile
-        const profileRes = await fetch(`${API_BASE}/auth/me`, {
+        const profileRes = await safeFetch(`${API_BASE}/auth/me`, {
           headers: { Authorization: `Bearer ${access_token}` },
         });
         const profileJson = await profileRes.json();
@@ -198,7 +229,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Fetch profile / trigger sync on backend
         try {
-          const profileRes = await fetch(`${API_BASE}/auth/me`, {
+          const profileRes = await safeFetch(`${API_BASE}/auth/me`, {
             headers: { Authorization: `Bearer ${session.access_token}` },
           });
           const profileJson = await profileRes.json();
@@ -234,7 +265,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signup = async (email: string, password: string, fullName: string, role: string) => {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
       try {
-        const res = await fetch(`${API_BASE}/auth/signup`, {
+        const res = await safeFetch(`${API_BASE}/auth/signup`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password, full_name: fullName, role: role.toLowerCase() }),
@@ -278,7 +309,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Fetch profile / trigger sync on backend
         try {
-          const profileRes = await fetch(`${API_BASE}/auth/me`, {
+          const profileRes = await safeFetch(`${API_BASE}/auth/me`, {
             headers: { Authorization: `Bearer ${session.access_token}` },
           });
           const profileJson = await profileRes.json();
@@ -344,7 +375,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Always load token from active Supabase session
     const activeToken = token;
     if (activeToken) headers.set("Authorization", `Bearer ${activeToken}`);
-    return fetch(url, { ...options, headers });
+    return safeFetch(url, { ...options, headers });
   };
 
   const setGeminiKey = async (key: string) => {
@@ -424,7 +455,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     try {
       console.log("🔄 refreshUser triggered. Fetching from:", `${API_BASE}/auth/me`);
-      const res = await fetch(`${API_BASE}/auth/me`, {
+      const res = await safeFetch(`${API_BASE}/auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log("➡️ refreshUser response status:", res.status);

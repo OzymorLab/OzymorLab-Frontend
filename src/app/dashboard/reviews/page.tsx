@@ -490,8 +490,8 @@ export default function ReviewsPage() {
                                 min="0"
                                 max={reviewDetail.max_grade}
                                 className="input-field py-2 text-[13px]"
-                                value={isNaN(newGrade) ? "" : newGrade}
-                                onChange={(e) => setNewGrade(e.target.value === "" ? 0 : Number(e.target.value))}
+                                value={newGrade === "" ? "" : newGrade}
+                                onChange={(e) => setNewGrade(e.target.value === "" ? "" : Number(e.target.value))}
                               />
                             </div>
                           </div>

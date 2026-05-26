@@ -312,7 +312,7 @@ function LoginPageContent() {
                   onChange={(e) => setRole(e.target.value)}
                 >
                   <option value="teacher">Teacher</option>
-                  <option value="evaluator">Evaluator</option>
+                  <option value="student">Student</option>
                   <option value="admin">Administrator</option>
                 </select>
               </div>
