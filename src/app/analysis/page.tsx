@@ -141,8 +141,20 @@ function AnalysisHUDPageContent() {
         
         // Check URL params for initial selection
         const params = new URLSearchParams(window.location.search);
-        const qTaskId = params.get("task_id");
+        let qTaskId = params.get("task_id");
         const qSubId = params.get("submission_id");
+        
+        if (qSubId && !qTaskId) {
+          try {
+            const subRes = await fetchWithAuth(`${API_BASE}/submissions/${qSubId}`);
+            const subJson = await subRes.json();
+            if (subJson.data && subJson.data.task_id) {
+              qTaskId = subJson.data.task_id;
+            }
+          } catch (err) {
+            console.error("Failed to resolve task_id for submission", err);
+          }
+        }
         
         const initialTaskId = qTaskId && json.data.some((t: Task) => t.id === qTaskId) 
           ? qTaskId 

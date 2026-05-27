@@ -294,7 +294,21 @@ export default function SubmissionsPage() {
                     }
                   }}
                 >
-                  <td className="col-primary font-medium text-[13px]">{generateStudentName(sub.student_id).name}</td>
+                  <td className="col-primary font-medium text-[13px]">
+                    {sub.status === "GRADED" ? (
+                      <span 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/analysis?task_id=${sub.task_id || ""}&submission_id=${sub.id}`);
+                        }}
+                        className="text-[var(--text-primary)] hover:text-brand-600 hover:underline transition-colors cursor-pointer"
+                      >
+                        {generateStudentName(sub.student_id).name}
+                      </span>
+                    ) : (
+                      generateStudentName(sub.student_id).name
+                    )}
+                  </td>
                   <td className="text-[12.5px] max-w-[200px] truncate" style={{ color: 'var(--text-secondary)' }}>{sub.file_name}</td>
                   <td className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>{new Date(sub.created_at).toLocaleString()}</td>
                   <td>

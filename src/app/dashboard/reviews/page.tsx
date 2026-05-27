@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { 
   ShieldAlert, CheckCircle2, AlertTriangle, Eye, RefreshCw, 
   Star, ShieldCheck, ChevronRight, Check, X, Loader2, Sparkles,
@@ -80,6 +81,7 @@ interface PendingRubric {
 
 export default function ReviewsPage() {
   const { user, fetchWithAuth } = useAuth();
+  const router = useRouter();
   
   // Pending review items
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
@@ -445,7 +447,15 @@ export default function ReviewsPage() {
                       className="hover:bg-red-500/5 cursor-pointer transition-colors duration-150 group"
                     >
                       <td className="px-6 py-5 text-[13px] text-[var(--text-primary)] font-semibold">
-                        {generateStudentName(r.student_id).name}
+                        <span 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/analysis?submission_id=${r.submission_id}`);
+                          }}
+                          className="text-[var(--text-primary)] hover:text-brand-600 hover:underline transition-colors cursor-pointer"
+                        >
+                          {generateStudentName(r.student_id).name}
+                        </span>
                       </td>
                       <td className="px-6 py-5 text-[12.5px] text-[var(--text-secondary)] font-medium">{r.task_title}</td>
                       <td className="px-6 py-5 text-[12px] text-red-500 font-semibold">
