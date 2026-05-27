@@ -924,29 +924,7 @@ function AnalysisHUDPageContent() {
                 <div className="flex-1 h-12 px-4 rounded-xl text-[13.5px] font-bold bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center shadow-sm">
                   {activeQuestion.title || "No question selected"}
                 </div>
-                
-                {viewMode === "teacher" && (
-                  <select
-                    value={selectedStudentId}
-                    onChange={(e) => {
-                      setSelectedStudentId(e.target.value);
-                      setHighlightedStep(null);
-                      setChatMessages([]);
-                    }}
-                    className="h-12 px-4 rounded-xl text-[13px] font-bold bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm cursor-pointer min-w-[200px]"
-                    disabled={roster.length === 0}
-                  >
-                    {roster.length === 0 ? (
-                      <option value="">No submissions available</option>
-                    ) : (
-                      roster.map((student) => (
-                        <option key={student.id} value={student.id}>
-                          {student.studentName}
-                        </option>
-                      ))
-                    )}
-                  </select>
-                )}
+
 
                 {/* Marks Box (Points adjustments very close to selectors) */}
                 <div className="h-12 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex items-center overflow-hidden flex-shrink-0 shadow-sm">
@@ -1295,11 +1273,11 @@ function AnalysisHUDPageContent() {
               {/* RIGHT PANE: AI Step Traces / Conversation (30% width) */}
               <div 
                 ref={rightPaneRef}
-                className="flex-[3] p-6 overflow-y-auto flex flex-col gap-4 scroll-smooth bg-[var(--surface-primary)]"
+                className="flex-[3] p-8 overflow-y-auto flex flex-col gap-6 scroll-smooth bg-[var(--surface-primary)]"
                 style={{
                   border: "1px solid var(--border-subtle)",
-                  margin: "8px",
-                  borderRadius: "12px",
+                  margin: "12px",
+                  borderRadius: "16px",
                 }}
               >
                 <div className="flex items-center justify-between border-b pb-3 flex-shrink-0" style={{ borderBottomColor: "var(--border-subtle)" }}>
@@ -1327,7 +1305,7 @@ function AnalysisHUDPageContent() {
                         key={step.stepNum}
                         id={`step-card-${step.stepNum}`}
                         onClick={() => setHighlightedStep(step.stepNum)}
-                        className={`p-3.5 rounded-xl border transition-all duration-200 cursor-pointer relative overflow-hidden flex-shrink-0 flex flex-col gap-2 ${
+                        className={`p-6 rounded-xl border transition-all duration-200 cursor-pointer relative overflow-hidden flex-shrink-0 flex flex-col gap-4 ${
                           isStepHighlighted ? "bg-[var(--surface-secondary)] border-[var(--text-primary)]" : "bg-transparent border-[var(--border-subtle)]"
                         }`}
                       >
@@ -1439,27 +1417,25 @@ function AnalysisHUDPageContent() {
       </div>
 
       <footer 
-        className="flex-shrink-0 bg-[var(--surface-primary)] p-4 flex justify-center items-center"
         style={{
           position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 50,
-          borderTop: "1px solid var(--border-subtle)",
-          boxShadow: "0 -4px 12px rgba(0,0,0,0.05)",
+          bottom: "32px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 1000,
+          width: "70%",
+          maxWidth: "700px",
+          pointerEvents: "auto",
         }}
       >
         
-        {/* Chat Input Box (Claude web style, 70% width, centered, padded) */}
+        {/* Chat Input Box (Claude web style, centered, padded) */}
         <div 
-          className="rounded-2xl flex flex-col p-5 gap-3.5 border transition-all shadow-sm"
+          className="rounded-2xl flex flex-col p-5 gap-3.5 border transition-all shadow-xl"
           style={{
-            width: "70%",
-            maxWidth: "700px",
-            background: "var(--surface-secondary)",
+            background: "var(--surface-primary)",
             borderColor: "var(--border-subtle)",
-            margin: "16px auto",
+            boxShadow: "0 10px 30px -10px rgba(0,0,0,0.3)",
           }}
         >
           {/* Text input on top with padding */}
