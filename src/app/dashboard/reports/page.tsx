@@ -119,7 +119,7 @@ export default function ReportsPage() {
   return (
     <div className="flex flex-col gap-8 w-full animate-fade-in relative z-10" style={{ padding: "4px 0" }}>
       {/* Title area */}
-      <div className="relative overflow-hidden bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm" style={{ padding: "28px 32px" }}>
+      <div className="relative overflow-hidden" style={{ padding: "8px 0" }}>
         <div className="flex flex-col gap-2">
           <div
             className="flex items-center gap-2 w-max"
