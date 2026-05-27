@@ -530,21 +530,21 @@ function AnalysisHUDPageContent() {
   }
 
   return (
-    <div className="min-h-screen w-screen p-4 font-sans overflow-hidden flex flex-col" style={{ background: "#f0f0f0" }}>
+    <div className="min-h-screen w-full flex flex-col font-sans" style={{ background: "#0c0d0e" }}>
       
-      <div className="flex-1 mx-auto w-full max-w-[900px] rounded-lg overflow-hidden shadow-lg flex flex-col" style={{ background: "#fff" }}>
+      <div className="flex-1 w-full flex flex-col" style={{ background: "#0c0d0e" }}>
         
         {/* ==========================================
-            1. TOP NAVIGATION
+            1. TOP NAVIGATION (Premium Dark Themed Header)
            ========================================== */}
-        <header className="h-12 px-4 flex items-center gap-3 border-b" style={{ background: "#e0e0e0", borderBottomColor: "#ccc" }}>
+        <header className="h-16 px-6 border-b border-[var(--border-subtle)] bg-[var(--surface-primary)] flex items-center justify-between sticky top-0 z-40 backdrop-blur-md bg-opacity-80 gap-4">
           
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-8 h-8 rounded flex items-center justify-center font-bold text-white text-xs" style={{ background: "#4caf50" }}>
+            <div className="w-8 h-8 rounded bg-gradient-to-tr from-brand-600 to-brand-400 text-white flex items-center justify-center font-bold text-[13px] shadow-sm">
               Oz
             </div>
-            <span className="hidden sm:inline text-sm font-semibold text-gray-700">OzymorLab</span>
+            <span className="hidden sm:inline text-[15px] font-bold text-[var(--text-primary)] tracking-tight">OzymorLab</span>
           </Link>
 
           {/* Navigation Tabs */}
@@ -553,11 +553,11 @@ function AnalysisHUDPageContent() {
               <Link
                 key={idx}
                 href={tab.href}
-                className="px-3 py-1 rounded text-xs font-medium transition-all"
-                style={{
-                  background: tab.active ? "#4caf50" : "transparent",
-                  color: tab.active ? "#fff" : "#666"
-                }}
+                className={`px-3 py-1.5 rounded-xl text-[12px] font-bold transition-all ${
+                  tab.active 
+                    ? "bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-brand-600 shadow-sm"
+                    : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+                }`}
               >
                 {tab.name}
               </Link>
@@ -570,15 +570,21 @@ function AnalysisHUDPageContent() {
               <>
                 <button
                   onClick={() => switchViewMode("student")}
-                  className="h-7 px-3 rounded text-xs font-medium text-white transition-all"
-                  style={{ background: viewMode === "student" ? "#2196f3" : "#90caf9" }}
+                  className={`h-8 px-3.5 rounded-xl text-[11px] font-bold transition-all border cursor-pointer ${
+                    viewMode === "student"
+                      ? "bg-brand-500 text-white border-brand-500"
+                      : "bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]"
+                  }`}
                 >
                   Evaluations
                 </button>
                 <button
                   onClick={() => switchViewMode("self-eval")}
-                  className="h-7 px-3 rounded text-xs font-medium text-white transition-all"
-                  style={{ background: viewMode === "self-eval" ? "#2196f3" : "#90caf9" }}
+                  className={`h-8 px-3.5 rounded-xl text-[11px] font-bold transition-all border cursor-pointer ${
+                    viewMode === "self-eval"
+                      ? "bg-brand-500 text-white border-brand-500"
+                      : "bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]"
+                  }`}
                 >
                   Self-Eval
                 </button>
@@ -587,22 +593,31 @@ function AnalysisHUDPageContent() {
               <>
                 <button
                   onClick={() => switchViewMode("teacher")}
-                  className="h-7 px-3 rounded text-xs font-medium text-white transition-all"
-                  style={{ background: viewMode === "teacher" ? "#2196f3" : "#90caf9" }}
+                  className={`h-8 px-3.5 rounded-xl text-[11px] font-bold transition-all border cursor-pointer ${
+                    viewMode === "teacher"
+                      ? "bg-brand-500 text-white border-brand-500"
+                      : "bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]"
+                  }`}
                 >
                   Teacher
                 </button>
                 <button
                   onClick={() => switchViewMode("student")}
-                  className="h-7 px-3 rounded text-xs font-medium text-white transition-all"
-                  style={{ background: viewMode === "student" ? "#2196f3" : "#90caf9" }}
+                  className={`h-8 px-3.5 rounded-xl text-[11px] font-bold transition-all border cursor-pointer ${
+                    viewMode === "student"
+                      ? "bg-brand-500 text-white border-brand-500"
+                      : "bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]"
+                  }`}
                 >
                   Student
                 </button>
                 <button
                   onClick={() => switchViewMode("self-eval")}
-                  className="h-7 px-3 rounded text-xs font-medium text-white transition-all"
-                  style={{ background: viewMode === "self-eval" ? "#2196f3" : "#90caf9" }}
+                  className={`h-8 px-3.5 rounded-xl text-[11px] font-bold transition-all border cursor-pointer ${
+                    viewMode === "self-eval"
+                      ? "bg-brand-500 text-white border-brand-500"
+                      : "bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]"
+                  }`}
                 >
                   Sandbox
                 </button>
@@ -610,9 +625,10 @@ function AnalysisHUDPageContent() {
             )}
             
             <button
-              onClick={() => {/* handle logout */}}
-              className="h-7 px-3 rounded text-xs font-medium text-white transition-all ml-1"
-              style={{ background: "#f44336" }}
+              onClick={() => {
+                window.location.href = "/login";
+              }}
+              className="h-8 px-3.5 rounded-xl text-[11px] font-bold bg-red-600/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all cursor-pointer ml-1"
             >
               Log-Out
             </button>
@@ -622,14 +638,14 @@ function AnalysisHUDPageContent() {
         {/* ==========================================
             2. QUESTION BAR
            ========================================== */}
-        <section className="px-4 py-2.5 flex items-center gap-2.5 border-b" style={{ background: "#f5f5f5", borderBottomColor: "#ddd" }}>
+        <section className="px-6 py-4 flex items-center gap-3 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] bg-opacity-40">
           
           {/* Question Selector */}
           <div className="flex-1 flex items-center gap-2">
             {isLoadingRoster ? (
-              <div className="flex-1 h-14 rounded border flex items-center px-3" style={{ background: "#fff", borderColor: "#ccc" }}>
-                <Loader2 className="animate-spin mr-2" size={16} style={{ color: "#4caf50" }} />
-                <span className="text-sm text-gray-500">Loading submissions...</span>
+              <div className="flex-1 h-12 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex items-center px-4" style={{ color: "var(--text-tertiary)" }}>
+                <Loader2 className="animate-spin mr-2 text-[var(--text-primary)]" size={16} />
+                <span className="text-[12.5px] font-medium">Loading submissions...</span>
               </div>
             ) : (
               <select
@@ -639,8 +655,7 @@ function AnalysisHUDPageContent() {
                   setHighlightedStep(null);
                   setChatMessages([]);
                 }}
-                className="flex-1 h-14 px-3 rounded text-sm font-medium border focus:outline-none"
-                style={{ background: "#fff", borderColor: "#ccc" }}
+                className="flex-1 h-12 px-4 rounded-xl text-[13px] font-bold bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm cursor-pointer"
                 disabled={tasks.length === 0}
               >
                 {tasks.length === 0 ? (
@@ -654,8 +669,8 @@ function AnalysisHUDPageContent() {
             )}
             
             {activeQuestion.id && (
-              <div className="hidden lg:flex items-center gap-2 text-xs text-gray-500">
-                <span className="px-1.5 py-0.5 rounded uppercase" style={{ background: "#e8f5e9", color: "#2e7d32" }}>
+              <div className="hidden lg:flex items-center gap-3 text-[11px] text-[var(--text-secondary)] font-mono font-semibold">
+                <span className="px-2.5 py-0.5 rounded-full uppercase border border-[var(--border-subtle)] bg-[var(--surface-secondary)]">
                   {activeQuestion.difficulty}
                 </span>
                 <span>Avg: {activeQuestion.avgClassScore}%</span>
@@ -665,59 +680,61 @@ function AnalysisHUDPageContent() {
           </div>
 
           {/* Confidence Indicator */}
-          <div className="w-9 h-9 rounded flex items-center justify-center flex-shrink-0" 
-            style={{ background: activeQuestion.confidence > 80 ? "#388e3c" : activeQuestion.confidence > 50 ? "#f57c00" : "#c62828" }} 
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 border border-[var(--border-subtle)]" 
+            style={{ 
+              background: activeQuestion.confidence > 80 ? "rgba(16,185,129,0.15)" : activeQuestion.confidence > 50 ? "rgba(245,158,11,0.15)" : "rgba(239,68,68,0.15)",
+              color: activeQuestion.confidence > 80 ? "#10b981" : activeQuestion.confidence > 50 ? "#f59e0b" : "#ef4444"
+            }} 
             title={`AI Confidence: ${activeQuestion.confidence}%`}
           >
-            <div className="w-3 h-3 rounded-full bg-white opacity-75" />
+            <Sparkles size={16} />
           </div>
 
           {/* Correctness Indicator */}
           {activeSteps.length > 0 && (
-            <div className="w-9 h-9 rounded border-2 flex items-center justify-center flex-shrink-0" 
+            <div className="w-10 h-10 rounded-xl border flex items-center justify-center flex-shrink-0" 
               style={{ 
-                background: activeSteps.every((s) => s.sympyValid !== false) ? "#e0f2f1" : "#ffebee",
-                borderColor: activeSteps.every((s) => s.sympyValid !== false) ? "#26a69a" : "#ef9a9a",
-                color: activeSteps.every((s) => s.sympyValid !== false) ? "#26a69a" : "#c62828"
+                background: activeSteps.every((s) => s.sympyValid !== false) ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.15)",
+                borderColor: activeSteps.every((s) => s.sympyValid !== false) ? "rgba(16,185,129,0.3)" : "rgba(239,68,68,0.3)",
+                color: activeSteps.every((s) => s.sympyValid !== false) ? "#10b981" : "#ef4444"
               }}
             >
               {activeSteps.every((s) => s.sympyValid !== false) ? (
-                <CheckCircle2 size={20} strokeWidth={2.5} />
+                <CheckCircle2 size={18} strokeWidth={2.5} />
               ) : (
-                <AlertTriangle size={20} strokeWidth={2.5} />
+                <AlertTriangle size={18} strokeWidth={2.5} />
               )}
             </div>
           )}
 
           {/* Marks Box */}
-          <div className="h-9 rounded border-2 flex items-center overflow-hidden flex-shrink-0" style={{ background: "#fff", borderColor: "#ccc" }}>
-            <div className="px-3 text-center border-r" style={{ borderRightColor: "#ccc" }}>
-              <span className="text-sm font-bold" style={{ color: "#2e7d32" }}>
+          <div className="h-10 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex items-center overflow-hidden flex-shrink-0">
+            <div className="px-4 text-center border-r border-[var(--border-subtle)]">
+              <span className="text-[13px] font-mono font-bold text-[var(--text-primary)]">
                 {activeStudent.score?.toFixed(1) || "0.0"}
-                <span className="text-xs text-gray-500 font-normal">/{activeQuestion.maxMarks || 0}</span>
+                <span className="text-[11px] text-[var(--text-tertiary)] font-normal font-sans"> / {activeQuestion.maxMarks || 0} pts</span>
               </span>
             </div>
             
             {viewMode === "teacher" ? (
-              <div className="flex flex-col" style={{ background: "#f5f5f5" }}>
+              <div className="flex flex-col h-full bg-[var(--surface-primary)]">
                 <button
                   onClick={() => adjustTotalMarks(0.5)}
-                  className="w-6 flex-1 flex items-center justify-center text-xs font-bold hover:text-green-700 border-b"
-                  style={{ borderBottomColor: "#ddd" }}
+                  className="w-7 flex-1 flex items-center justify-center text-[10px] font-bold text-[var(--text-secondary)] hover:text-brand-600 hover:bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] cursor-pointer"
                   disabled={!selectedStudentId}
                 >
                   +
                 </button>
                 <button
                   onClick={() => adjustTotalMarks(-0.5)}
-                  className="w-6 flex-1 flex items-center justify-center text-xs font-bold hover:text-green-700"
+                  className="w-7 flex-1 flex items-center justify-center text-[10px] font-bold text-[var(--text-secondary)] hover:text-brand-600 hover:bg-[var(--surface-secondary)] cursor-pointer"
                   disabled={!selectedStudentId}
                 >
                   -
                 </button>
               </div>
             ) : (
-              <div className="px-2.5 text-xs font-bold uppercase flex items-center" style={{ background: "#e8f5e9", color: "#2e7d32" }}>
+              <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-brand-600 bg-brand-500/10 font-mono flex items-center h-full">
                 Locked
               </div>
             )}
@@ -732,7 +749,7 @@ function AnalysisHUDPageContent() {
           {/* ==========================================
               3A. SIDEBAR
              ========================================== */}
-          <aside className="w-12 flex flex-col items-center gap-2 py-3 border-r overflow-y-auto" style={{ background: "#ececec", borderRightColor: "#ddd" }}>
+          <aside className="w-14 flex flex-col items-center gap-3 py-4 border-r border-[var(--border-subtle)] overflow-y-auto shrink-0 bg-[var(--surface-primary)]">
             
             {/* Teacher Roster Flags */}
             {viewMode === "teacher" && !isLoadingRoster && roster.map((student) => {
@@ -740,7 +757,7 @@ function AnalysisHUDPageContent() {
                 "red-d": "#c62828",
                 "red": "#ef5350",
                 "red-l": "#ef9a9a",
-                "white": "#fff",
+                "white": "var(--surface-secondary)",
                 "green-l": "#a5d6a7",
                 "green": "#66bb6a",
                 "green-d": "#2e7d32"
@@ -756,13 +773,13 @@ function AnalysisHUDPageContent() {
                     setHighlightedStep(null);
                     setChatMessages([]);
                   }}
-                  className={`w-7 h-5.5 rounded flex items-center justify-center font-bold text-[10px] relative group transition-all flex-shrink-0 ${
-                    isActive ? "ring-2 ring-blue-500 ring-offset-1 scale-105" : "opacity-80 hover:opacity-100 hover:scale-105"
+                  className={`w-9 h-7 rounded-lg flex items-center justify-center font-bold text-[11px] relative group transition-all flex-shrink-0 cursor-pointer ${
+                    isActive ? "ring-2 ring-brand-500 ring-offset-1 ring-offset-[var(--surface-primary)] scale-105" : "opacity-80 hover:opacity-100 hover:scale-105"
                   }`}
                   style={{ 
                     background: flagColors[student.flagColor] || "#fff",
-                    border: student.flagColor === "white" ? "1px solid #ccc" : "none",
-                    color: ["white", "green-l", "red-l"].includes(student.flagColor) ? "#333" : "#fff"
+                    border: student.flagColor === "white" ? "1px solid var(--border-subtle)" : "none",
+                    color: ["white", "green-l", "red-l"].includes(student.flagColor) ? "var(--text-primary)" : "#fff"
                   }}
                   title={`${student.studentName} - Score: ${student.score}/${student.maxScore}`}
                 >
@@ -772,11 +789,11 @@ function AnalysisHUDPageContent() {
             })}
 
             {viewMode === "teacher" && isLoadingRoster && (
-              <Loader2 className="animate-spin mt-2" size={16} style={{ color: "#4caf50" }} />
+              <Loader2 className="animate-spin mt-2 text-[var(--text-primary)]" size={16} />
             )}
 
             {viewMode === "teacher" && !isLoadingRoster && roster.length === 0 && (
-              <span className="text-[10px] text-gray-500 text-center px-1">No submissions</span>
+              <span className="text-[9px] text-[var(--text-tertiary)] font-bold text-center px-1 font-mono uppercase">None</span>
             )}
 
             {/* Student Question Flags */}
@@ -790,12 +807,13 @@ function AnalysisHUDPageContent() {
                     setHighlightedStep(null);
                     setChatMessages([]);
                   }}
-                  className={`w-7 h-5.5 rounded flex items-center justify-center font-bold font-mono text-[10px] transition-all flex-shrink-0 ${
-                    isSelected ? "ring-2 ring-blue-500 ring-offset-1 scale-105" : "opacity-80 hover:opacity-100 hover:scale-105"
+                  className={`w-9 h-7 rounded-lg flex items-center justify-center font-bold font-mono text-[11px] transition-all flex-shrink-0 cursor-pointer ${
+                    isSelected ? "ring-2 ring-brand-500 ring-offset-1 ring-offset-[var(--surface-primary)] scale-105" : "opacity-80 hover:opacity-100 hover:scale-105"
                   }`}
                   style={{ 
-                    background: isSelected ? "#4caf50" : "#66bb6a",
-                    color: "#fff"
+                    background: isSelected ? "var(--text-primary)" : "var(--surface-secondary)",
+                    color: isSelected ? "var(--surface-primary)" : "var(--text-secondary)",
+                    border: "1px solid var(--border-subtle)"
                   }}
                   title={question.title}
                 >
@@ -816,13 +834,13 @@ function AnalysisHUDPageContent() {
                     setHighlightedStep(null);
                     setChatMessages([]);
                   }}
-                  className={`w-7 h-5.5 rounded flex items-center justify-center font-bold font-mono text-[10px] transition-all flex-shrink-0 ${
-                    isSelected ? "ring-2 ring-blue-500 ring-offset-1 scale-105" : "opacity-80 hover:opacity-100 hover:scale-105"
+                  className={`w-9 h-7 rounded-lg flex items-center justify-center font-bold font-mono text-[11px] transition-all flex-shrink-0 cursor-pointer ${
+                    isSelected ? "ring-2 ring-brand-500 ring-offset-1 ring-offset-[var(--surface-primary)] scale-105" : "opacity-80 hover:opacity-100 hover:scale-105"
                   }`}
                   style={{ 
-                    background: isSelected ? "#4caf50" : "#fff",
-                    border: isSelected ? "none" : "1px solid #ccc",
-                    color: isSelected ? "#fff" : "#666"
+                    background: isSelected ? "var(--text-primary)" : "var(--surface-secondary)",
+                    border: isSelected ? "none" : "1px solid var(--border-subtle)",
+                    color: isSelected ? "var(--surface-primary)" : "var(--text-secondary)"
                   }}
                   title={practice.title}
                 >
@@ -832,7 +850,7 @@ function AnalysisHUDPageContent() {
             })}
 
             {viewMode === "self-eval" && isLoadingPractices && (
-              <Loader2 className="animate-spin mt-2" size={16} style={{ color: "#4caf50" }} />
+              <Loader2 className="animate-spin mt-2 text-[var(--text-primary)]" size={16} />
             )}
 
             {/* New Practice Button */}
@@ -843,11 +861,11 @@ function AnalysisHUDPageContent() {
                   setHighlightedStep(null);
                   setChatMessages([]);
                 }}
-                className="w-7 h-5.5 rounded border border-dashed flex items-center justify-center transition-all flex-shrink-0"
+                className="w-9 h-7 rounded-lg border border-dashed flex items-center justify-center transition-all flex-shrink-0 cursor-pointer"
                 style={{ 
-                  borderColor: isCreatingPractice ? "#4caf50" : "#ccc",
-                  background: isCreatingPractice ? "#e8f5e9" : "#fff",
-                  color: "#4caf50"
+                  borderColor: isCreatingPractice ? "var(--text-primary)" : "var(--border-subtle)",
+                  background: isCreatingPractice ? "rgba(255,255,255,0.05)" : "transparent",
+                  color: "var(--text-primary)"
                 }}
                 title="Create New Practice"
               >
@@ -862,16 +880,16 @@ function AnalysisHUDPageContent() {
           <main className="flex-1 flex flex-col min-w-0">
             
             {/* Answer Label Bar */}
-            <div className="h-8 px-4 flex items-center border-b text-xs text-gray-500 flex-shrink-0" style={{ background: "#f5f5f5", borderBottomColor: "#ddd" }}>
+            <div className="h-10 px-6 flex items-center border-b text-xs text-[var(--text-secondary)] flex-shrink-0 font-medium" style={{ background: "var(--surface-primary)", borderBottomColor: "var(--border-subtle)" }}>
               {isLoadingDetail ? (
                 <div className="flex items-center gap-2">
-                  <Loader2 className="animate-spin" size={12} style={{ color: "#4caf50" }} />
+                  <Loader2 className="animate-spin text-[var(--text-primary)]" size={12} />
                   <span>Loading submission details...</span>
                 </div>
               ) : activeSteps.length > 0 ? (
                 <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#4caf50" }} />
-                  <span className="font-bold uppercase" style={{ color: "#4caf50" }}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-500" />
+                  <span className="font-bold font-mono uppercase text-brand-600">
                     {activeSteps.length} Steps Digitized
                   </span>
                   <span>• Student: {activeStudent.studentName}</span>
@@ -882,31 +900,30 @@ function AnalysisHUDPageContent() {
             </div>
 
             {/* Double-Pane Workspace */}
-            <div className="flex-1 flex flex-col md:flex-row min-h-0">
+            <div className="flex-1 flex flex-col md:flex-row min-h-0 bg-[var(--surface-secondary)]">
               
               {/* LEFT PANE: Digital Manuscript */}
-              <div className="flex-1 p-3 overflow-y-auto border-r" style={{ background: "#d6d6d6", borderRightColor: "#ddd", minHeight: "220px" }}>
+              <div className="flex-1 p-4 overflow-y-auto border-r border-[var(--border-subtle)]" style={{ background: "#161718", minHeight: "220px" }}>
                 
                 {isCreatingPractice ? (
                   /* Practice Creation Form */
-                  <div className="flex flex-col gap-4 p-4 rounded-lg border" style={{ background: "#fff", borderColor: "#ccc" }}>
+                  <div className="flex flex-col gap-4 p-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-primary)] shadow-sm">
                     <div>
-                      <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: "#4caf50" }}>
-                        <Sparkles size={14} />
-                        Configure New Practice Attempt
+                      <h3 className="text-[14px] font-bold flex items-center gap-2 text-[var(--text-primary)] font-mono uppercase tracking-wider">
+                        <Sparkles size={14} className="text-brand-600" />
+                        Configure Practice Workspace
                       </h3>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Upload your answer sheet and select a rubric to grade privately.
+                      <p className="text-[11.5px] text-[var(--text-secondary)] mt-0.5">
+                        Upload your handwritten sheets to trigger private step-grading.
                       </p>
                     </div>
                     
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold uppercase text-gray-600">1. Assessment Rubric</label>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] font-mono">1. Assessment Rubric</label>
                       <select 
                         value={practiceRubric} 
                         onChange={(e) => setPracticeRubric(e.target.value)}
-                        className="h-10 px-3 rounded border text-sm focus:outline-none"
-                        style={{ background: "#f5f5f5", borderColor: "#ccc" }}
+                        className="h-11 px-3.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 cursor-pointer font-medium"
                       >
                         <option value="">Select a rubric...</option>
                         <option value="CBSE Physics Class 12 - Electrostatics (15 Marks)">CBSE Physics - Electrostatics (15 Marks)</option>
@@ -916,27 +933,20 @@ function AnalysisHUDPageContent() {
                     </div>
 
                     {practiceRubric === "Custom Rubric (Paste text below)" && (
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold uppercase text-gray-600">Paste Custom Rubric</label>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] font-mono">Paste Custom Rubric</label>
                         <textarea 
                           value={customRubricText}
                           onChange={(e) => setCustomRubricText(e.target.value)}
                           placeholder="Step 1: Coulomb's Law statement (2 marks)\nStep 2: Surface integration (3 marks)..."
-                          className="p-3 rounded border text-xs focus:outline-none min-h-[80px]"
-                          style={{ background: "#f5f5f5", borderColor: "#ccc" }}
+                          className="p-3.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 min-h-[90px]"
                         />
                       </div>
                     )}
 
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold uppercase text-gray-600">2. Upload Answer Sheet</label>
-                      <div className={`border border-dashed rounded-xl p-6 flex flex-col items-center justify-center relative transition-colors ${
-                        practiceFile ? "hover:border-green-600" : "hover:border-green-500"
-                      }`} 
-                        style={{ 
-                          background: "#fafafa", 
-                          borderColor: practiceFile ? "#4caf50" : "#ccc" 
-                        }}>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] font-mono">2. Upload Answer Sheet</label>
+                      <div className="border border-dashed border-[var(--border-subtle)] bg-[var(--surface-secondary)] bg-opacity-35 rounded-xl p-6 flex flex-col items-center justify-center relative transition-colors hover:border-brand-500 cursor-pointer">
                         <input 
                           type="file"
                           accept="image/*,.pdf"
@@ -946,45 +956,43 @@ function AnalysisHUDPageContent() {
                           }}
                           className="absolute inset-0 opacity-0 cursor-pointer"
                         />
-                        <Upload className="mb-2" size={24} style={{ color: "#4caf50" }} />
+                        <Upload className="mb-2 text-brand-600" size={24} />
                         {practiceFile ? (
                           <div className="text-center">
-                            <span className="text-xs font-semibold block truncate max-w-[200px]">{practiceFile.name}</span>
-                            <span className="text-[10px] text-gray-500 block">{(practiceFile.size / 1024).toFixed(0)} KB</span>
+                            <span className="text-[12px] font-bold text-[var(--text-primary)] block truncate max-w-[200px]">{practiceFile.name}</span>
+                            <span className="text-[10px] text-[var(--text-tertiary)] font-mono block">{(practiceFile.size / 1024).toFixed(0)} KB</span>
                           </div>
                         ) : (
                           <div className="text-center">
-                            <span className="text-xs font-semibold text-gray-600 block">Upload answer page photo or PDF</span>
-                            <span className="text-[10px] text-gray-500 block">Supports high-res handwriting scans</span>
+                            <span className="text-[12px] font-bold text-[var(--text-primary)] block">Upload answer page photo or PDF</span>
+                            <span className="text-[10px] text-[var(--text-tertiary)] block mt-0.5 font-medium">Supports high-res scans &amp; camera snapshots</span>
                           </div>
                         )}
                       </div>
                     </div>
 
                     {practiceError && (
-                      <div className="p-2 rounded text-xs flex items-center gap-1.5" style={{ background: "#ffebee", color: "#c62828", border: "1px solid #ef9a9a" }}>
-                        <AlertTriangle size={12} />
+                      <div className="p-3 rounded-xl text-xs flex items-center gap-1.5 bg-red-500/10 border border-red-500/20 text-red-500">
+                        <AlertTriangle size={12} className="shrink-0" />
                         {practiceError}
                       </div>
                     )}
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-3 mt-2">
                       <button
                         onClick={() => {
                           setIsCreatingPractice(false);
                           setPracticeFile(null);
                           setPracticeError("");
                         }}
-                        className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors border"
-                        style={{ background: "#fff", borderColor: "#ccc", color: "#666" }}
+                        className="flex-1 py-2.5 rounded-xl text-[12px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-primary)] cursor-pointer"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={handleRunPracticeGrading}
                         disabled={isGradingPractice || !practiceFile || !practiceRubric}
-                        className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
-                        style={{ background: "#4caf50" }}
+                        className="flex-1 py-2.5 rounded-xl text-[12px] font-bold text-white transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5 bg-brand-500 hover:bg-brand-600 cursor-pointer"
                       >
                         {isGradingPractice ? (
                           <>
@@ -994,7 +1002,7 @@ function AnalysisHUDPageContent() {
                         ) : (
                           <>
                             <Play size={13} />
-                            Run AI Practice Grading
+                            Grade Sheet
                           </>
                         )}
                       </button>
@@ -1004,26 +1012,25 @@ function AnalysisHUDPageContent() {
                   <>
                     {/* Question Card */}
                     {activeQuestion.questionText && (
-                      <div className="mb-3 p-4 rounded-lg border" style={{ background: "#fff", borderColor: "#ccc" }}>
-                        <span className="text-[10px] uppercase font-semibold block mb-1 text-gray-500">
+                      <div className="mb-3 p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-primary)]">
+                        <span className="text-[10px] uppercase font-mono font-bold block mb-1.5 text-[var(--text-tertiary)]">
                           {viewMode === "self-eval" ? "Practice Exercise" : "Assigned Question"}
                         </span>
-                        <p className="text-sm leading-relaxed font-mono font-medium">{activeQuestion.questionText}</p>
+                        <p className="text-sm leading-relaxed font-mono font-bold text-[var(--text-primary)]">{activeQuestion.questionText}</p>
                       </div>
                     )}
 
-                    {/* Manuscript Canvas */}
-                    <div className="flex-1 min-h-[260px] rounded-lg border relative overflow-hidden flex flex-col" 
+                    {/* Manuscript Canvas (Premium Grid Background) */}
+                    <div className="flex-1 min-h-[260px] rounded-xl border border-[var(--border-subtle)] relative overflow-hidden flex flex-col" 
                       style={{ 
-                        background: "#fafafa", 
-                        borderColor: "#ddd",
-                        backgroundImage: "radial-gradient(rgba(0,0,0,0.08) 1px, transparent 1px)",
-                        backgroundSize: "16px 16px"
+                        background: "#161718", 
+                        backgroundImage: "radial-gradient(rgba(255,255,255,0.05) 1.5px, transparent 1.5px)",
+                        backgroundSize: "18px 18px"
                       }}>
                       
-                      <div className="border-b border-dashed py-2.5 px-4 flex justify-between items-center text-[10px] uppercase text-gray-500 flex-shrink-0" style={{ borderBottomColor: "#ddd" }}>
+                      <div className="border-b border-dashed border-[var(--border-subtle)] py-3 px-4 flex justify-between items-center text-[10px] uppercase text-[var(--text-tertiary)] font-bold flex-shrink-0">
                         <span>Sheet #{selectedStudentId?.slice(-4) || "0000"} - OCR Manuscript</span>
-                        <span className="font-semibold" style={{ color: "#4caf50" }}>
+                        <span className="font-semibold text-brand-600">
                           {activeSteps.length > 0 ? "Verified" : "Pending"}
                         </span>
                       </div>
@@ -1032,10 +1039,10 @@ function AnalysisHUDPageContent() {
                         
                         {isLoadingDetail ? (
                           <div className="flex items-center justify-center flex-1">
-                            <Loader2 className="animate-spin" size={24} style={{ color: "#4caf50" }} />
+                            <Loader2 className="animate-spin text-[var(--text-primary)]" size={24} />
                           </div>
                         ) : activeSteps.length === 0 ? (
-                          <div className="flex items-center justify-center flex-1 text-gray-500 text-sm">
+                          <div className="flex items-center justify-center flex-1 text-[var(--text-tertiary)] text-xs font-mono font-bold uppercase tracking-wider">
                             {selectedStudentId ? "No OCR steps available for this submission" : "Select a submission to view OCR steps"}
                           </div>
                         ) : (
@@ -1048,33 +1055,32 @@ function AnalysisHUDPageContent() {
                                 key={step.stepNum}
                                 onClick={() => setHighlightedStep(step.stepNum)}
                                 className={`relative p-3 rounded-lg border border-dashed transition-all duration-300 cursor-pointer ${
-                                  isStepHighlighted ? "shadow-md scale-[1.01]" : "hover:bg-gray-50"
+                                  isStepHighlighted ? "shadow-md scale-[1.01]" : "hover:bg-white/5"
                                 }`}
                                 style={{
-                                  background: isStepHighlighted ? "#e8f5e9" : "transparent",
-                                  borderColor: isStepErroneous ? "#ef9a9a" : isStepHighlighted ? "#4caf50" : "transparent"
+                                  background: isStepHighlighted ? "rgba(16,185,129,0.08)" : "transparent",
+                                  borderColor: isStepErroneous ? "rgba(239,68,68,0.4)" : isStepHighlighted ? "#10b981" : "transparent"
                                 }}
                               >
-                                <div className="absolute -top-2 left-2 text-white font-mono text-[8px] px-1 py-0.5 rounded shadow uppercase z-10" 
-                                  style={{ background: "#333" }}>
+                                <div className="absolute -top-2 left-2 text-[var(--text-primary)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] font-mono font-bold text-[8px] px-1.5 py-0.5 rounded shadow uppercase z-10">
                                   Step {step.stepNum} (OCR)
                                 </div>
 
                                 <div className="pl-4 py-1">
-                                  <code className="text-sm font-mono font-bold">{step.latex}</code>
-                                  <span className="text-xs text-gray-500 italic block mt-0.5">{step.text}</span>
+                                  <code className="text-sm font-mono font-bold text-[var(--text-primary)]">{step.latex}</code>
+                                  <span className="text-xs text-[var(--text-secondary)] italic block mt-0.5">{step.text}</span>
                                 </div>
 
                                 <div className="absolute right-2 top-2 flex items-center gap-1.5">
                                   {step.sympyValid === true && (
                                     <span className="w-5 h-5 rounded flex items-center justify-center" 
-                                      style={{ background: "#e8f5e9", color: "#2e7d32", border: "1px solid #a5d6a7" }}>
+                                      style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", border: "1px solid rgba(16,185,129,0.3)" }}>
                                       <Check size={11} strokeWidth={3} />
                                     </span>
                                   )}
                                   {step.sympyValid === false && (
                                     <span className="w-5 h-5 rounded flex items-center justify-center" 
-                                      style={{ background: "#ffebee", color: "#c62828", border: "1px solid #ef9a9a" }}>
+                                      style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }}>
                                       <X size={11} strokeWidth={3} />
                                     </span>
                                   )}
@@ -1094,24 +1100,24 @@ function AnalysisHUDPageContent() {
               {/* RIGHT PANE: AI Step Traces */}
               <div 
                 ref={rightPaneRef}
-                className="flex-1 p-4 overflow-y-auto flex flex-col gap-3 scroll-smooth"
+                className="flex-1 p-4 overflow-y-auto flex flex-col gap-3 scroll-smooth bg-[var(--surface-primary)]"
               >
-                <div className="flex items-center justify-between border-b pb-2 flex-shrink-0" style={{ borderBottomColor: "#ddd" }}>
-                  <h3 className="font-semibold text-sm flex items-center gap-2">
-                    <Sparkles size={14} style={{ color: "#4caf50" }} />
+                <div className="flex items-center justify-between border-b pb-2.5 flex-shrink-0" style={{ borderBottomColor: "var(--border-subtle)" }}>
+                  <h3 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)]">
+                    <Sparkles size={14} className="text-brand-600" />
                     AI Grading Step Traces
                   </h3>
-                  <span className="text-[10px] uppercase rounded px-2 py-0.5 text-gray-500" style={{ background: "#f5f5f5" }}>
+                  <span className="text-[10px] font-mono font-bold uppercase rounded-lg border border-[var(--border-subtle)] px-2.5 py-0.5 text-[var(--text-secondary)] bg-[var(--surface-secondary)]">
                     {activeSteps.length} Steps
                   </span>
                 </div>
 
                 {isLoadingDetail ? (
                   <div className="flex items-center justify-center flex-1">
-                    <Loader2 className="animate-spin" size={24} style={{ color: "#4caf50" }} />
+                    <Loader2 className="animate-spin text-[var(--text-primary)]" size={24} />
                   </div>
                 ) : activeSteps.length === 0 ? (
-                  <div className="flex items-center justify-center flex-1 text-gray-500 text-sm">
+                  <div className="flex items-center justify-center flex-1 text-[var(--text-tertiary)] text-xs font-mono font-bold uppercase tracking-wider">
                     No step traces available
                   </div>
                 ) : (
@@ -1124,42 +1130,42 @@ function AnalysisHUDPageContent() {
                         key={step.stepNum}
                         id={`step-card-${step.stepNum}`}
                         onClick={() => setHighlightedStep(step.stepNum)}
-                        className={`p-4 rounded-lg border transition-all duration-300 cursor-pointer relative overflow-hidden flex-shrink-0 ${
+                        className={`p-4 rounded-xl border transition-all duration-300 cursor-pointer relative overflow-hidden flex-shrink-0 ${
                           isStepHighlighted ? "shadow-md scale-[1.01]" : ""
                         }`}
                         style={{
-                          background: isStepHighlighted ? "#e8f5e9" : "#fff",
-                          borderColor: isStepErroneous ? "#ef9a9a" : isStepHighlighted ? "#4caf50" : "#ddd"
+                          background: isStepHighlighted ? "rgba(16,185,129,0.08)" : "var(--surface-secondary)",
+                          borderColor: isStepErroneous ? "rgba(239,68,68,0.4)" : isStepHighlighted ? "#10b981" : "var(--border-subtle)"
                         }}
                       >
                         {isStepHighlighted && (
-                          <div className="absolute top-0 left-0 w-1.5 h-full" style={{ background: "#4caf50" }} />
+                          <div className="absolute top-0 left-0 w-1.5 h-full bg-[#10b981]" />
                         )}
 
-                        <div className="flex justify-between items-start mb-2">
+                        <div className="flex justify-between items-start mb-2.5">
                           <div>
-                            <span className="text-[10px] font-mono font-bold uppercase block" style={{ color: "#4caf50" }}>
+                            <span className="text-[10px] font-mono font-bold uppercase block text-[#10b981]">
                               Step {step.stepNum}: {step.type}
                             </span>
-                            <code className="text-sm font-mono font-semibold block mt-0.5">{step.latex}</code>
+                            <code className="text-sm font-mono font-bold block mt-0.5 text-[var(--text-primary)]">{step.latex}</code>
                           </div>
                           
                           <div className="text-right">
-                            <span className="text-sm font-bold font-mono">
-                              {step.marks} <span className="text-[10px] text-gray-500">/ {step.maxMarks}</span>
+                            <span className="text-sm font-bold font-mono text-[var(--text-primary)]">
+                              {step.marks} <span className="text-[10px] text-[var(--text-tertiary)]">/ {step.maxMarks}</span>
                             </span>
                           </div>
                         </div>
 
-                        <p className="text-xs text-gray-600 leading-relaxed mb-2.5">{step.justification}</p>
+                        <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-3 font-medium">{step.justification}</p>
 
                         <div className="flex flex-wrap gap-2 items-center text-[10px]">
                           
-                          <div className="px-2 py-0.5 rounded flex items-center gap-1 font-mono uppercase text-[9px]"
+                          <div className="px-2 py-0.5 rounded-lg flex items-center gap-1 font-mono uppercase text-[9px]"
                             style={{
-                              background: step.sympyValid === true ? "#e8f5e9" : step.sympyValid === false ? "#ffebee" : "#f5f5f5",
-                              color: step.sympyValid === true ? "#2e7d32" : step.sympyValid === false ? "#c62828" : "#999",
-                              border: `1px solid ${step.sympyValid === true ? "#a5d6a7" : step.sympyValid === false ? "#ef9a9a" : "#ddd"}`
+                              background: step.sympyValid === true ? "rgba(16,185,129,0.15)" : step.sympyValid === false ? "rgba(239,68,68,0.15)" : "var(--surface-secondary)",
+                              color: step.sympyValid === true ? "#10b981" : step.sympyValid === false ? "#ef4444" : "var(--text-tertiary)",
+                              border: `1px solid ${step.sympyValid === true ? "rgba(16,185,129,0.3)" : step.sympyValid === false ? "rgba(239,68,68,0.3)" : "var(--border-subtle)"}`
                             }}>
                             {step.sympyValid === true ? (
                               <>
@@ -1180,8 +1186,12 @@ function AnalysisHUDPageContent() {
                           </div>
 
                           {step.errorType && (
-                            <div className="px-2 py-0.5 rounded font-mono uppercase text-[9px] flex items-center gap-1" 
-                              style={{ background: "#ffebee", color: "#c62828", border: "1px solid #ef9a9a" }}>
+                            <div className="px-2 py-0.5 rounded-lg font-mono uppercase text-[9px] flex items-center gap-1" 
+                              style={{ 
+                                background: "rgba(239,68,68,0.15)", 
+                                color: "#ef4444", 
+                                border: "1px solid rgba(239,68,68,0.3)" 
+                              }}>
                               <AlertTriangle size={10} />
                               {step.errorType}
                             </div>
@@ -1197,21 +1207,21 @@ function AnalysisHUDPageContent() {
             </div>
 
             {/* ==========================================
-                4. CHAT BAR
+                4. CHAT BAR (Premium Rounded B&W Inputs)
                ========================================== */}
-            <footer className="border-t flex-shrink-0" style={{ background: "#f5f5f5", borderTopColor: "#ddd" }}>
+            <footer className="border-t border-[var(--border-subtle)] flex-shrink-0 bg-[var(--surface-primary)]">
               
               {/* Highlight Banner */}
               {highlightedStep && (
-                <div className="px-3 py-1.5 text-xs flex items-center justify-between" 
-                  style={{ background: "#e8f5e9", color: "#2e7d32", borderBottom: "1px solid #a5d6a7" }}>
+                <div className="px-4 py-2 text-xs flex items-center justify-between" 
+                  style={{ background: "rgba(16,185,129,0.12)", color: "#10b981", borderBottom: "1px solid rgba(16,185,129,0.25)" }}>
                   <div className="flex items-center gap-2">
-                    <Sparkles size={11} />
-                    <span>Aligned View to <strong>Step {highlightedStep}</strong> on the Manuscript OCR panel above.</span>
+                    <Sparkles size={12} className="animate-pulse" />
+                    <span>Aligned View to <strong className="font-mono">Step {highlightedStep}</strong> on the Manuscript OCR panel above.</span>
                   </div>
                   <button 
                     onClick={() => setHighlightedStep(null)} 
-                    className="text-xs uppercase hover:underline"
+                    className="text-[11px] uppercase tracking-wider font-bold hover:underline cursor-pointer"
                   >
                     Clear Link
                   </button>
@@ -1220,34 +1230,31 @@ function AnalysisHUDPageContent() {
 
               {/* Chat Messages */}
               {chatMessages.length > 0 && (
-                <div className="max-h-[120px] overflow-y-auto px-3 py-2 flex flex-col gap-2">
+                <div className="max-h-[140px] overflow-y-auto px-4 py-3 flex flex-col gap-2.5">
                   {chatMessages.map((msg, idx) => (
                     <div
                       key={idx}
-                      className={`flex items-start gap-2 max-w-[85%] ${
+                      className={`flex items-start gap-2.5 max-w-[85%] ${
                         msg.sender === "user" ? "ml-auto flex-row-reverse" : ""
                       }`}
                     >
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[9px] flex-shrink-0 ${
-                        msg.sender === "ai" ? "text-white" : "text-white"
-                      }`} style={{ background: msg.sender === "ai" ? "#4caf50" : "#666" }}>
+                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[9px] flex-shrink-0 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)]`}>
                         {msg.sender === "ai" ? "AI" : "U"}
                       </div>
 
-                      <div className={`p-2.5 rounded-lg text-xs leading-relaxed border ${
+                      <div className={`p-2.5 rounded-xl text-xs leading-relaxed border border-[var(--border-subtle)] ${
                         msg.sender === "ai" 
-                          ? "bg-white border-gray-200" 
-                          : "text-white"
-                      }`} style={{ background: msg.sender === "user" ? "#4caf50" : "#fff" }}>
+                          ? "bg-[var(--surface-secondary)] text-[var(--text-primary)]" 
+                          : "bg-[var(--surface-primary)] text-[var(--text-primary)]"
+                      }`}>
                         <p>{msg.text}</p>
                         
                         {msg.alignedStep && (
                           <div 
                             onClick={() => setHighlightedStep(msg.alignedStep || null)}
-                            className="mt-2 w-max px-2 py-0.5 rounded text-[9px] font-mono uppercase cursor-pointer hover:bg-opacity-80 transition-all flex items-center gap-1"
-                            style={{ background: "#e8f5e9", color: "#2e7d32", border: "1px solid #a5d6a7" }}
+                            className="mt-2 w-max px-2.5 py-1 rounded-lg text-[9px] font-mono font-bold uppercase cursor-pointer hover:bg-opacity-80 transition-all flex items-center gap-1 bg-brand-500/10 border border-brand-500/20 text-brand-600"
                           >
-                            <ChevronRight size={9} />
+                            <ChevronRight size={10} />
                             <span>Link: Step {msg.alignedStep} ({msg.alignedReason})</span>
                           </div>
                         )}
@@ -1256,15 +1263,14 @@ function AnalysisHUDPageContent() {
                   ))}
 
                   {isTyping && (
-                    <div className="flex items-start gap-2">
-                      <div className="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[9px] text-white flex-shrink-0" 
-                        style={{ background: "#4caf50" }}>
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[9px] text-white flex-shrink-0 bg-brand-500">
                         AI
                       </div>
-                      <div className="px-3 py-2 rounded-lg bg-white border border-gray-200 text-xs text-gray-500 flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                      <div className="px-3.5 py-2.5 rounded-xl bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-xs text-[var(--text-secondary)] flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 bg-[var(--text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                        <span className="w-1.5 h-1.5 bg-[var(--text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                        <span className="w-1.5 h-1.5 bg-[var(--text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                       </div>
                     </div>
                   )}
@@ -1273,39 +1279,30 @@ function AnalysisHUDPageContent() {
                 </div>
               )}
 
-              {/* Quick Action Chips */}
+              {/* Quick Action Chips (Premium fully refactored B&W Pills) */}
               {activeSteps.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 px-3 py-2 border-t" style={{ borderTopColor: "#ddd" }}>
-                  <span className="text-[10px] text-gray-500 self-center uppercase font-semibold mr-1">Ask AI:</span>
-                  <button
-                    onClick={() => handleSendChat("Explain Step 2 coefficients and why it failed.")}
-                    className="px-2.5 py-1 text-xs rounded-full border transition-all hover:bg-gray-100"
-                    style={{ background: "#fff", borderColor: "#ccc", color: "#666" }}
-                  >
-                    "Why did Step 2 fail?"
-                  </button>
-                  <button
-                    onClick={() => handleSendChat("Check the notation constant compliance check in Step 4.")}
-                    className="px-2.5 py-1 text-xs rounded-full border transition-all hover:bg-gray-100"
-                    style={{ background: "#fff", borderColor: "#ccc", color: "#666" }}
-                  >
-                    "Audit Step 4 constants"
-                  </button>
-                  <button
-                    onClick={() => handleSendChat("What logic anomaly was flagged in Step 3?")}
-                    className="px-2.5 py-1 text-xs rounded-full border transition-all hover:bg-gray-100"
-                    style={{ background: "#fff", borderColor: "#ccc", color: "#666" }}
-                  >
-                    "Scan Step 3 logical anomaly"
-                  </button>
+                <div className="flex flex-wrap gap-2 px-4 py-2 border-t border-[var(--border-subtle)] bg-[var(--surface-secondary)] bg-opacity-35">
+                  <span className="text-[10px] text-[var(--text-tertiary)] self-center uppercase font-mono font-bold mr-1">Ask AI:</span>
+                  {[
+                    { text: "Why did Step 2 fail?", query: "Explain Step 2 coefficients and why it failed." },
+                    { text: "Audit Step 4 constants", query: "Check the notation constant compliance check in Step 4." },
+                    { text: "Scan Step 3 logical anomaly", query: "What logic anomaly was flagged in Step 3?" }
+                  ].map((chip, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleSendChat(chip.query)}
+                      className="px-3 py-1 rounded-full border border border-[var(--border-subtle)] text-[11px] font-bold bg-[var(--surface-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-brand-500 transition-all cursor-pointer shadow-sm"
+                    >
+                      {chip.text}
+                    </button>
+                  ))}
                 </div>
               )}
 
               {/* Chat Input */}
-              <div className="p-2.5 flex items-center gap-2">
-                <div className="flex-1 h-9 rounded border flex items-center px-3 gap-2 focus-within:border-green-500 transition-colors"
-                  style={{ background: "#fff", borderColor: "#ccc" }}>
-                  <QuestionIcon size={14} className="text-gray-400 flex-shrink-0" />
+              <div className="p-3.5 flex items-center gap-2.5">
+                <div className="flex-1 h-11 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex items-center px-4 gap-2 focus-within:border-brand-500 transition-colors">
+                  <QuestionIcon size={14} className="text-[var(--text-tertiary)] flex-shrink-0" />
                   <input
                     type="text"
                     value={chatInput}
@@ -1314,7 +1311,7 @@ function AnalysisHUDPageContent() {
                       if (e.key === "Enter") handleSendChat(chatInput);
                     }}
                     placeholder="Ask the AI Copilot to analyze a specific step or override scores..."
-                    className="flex-1 bg-transparent border-none outline-none text-xs placeholder-gray-400"
+                    className="flex-1 bg-transparent border-none outline-none text-xs placeholder-gray-500 text-[var(--text-primary)]"
                     disabled={!selectedStudentId}
                   />
                 </div>
@@ -1322,10 +1319,9 @@ function AnalysisHUDPageContent() {
                 <button
                   onClick={() => handleSendChat(chatInput)}
                   disabled={!chatInput.trim() || !selectedStudentId}
-                  className="h-9 w-9 rounded flex items-center justify-center text-white transition-all hover:scale-105 disabled:opacity-50 flex-shrink-0"
-                  style={{ background: "#4caf50" }}
+                  className="h-11 w-11 rounded-xl flex items-center justify-center text-white transition-all hover:scale-105 disabled:opacity-50 flex-shrink-0 bg-brand-500 hover:bg-brand-600 cursor-pointer shadow-sm"
                 >
-                  <Send size={12} />
+                  <Send size={13} />
                 </button>
               </div>
             </footer>
