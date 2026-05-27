@@ -85,6 +85,7 @@ export default function SubmissionsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [isLoading, setIsLoading] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(10);
 
   const fetchSubmissions = async () => {
     setIsLoading(true);
@@ -283,7 +284,7 @@ export default function SubmissionsPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredSubmissions.map((sub) => (
+              {filteredSubmissions.slice(0, visibleCount).map((sub) => (
                 <tr 
                   key={sub.id} 
                   onClick={() => {
@@ -349,6 +350,52 @@ export default function SubmissionsPage() {
             </tbody>
           </table>
         </div>
+        {filteredSubmissions.length > 10 && (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '12px',
+            padding: '16px',
+            borderTop: '1px solid var(--border-subtle)',
+            background: 'var(--surface-secondary)',
+            opacity: 0.85
+          }}>
+            {visibleCount < filteredSubmissions.length && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setVisibleCount(prev => prev + 5); }}
+                style={{
+                  padding: '8px 18px',
+                  borderRadius: '10px',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  border: '1px solid var(--border-subtle)',
+                  background: 'var(--surface-primary)',
+                  color: 'var(--text-primary)',
+                }}
+              >
+                See More +5
+              </button>
+            )}
+            {visibleCount > 10 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setVisibleCount(10); }}
+                style={{
+                  padding: '8px 18px',
+                  borderRadius: '10px',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  border: '1px solid var(--border-subtle)',
+                  background: 'var(--surface-primary)',
+                  color: 'var(--text-primary)',
+                }}
+              >
+                Show Less
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Details Slide Overlay */}

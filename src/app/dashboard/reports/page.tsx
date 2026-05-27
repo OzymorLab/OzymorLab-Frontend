@@ -36,6 +36,7 @@ export default function ReportsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [classFilter, setClassFilter] = useState("");
   const [isDownloadingPdf, setIsDownloadingPdf] = useState<string | null>(null);
+  const [visibleReportsCount, setVisibleReportsCount] = useState(10);
 
   useEffect(() => {
     fetchReportDashboard();
@@ -312,7 +313,7 @@ export default function ReportsPage() {
                   </td>
                 </tr>
               ) : (
-                filteredReports.map((r) => (
+                filteredReports.slice(0, visibleReportsCount).map((r) => (
                   <tr key={r.student_id} className="hover:bg-brand-500/5 transition-colors duration-150 group">
                     <td className="px-6 py-5 font-mono text-[12px] text-[var(--text-primary)] font-bold">{r.student_id}</td>
                     <td className="px-6 py-5 text-[13px] text-[var(--text-primary)] font-semibold">{r.student_name}</td>
@@ -355,6 +356,26 @@ export default function ReportsPage() {
             </tbody>
           </table>
         </div>
+        {filteredReports.length > 10 && (
+          <div className="flex justify-center gap-3 p-4 border-t border-[var(--border-subtle)] bg-[var(--surface-secondary)] bg-opacity-20">
+            {visibleReportsCount < filteredReports.length && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setVisibleReportsCount(prev => prev + 5); }}
+                className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-primary)] text-[var(--text-primary)] hover:border-brand-500 hover:text-brand-600 transition-all cursor-pointer shadow-sm"
+              >
+                See More +5
+              </button>
+            )}
+            {visibleReportsCount > 10 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setVisibleReportsCount(10); }}
+                className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-primary)] text-[var(--text-primary)] hover:border-red-500 hover:text-red-600 transition-all cursor-pointer shadow-sm"
+              >
+                Show Less
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
