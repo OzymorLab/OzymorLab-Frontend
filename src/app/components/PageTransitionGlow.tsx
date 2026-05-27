@@ -13,10 +13,5 @@ export default function PageTransitionGlow() {
 
   if (!mounted) return null;
 
-  return (
-    <>
-      <div key={`bar-${pathname}`} className="glowup-topbar" />
-      <div key={`radial-${pathname}`} className="glowup-radial-overlay" />
-    </>
-  );
+  return null;
 }
