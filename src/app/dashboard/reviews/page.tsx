@@ -10,6 +10,30 @@ import { useAuth } from "../../context/AuthContext";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.com/api/v1";
 
+/* ── Deterministic name generator from UUID ── */
+const FIRST_NAMES = [
+  "Aarav", "Ananya", "Arjun", "Diya", "Ishaan", "Kavya",
+  "Lakshmi", "Mihail", "Neha", "Pranav", "Rhea", "Rohan",
+  "Sanya", "Tanvi", "Vivaan", "Yash", "Zara", "Aman",
+  "Divya", "Kiran", "Meera", "Nikhil", "Pooja", "Rahul",
+  "Shriya", "Siddharth", "Tarini", "Umesh", "Vandana", "Wren",
+];
+const LAST_NAMES = [
+  "Agarwal", "Bose", "Chandra", "Desai", "Gupta", "Iyer",
+  "Joshi", "Kumar", "Mehta", "Nair", "Patel", "Rao",
+  "Sharma", "Singh", "Tiwari", "Verma", "Yadav", "Bansal",
+  "Chopra", "Dubey", "Goswami", "Khanna", "Malhotra", "Pillai",
+  "Reddy", "Saxena", "Thakur", "Upadhyay", "Venkatesan", "Walia",
+];
+
+function generateStudentName(id: string | null): { name: string; initials: string } {
+  if (!id) return { name: "Unknown Student", initials: "?" };
+  const hash = id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const first = FIRST_NAMES[hash % FIRST_NAMES.length];
+  const last = LAST_NAMES[(hash >> 2) % LAST_NAMES.length];
+  return { name: `${first} ${last}`, initials: `${first[0]}${last[0]}` };
+}
+
 interface ReviewItem {
   submission_id: string;
   student_id: string | null;
@@ -248,23 +272,52 @@ export default function ReviewsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full animate-fade-in relative z-10">
-      {/* Title block */}
-      <div className="relative overflow-hidden bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm backdrop-blur-md bg-opacity-80">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-amber-600 dark:text-amber-500 uppercase bg-amber-50 dark:bg-amber-950/20 px-2 py-0.5 rounded-full w-max">
-            <ShieldAlert size={11} className="animate-pulse" />
-            Security & Oversight
+    <div className="flex flex-col gap-6 w-full animate-fade-in relative z-10" style={{ padding: "4px 0" }}>
+      {/* ── Page Header ── */}
+      <div
+        className="relative overflow-hidden bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4"
+        style={{ padding: "28px 32px" }}
+      >
+        <div className="flex flex-col gap-2">
+          {/* Badge — border only, no background */}
+          <div
+            className="flex items-center gap-2 w-max"
+            style={{
+              fontSize: "10px",
+              fontFamily: "var(--font-mono)",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              color: "var(--text-secondary)",
+              border: "1px solid var(--border-default)",
+              borderRadius: "999px",
+              padding: "3px 10px",
+            }}
+          >
+            <ShieldAlert size={11} />
+            Security &amp; Oversight
           </div>
-          <h1 className="text-[20px] font-bold text-[var(--text-primary)] mt-2">Institutional Moderation & Approval Center</h1>
-          <p className="text-[13px] text-[var(--text-secondary)] mt-0.5">
+          <h1
+            style={{
+              fontSize: "22px",
+              fontWeight: 700,
+              color: "var(--text-primary)",
+              letterSpacing: "-0.02em",
+              lineHeight: 1.2,
+              margin: "2px 0 0",
+            }}
+          >
+            Institutional Moderation &amp; Approval Center
+          </h1>
+          <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginTop: 2, lineHeight: 1.6 }}>
             Resolve grading drifts, approve rubrics, and release institutional assessments.
           </p>
         </div>
-        <button 
+        <button
           onClick={() => { fetchPendingReviews(); if (isAdminOrHOD) fetchPendingRubrics(); }}
           disabled={isLoadingReviews || isLoadingRubrics}
-          className="flex items-center justify-center gap-1.5 py-2 px-4 rounded-xl text-[12px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] hover:border-brand-500 hover:bg-brand-500 hover:text-white transition-all duration-200 cursor-pointer shadow-sm"
+          className="flex items-center justify-center gap-1.5 rounded-xl text-[12px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] hover:border-brand-500 hover:bg-brand-500 hover:text-white transition-all duration-200 cursor-pointer shadow-sm shrink-0"
+          style={{ padding: "10px 18px" }}
         >
           <RefreshCw size={13} className={isLoadingReviews || isLoadingRubrics ? "animate-spin" : ""} />
           Refresh Lists
@@ -273,8 +326,8 @@ export default function ReviewsPage() {
 
       {/* ── State Machine Rubric Approvals (HOD / Admin only) ── */}
       {isAdminOrHOD && (
-        <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm backdrop-blur-md bg-opacity-80 overflow-hidden">
-          <div className="border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] px-6 py-4 flex justify-between items-center bg-opacity-50">
+        <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm overflow-hidden">
+          <div className="border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex justify-between items-center" style={{ padding: "18px 24px" }}>
             <div className="font-bold text-[13.5px] text-[var(--text-primary)] flex items-center gap-2">
               <ShieldCheck size={16} className="text-brand-600" />
               Teacher Rubrics Awaiting Approval
@@ -340,8 +393,8 @@ export default function ReviewsPage() {
       )}
 
       {/* ── Submissions Flagged for Human Review ── */}
-      <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm backdrop-blur-md bg-opacity-80 overflow-hidden">
-        <div className="border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-2 bg-opacity-50">
+      <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm overflow-hidden">
+        <div className="border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex flex-col md:flex-row md:items-center justify-between gap-2" style={{ padding: "18px 24px" }}>
           <div className="font-bold text-[13.5px] text-[var(--text-primary)] flex items-center gap-2">
             <ShieldAlert size={16} className="text-red-500" />
             Submissions Requiring Moderator Review
@@ -358,7 +411,7 @@ export default function ReviewsPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] bg-opacity-30">
-                <th className="px-6 py-4 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Student ID</th>
+                <th className="px-6 py-4 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Student Name</th>
                 <th className="px-6 py-4 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Subject Exam</th>
                 <th className="px-6 py-4 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Flagged Reason</th>
                 <th className="px-6 py-4 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Current Score</th>
@@ -390,7 +443,17 @@ export default function ReviewsPage() {
                       onClick={() => setSelectedSub(r)} 
                       className="hover:bg-red-500/5 cursor-pointer transition-colors duration-150 group"
                     >
-                      <td className="px-6 py-4 font-mono text-[12px] text-[var(--text-primary)] font-bold">{r.student_id}</td>
+                      <td className="px-6 py-4 text-[13px] text-[var(--text-primary)] font-semibold">
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className="rounded-full bg-gradient-to-tr from-brand-600/20 to-brand-400/10 text-brand-600 border border-brand-500/20 flex items-center justify-center font-bold shrink-0"
+                            style={{ width: 32, height: 32, fontSize: "11px" }}
+                          >
+                            {generateStudentName(r.student_id).initials}
+                          </div>
+                          {generateStudentName(r.student_id).name}
+                        </div>
+                      </td>
                       <td className="px-6 py-4 text-[12.5px] text-[var(--text-secondary)] font-medium">{r.task_title}</td>
                       <td className="px-6 py-4 text-[12px] text-red-500 font-semibold">
                         <div className="flex items-center gap-1.5 bg-red-500/5 border border-red-500/10 rounded-lg px-2.5 py-1 w-max">
@@ -435,11 +498,16 @@ export default function ReviewsPage() {
             
             <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
               <div className="flex items-center gap-3 bg-[var(--surface-secondary)] bg-opacity-40 border border-[var(--border-subtle)] p-4 rounded-xl">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-brand-600/10 to-brand-400/5 text-brand-600 border border-brand-500/20 flex items-center justify-center font-bold text-[14.5px] shadow-sm">
-                  {(selectedSub.student_id || '??').slice(-2)}
+                <div
+                  className="rounded-full bg-gradient-to-tr from-brand-600/20 to-brand-400/10 text-brand-600 border border-brand-500/20 flex items-center justify-center font-bold shrink-0"
+                  style={{ width: 46, height: 46, fontSize: "14px" }}
+                >
+                  {generateStudentName(selectedSub.student_id).initials}
                 </div>
                 <div>
-                  <div className="text-[14.5px] font-bold text-[var(--text-primary)]">{selectedSub.student_id || 'Unknown Student'}</div>
+                  <div className="text-[15px] font-bold text-[var(--text-primary)]">
+                    {generateStudentName(selectedSub.student_id).name}
+                  </div>
                   <div className="font-mono text-[10.5px] text-[var(--text-tertiary)] mt-0.5">{selectedSub.submission_id}</div>
                 </div>
               </div>
