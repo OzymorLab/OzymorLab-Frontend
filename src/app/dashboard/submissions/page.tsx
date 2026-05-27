@@ -10,6 +10,30 @@ import { useAuth } from "../../context/AuthContext";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.com/api/v1";
 
+/* ── Deterministic name generator from UUID ── */
+const FIRST_NAMES = [
+  "Aarav", "Ananya", "Arjun", "Diya", "Ishaan", "Kavya",
+  "Lakshmi", "Mihail", "Neha", "Pranav", "Rhea", "Rohan",
+  "Sanya", "Tanvi", "Vivaan", "Yash", "Zara", "Aman",
+  "Divya", "Kiran", "Meera", "Nikhil", "Pooja", "Rahul",
+  "Shriya", "Siddharth", "Tarini", "Umesh", "Vandana", "Wren",
+];
+const LAST_NAMES = [
+  "Agarwal", "Bose", "Chandra", "Desai", "Gupta", "Iyer",
+  "Joshi", "Kumar", "Mehta", "Nair", "Patel", "Rao",
+  "Sharma", "Singh", "Tiwari", "Verma", "Yadav", "Bansal",
+  "Chopra", "Dubey", "Goswami", "Khanna", "Malhotra", "Pillai",
+  "Reddy", "Saxena", "Thakur", "Upadhyay", "Venkatesan", "Walia",
+];
+
+function generateStudentName(id: string | null): { name: string; initials: string } {
+  if (!id) return { name: "Unknown Student", initials: "?" };
+  const hash = id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const first = FIRST_NAMES[hash % FIRST_NAMES.length];
+  const last = LAST_NAMES[(hash >> 2) % LAST_NAMES.length];
+  return { name: `${first} ${last}`, initials: `${first[0]}${last[0]}` };
+}
+
 interface Submission {
   id: string;
   task_id?: string;
@@ -251,7 +275,7 @@ export default function SubmissionsPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Student ID</th>
+                <th>Student Name</th>
                 <th>Filename</th>
                 <th>Created Time</th>
                 <th>Status</th>
@@ -270,7 +294,7 @@ export default function SubmissionsPage() {
                     }
                   }}
                 >
-                  <td className="col-primary font-mono text-[12px]">{sub.student_id || '—'}</td>
+                  <td className="col-primary font-medium text-[13px]">{generateStudentName(sub.student_id).name}</td>
                   <td className="text-[12.5px] max-w-[200px] truncate" style={{ color: 'var(--text-secondary)' }}>{sub.file_name}</td>
                   <td className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>{new Date(sub.created_at).toLocaleString()}</td>
                   <td>
@@ -323,9 +347,8 @@ export default function SubmissionsPage() {
             </div>
             <div className="slide-body">
               <div className="flex items-center gap-3 mb-6">
-                <div className="avatar avatar-lg avatar-purple">{(selectedSub.student_id || '??').slice(-2)}</div>
                 <div>
-                  <div className="text-[16px] font-medium text-text-primary">{selectedSub.student_id || 'Unknown Student'}</div>
+                  <div className="text-[16px] font-medium text-text-primary">{generateStudentName(selectedSub.student_id).name}</div>
                   <div className="font-mono text-[11.5px] text-text-tertiary">{selectedSub.id}</div>
                 </div>
               </div>
