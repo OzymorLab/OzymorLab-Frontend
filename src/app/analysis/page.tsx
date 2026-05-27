@@ -56,6 +56,7 @@ interface Submission {
   submissionTime: string;
   steps?: Step[];
   fileKey?: string;
+  confidence?: number;
 }
 
 interface Task {
@@ -123,6 +124,7 @@ function AnalysisHUDPageContent() {
   const [chatInput, setChatInput] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [agreedSubmissions, setAgreedSubmissions] = useState<Record<string, boolean>>({});
   
   // Loading States
   const [isLoadingTasks, setIsLoadingTasks] = useState(true);
@@ -678,101 +680,7 @@ function AnalysisHUDPageContent() {
             {/* Right side: Search + Theme + User */}
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto", flexShrink: 0 }}>
 
-              {/* View Switchers inside Right Navbar Area */}
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginRight: 16 }}>
-                {user?.role === "student" ? (
-                  <>
-                    <button
-                      onClick={() => switchViewMode("student")}
-                      style={{
-                        padding: "4px 12px",
-                        borderRadius: 8,
-                        fontSize: 11.5,
-                        fontWeight: viewMode === "student" ? 600 : 500,
-                        cursor: "pointer",
-                        border: viewMode === "student" ? "none" : "1px solid rgba(255,255,255,0.12)",
-                        background: viewMode === "student" ? "#ffffff" : "transparent",
-                        color: viewMode === "student" ? "#1f2223" : "rgba(255,255,255,0.6)",
-                        fontFamily: "inherit",
-                        transition: "all 0.15s"
-                      }}
-                    >
-                      Evaluations
-                    </button>
-                    <button
-                      onClick={() => switchViewMode("self-eval")}
-                      style={{
-                        padding: "4px 12px",
-                        borderRadius: 8,
-                        fontSize: 11.5,
-                        fontWeight: viewMode === "self-eval" ? 600 : 500,
-                        cursor: "pointer",
-                        border: viewMode === "self-eval" ? "none" : "1px solid rgba(255,255,255,0.12)",
-                        background: viewMode === "self-eval" ? "#ffffff" : "transparent",
-                        color: viewMode === "self-eval" ? "#1f2223" : "rgba(255,255,255,0.6)",
-                        fontFamily: "inherit",
-                        transition: "all 0.15s"
-                      }}
-                    >
-                      Self-Eval
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => switchViewMode("teacher")}
-                      style={{
-                        padding: "4px 12px",
-                        borderRadius: 8,
-                        fontSize: 11.5,
-                        fontWeight: viewMode === "teacher" ? 600 : 500,
-                        cursor: "pointer",
-                        border: viewMode === "teacher" ? "none" : "1px solid rgba(255,255,255,0.12)",
-                        background: viewMode === "teacher" ? "#ffffff" : "transparent",
-                        color: viewMode === "teacher" ? "#1f2223" : "rgba(255,255,255,0.6)",
-                        fontFamily: "inherit",
-                        transition: "all 0.15s"
-                      }}
-                    >
-                      Teacher
-                    </button>
-                    <button
-                      onClick={() => switchViewMode("student")}
-                      style={{
-                        padding: "4px 12px",
-                        borderRadius: 8,
-                        fontSize: 11.5,
-                        fontWeight: viewMode === "student" ? 600 : 500,
-                        cursor: "pointer",
-                        border: viewMode === "student" ? "none" : "1px solid rgba(255,255,255,0.12)",
-                        background: viewMode === "student" ? "#ffffff" : "transparent",
-                        color: viewMode === "student" ? "#1f2223" : "rgba(255,255,255,0.6)",
-                        fontFamily: "inherit",
-                        transition: "all 0.15s"
-                      }}
-                    >
-                      Student
-                    </button>
-                    <button
-                      onClick={() => switchViewMode("self-eval")}
-                      style={{
-                        padding: "4px 12px",
-                        borderRadius: 8,
-                        fontSize: 11.5,
-                        fontWeight: viewMode === "self-eval" ? 600 : 500,
-                        cursor: "pointer",
-                        border: viewMode === "self-eval" ? "none" : "1px solid rgba(255,255,255,0.12)",
-                        background: viewMode === "self-eval" ? "#ffffff" : "transparent",
-                        color: viewMode === "self-eval" ? "#1f2223" : "rgba(255,255,255,0.6)",
-                        fontFamily: "inherit",
-                        transition: "all 0.15s"
-                      }}
-                    >
-                      Sandbox
-                    </button>
-                  </>
-                )}
-              </div>
+
 
               {/* Search box matching layout.tsx */}
               <div style={{
@@ -1051,73 +959,61 @@ function AnalysisHUDPageContent() {
               </div>
             )}
             
-            {activeQuestion.id && (
-              <div className="hidden lg:flex items-center gap-3 text-[11px] text-[var(--text-secondary)] font-mono font-semibold">
-                <span className="px-2.5 py-0.5 rounded-full uppercase border border-[var(--border-subtle)] bg-[var(--surface-secondary)]">
-                  {activeQuestion.difficulty}
-                </span>
-                <span>Avg: {activeQuestion.avgClassScore}%</span>
-                <span>Lat: {activeQuestion.avgLatency}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Confidence Indicator */}
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 border border-[var(--border-subtle)]" 
-            style={{ 
-              background: activeQuestion.confidence > 80 ? "rgba(16,185,129,0.15)" : activeQuestion.confidence > 50 ? "rgba(245,158,11,0.15)" : "rgba(239,68,68,0.15)",
-              color: activeQuestion.confidence > 80 ? "#10b981" : activeQuestion.confidence > 50 ? "#f59e0b" : "#ef4444"
-            }} 
-            title={`AI Confidence: ${activeQuestion.confidence}%`}
-          >
-            <Sparkles size={16} />
-          </div>
-
-          {/* Correctness Indicator */}
-          {activeSteps.length > 0 && (
-            <div className="w-10 h-10 rounded-xl border flex items-center justify-center flex-shrink-0" 
-              style={{ 
-                background: activeSteps.every((s) => s.sympyValid !== false) ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.15)",
-                borderColor: activeSteps.every((s) => s.sympyValid !== false) ? "rgba(16,185,129,0.3)" : "rgba(239,68,68,0.3)",
-                color: activeSteps.every((s) => s.sympyValid !== false) ? "#10b981" : "#ef4444"
+            </div>
+  
+            {/* Confidence Score Display (Text) */}
+            <div className="h-10 px-3.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex items-center justify-center flex-shrink-0 text-[12px] font-bold font-mono text-[var(--text-primary)]"
+              title="AI Grading Confidence Score"
+            >
+              Confidence: {((submissionDetail?.confidence || activeQuestion.confidence || 0.95) * 100).toFixed(0)}%
+            </div>
+  
+            {/* Agree with AI Button (Tick) */}
+            <button
+              onClick={() => {
+                setAgreedSubmissions(prev => ({
+                  ...prev,
+                  [selectedStudentId]: !agreedSubmissions[selectedStudentId]
+                }));
+              }}
+              className="h-10 px-4 rounded-xl text-[12.5px] font-bold transition-all hover:scale-105 cursor-pointer shadow-sm flex items-center gap-1.5 border"
+              style={{
+                background: agreedSubmissions[selectedStudentId] ? "rgba(16,185,129,0.1)" : "var(--text-primary)",
+                color: agreedSubmissions[selectedStudentId] ? "#10b981" : "var(--surface-primary)",
+                borderColor: agreedSubmissions[selectedStudentId] ? "#10b981" : "transparent",
               }}
             >
-              {activeSteps.every((s) => s.sympyValid !== false) ? (
-                <CheckCircle2 size={18} strokeWidth={2.5} />
-              ) : (
-                <AlertTriangle size={18} strokeWidth={2.5} />
-              )}
-            </div>
-          )}
-
-          {/* Marks Box */}
-          <div className="h-10 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex items-center overflow-hidden flex-shrink-0">
-            <div className="px-4 text-center border-r border-[var(--border-subtle)]">
-              <span className="text-[13px] font-mono font-bold text-[var(--text-primary)]">
-                {activeStudent.score?.toFixed(1) || "0.0"}
-                <span className="text-[11px] text-[var(--text-tertiary)] font-normal font-sans"> / {activeQuestion.maxMarks || 0} pts</span>
-              </span>
-            </div>
-            
-            {viewMode === "teacher" ? (
-              <div className="flex flex-col h-full bg-[var(--surface-primary)]">
-                <button
-                  onClick={() => adjustTotalMarks(0.5)}
-                  className="w-7 flex-1 flex items-center justify-center text-[10px] font-bold text-[var(--text-secondary)] hover:text-brand-600 hover:bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] cursor-pointer"
-                  disabled={!selectedStudentId}
-                >
-                  +
-                </button>
-                <button
-                  onClick={() => adjustTotalMarks(-0.5)}
-                  className="w-7 flex-1 flex items-center justify-center text-[10px] font-bold text-[var(--text-secondary)] hover:text-brand-600 hover:bg-[var(--surface-secondary)] cursor-pointer"
-                  disabled={!selectedStudentId}
-                >
-                  -
-                </button>
+              <Check size={14} strokeWidth={3} />
+              {agreedSubmissions[selectedStudentId] ? "Agreed" : "Agree with AI"}
+            </button>
+  
+            {/* Marks Box */}
+            <div className="h-10 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex items-center overflow-hidden flex-shrink-0">
+              <div className="px-4 text-center">
+                <span className="text-[13px] font-mono font-bold text-[var(--text-primary)]">
+                  {activeStudent.score?.toFixed(1) || "0.0"} pts
+                </span>
               </div>
-            ) : (
-              <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-brand-600 bg-brand-500/10 font-mono flex items-center h-full">
+              
+              {viewMode === "teacher" ? (
+                <div className="flex flex-col h-full bg-[var(--surface-primary)] border-l border-[var(--border-subtle)]">
+                  <button
+                    onClick={() => adjustTotalMarks(0.5)}
+                    className="w-7 flex-1 flex items-center justify-center text-[10px] font-bold text-[var(--text-secondary)] hover:text-brand-600 hover:bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] cursor-pointer"
+                    disabled={!selectedStudentId}
+                  >
+                    +
+                  </button>
+                  <button
+                    onClick={() => adjustTotalMarks(-0.5)}
+                    className="w-7 flex-1 flex items-center justify-center text-[10px] font-bold text-[var(--text-secondary)] hover:text-brand-600 hover:bg-[var(--surface-secondary)] cursor-pointer"
+                    disabled={!selectedStudentId}
+                  >
+                    -
+                  </button>
+                </div>
+              ) : (
+                <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-brand-600 bg-brand-500/10 border-l border-[var(--border-subtle)] font-mono flex items-center h-full">
                 Locked
               </div>
             )}
@@ -1365,11 +1261,11 @@ function AnalysisHUDPageContent() {
                   <>
                     {/* Question Card */}
                     {activeQuestion.questionText && (
-                      <div className="mb-3 p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-primary)]">
-                        <span className="text-[10px] uppercase font-mono font-bold block mb-1.5 text-[var(--text-tertiary)]">
+                      <div className="mb-4 py-8 px-6 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-primary)] shadow-sm min-h-[120px] flex flex-col justify-center">
+                        <span className="text-[10px] uppercase font-mono font-bold block mb-2 text-[var(--text-tertiary)] tracking-wider">
                           {viewMode === "self-eval" ? "Practice Exercise" : "Assigned Question"}
                         </span>
-                        <p className="text-sm leading-relaxed font-mono font-bold text-[var(--text-primary)]">{activeQuestion.questionText}</p>
+                        <p className="text-[14.5px] leading-relaxed font-mono font-bold text-[var(--text-primary)]">{activeQuestion.questionText}</p>
                       </div>
                     )}
 
@@ -1471,6 +1367,57 @@ function AnalysisHUDPageContent() {
                   })
                 )}
 
+                {/* Copilot Chat Conversation History */}
+                {(chatMessages.length > 0 || isTyping) && (
+                  <div className="mt-4 pt-4 border-t border-[var(--border-subtle)] flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-[11.5px] uppercase font-mono font-bold text-[var(--text-secondary)] flex items-center gap-1.5">
+                        <MessageSquare size={12} className="text-brand-600" />
+                        AI Copilot Chat
+                      </h4>
+                      <span className="text-[9px] font-mono font-bold uppercase rounded-lg border border-[var(--border-subtle)] px-2 py-0.5 text-[var(--text-secondary)] bg-[var(--surface-secondary)]">
+                        {chatMessages.length} Messages
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col gap-3 max-h-[300px] overflow-y-auto pr-1">
+                      {chatMessages.map((msg, idx) => (
+                        <div
+                          key={idx}
+                          className={`flex items-start gap-2.5 max-w-[90%] ${
+                            msg.sender === "user" ? "ml-auto flex-row-reverse" : ""
+                          }`}
+                        >
+                          <div className="w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[9px] flex-shrink-0 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)]">
+                            {msg.sender === "ai" ? "AI" : "U"}
+                          </div>
+
+                          <div className={`p-2.5 rounded-xl text-xs leading-relaxed border border-[var(--border-subtle)] ${
+                            msg.sender === "ai" 
+                              ? "bg-[var(--surface-secondary)] text-[var(--text-primary)]" 
+                              : "bg-[var(--surface-primary)] text-[var(--text-primary)]"
+                          }`}>
+                            <p>{msg.text}</p>
+                          </div>
+                        </div>
+                      ))}
+
+                      {isTyping && (
+                        <div className="flex items-start gap-2.5">
+                          <div className="w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[9px] text-white flex-shrink-0 bg-brand-500">
+                            AI
+                          </div>
+                          <div className="px-3.5 py-2.5 rounded-xl bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-xs text-[var(--text-secondary)] flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 bg-[var(--text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                            <span className="w-1.5 h-1.5 bg-[var(--text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                            <span className="w-1.5 h-1.5 bg-[var(--text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
               </div>
 
             </div>
@@ -1478,85 +1425,37 @@ function AnalysisHUDPageContent() {
             {/* ==========================================
                 4. CHAT BAR (Premium Rounded B&W Inputs)
                ========================================== */}
-            <footer className="border-t border-[var(--border-subtle)] flex-shrink-0 bg-[var(--surface-primary)] p-4">
+            {/* Highlight Banner */}
+            {highlightedStep && (
+              <div className="px-4 py-2 text-xs flex items-center justify-between rounded-lg mb-3 mx-4" 
+                style={{ background: "rgba(16,185,129,0.12)", color: "#10b981", border: "1px solid rgba(16,185,129,0.25)" }}>
+                <div className="flex items-center gap-2">
+                  <Sparkles size={12} className="animate-pulse" />
+                  <span>Aligned View to <strong className="font-mono">Step {highlightedStep}</strong> on the Manuscript OCR panel above.</span>
+                </div>
+                <button 
+                  onClick={() => setHighlightedStep(null)} 
+                  className="text-[11px] uppercase tracking-wider font-bold hover:underline cursor-pointer"
+                >
+                  Clear Link
+                </button>
+              </div>
+            )}
+
+            <footer className="flex-shrink-0 bg-[var(--surface-primary)] p-4 flex justify-center items-center">
               
-              {/* Highlight Banner */}
-              {highlightedStep && (
-                <div className="px-4 py-2 text-xs flex items-center justify-between rounded-lg mb-3" 
-                  style={{ background: "rgba(16,185,129,0.12)", color: "#10b981", border: "1px solid rgba(16,185,129,0.25)" }}>
-                  <div className="flex items-center gap-2">
-                    <Sparkles size={12} className="animate-pulse" />
-                    <span>Aligned View to <strong className="font-mono">Step {highlightedStep}</strong> on the Manuscript OCR panel above.</span>
-                  </div>
-                  <button 
-                    onClick={() => setHighlightedStep(null)} 
-                    className="text-[11px] uppercase tracking-wider font-bold hover:underline cursor-pointer"
-                  >
-                    Clear Link
-                  </button>
-                </div>
-              )}
-
-              {/* Chat Messages */}
-              {chatMessages.length > 0 && (
-                <div className="max-h-[140px] overflow-y-auto px-4 py-3 flex flex-col gap-2.5 mb-3">
-                  {chatMessages.map((msg, idx) => (
-                    <div
-                      key={idx}
-                      className={`flex items-start gap-2.5 max-w-[85%] ${
-                        msg.sender === "user" ? "ml-auto flex-row-reverse" : ""
-                      }`}
-                    >
-                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[9px] flex-shrink-0 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)]`}>
-                        {msg.sender === "ai" ? "AI" : "U"}
-                      </div>
-
-                      <div className={`p-2.5 rounded-xl text-xs leading-relaxed border border-[var(--border-subtle)] ${
-                        msg.sender === "ai" 
-                          ? "bg-[var(--surface-secondary)] text-[var(--text-primary)]" 
-                          : "bg-[var(--surface-primary)] text-[var(--text-primary)]"
-                      }`}>
-                        <p>{msg.text}</p>
-                        
-                        {msg.alignedStep && (
-                          <div 
-                            onClick={() => setHighlightedStep(msg.alignedStep || null)}
-                            className="mt-2 w-max px-2.5 py-1 rounded-lg text-[9px] font-mono font-bold uppercase cursor-pointer hover:bg-opacity-80 transition-all flex items-center gap-1 bg-brand-500/10 border border-brand-500/20 text-brand-600"
-                          >
-                            <ChevronRight size={10} />
-                            <span>Link: Step {msg.alignedStep} ({msg.alignedReason})</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-
-                  {isTyping && (
-                    <div className="flex items-start gap-2.5">
-                      <div className="w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[9px] text-white flex-shrink-0 bg-brand-500">
-                        AI
-                      </div>
-                      <div className="px-3.5 py-2.5 rounded-xl bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-xs text-[var(--text-secondary)] flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 bg-[var(--text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                        <span className="w-1.5 h-1.5 bg-[var(--text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                        <span className="w-1.5 h-1.5 bg-[var(--text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div ref={chatBottomRef} />
-                </div>
-              )}
-
-              {/* Chat Input Box (Exact replication of screenshot capsule) */}
+              {/* Chat Input Box (Claude web style, 70% width, centered, padded) */}
               <div 
-                className="w-full rounded-2xl flex flex-col p-3 gap-2 border transition-all"
+                className="rounded-2xl flex flex-col p-4 gap-3 border transition-all shadow-sm"
                 style={{
+                  width: "70%",
+                  maxWidth: "700px",
                   background: "var(--surface-secondary)",
                   borderColor: "var(--border-subtle)",
+                  margin: "12px auto",
                 }}
               >
-                {/* Text input on top */}
+                {/* Text input on top with padding */}
                 <input
                   type="text"
                   value={chatInput}
@@ -1565,34 +1464,29 @@ function AnalysisHUDPageContent() {
                     if (e.key === "Enter") handleSendChat(chatInput);
                   }}
                   placeholder="Write a message..."
-                  className="w-full bg-transparent border-none outline-none text-[13.5px] text-[var(--text-primary)] placeholder-gray-500 px-1"
+                  className="w-full bg-transparent border-none outline-none text-[14px] text-[var(--text-primary)] placeholder-gray-500 px-2 py-1"
                   disabled={!selectedStudentId}
                 />
                 
                 {/* Controls toolbar on bottom */}
-                <div className="flex items-center justify-between mt-1 pt-1.5 border-t border-[rgba(255,255,255,0.03)]">
+                <div className="flex items-center justify-between mt-1 pt-2 border-t border-[rgba(255,255,255,0.04)] px-2">
                   {/* Left: Plus icon */}
                   <button 
                     className="p-1 rounded-lg hover:bg-[rgba(255,255,255,0.06)] text-[var(--text-secondary)] transition-all cursor-pointer"
                     title="Add attachment"
                   >
-                    <Plus size={16} />
+                    <Plus size={18} />
                   </button>
                   
-                  {/* Right: Model Selector, Mic, Waveform */}
+                  {/* Right: Mic, Waveform (Model Selector Removed!) */}
                   <div className="flex items-center gap-4 text-[var(--text-secondary)]">
-                    {/* Model Selector */}
-                    <div className="flex items-center gap-1 text-[12px] font-medium hover:text-[var(--text-primary)] cursor-pointer">
-                      <span>Sonnet 4.6</span>
-                      <ChevronDown size={12} className="opacity-70" />
-                    </div>
                     
                     {/* Mic Icon */}
                     <button 
                       className="p-1 hover:text-[var(--text-primary)] transition-all cursor-pointer"
                       title="Voice input"
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-mic">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-mic">
                         <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
                         <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
                         <line x1="12" x2="12" y1="19" y2="22"/>
@@ -1600,11 +1494,11 @@ function AnalysisHUDPageContent() {
                     </button>
                     
                     {/* Voice waveform icon */}
-                    <div className="flex items-center gap-[2.5px] h-3 px-0.5" title="Voice activity indicator">
-                      <span className="w-[1.5px] h-2 bg-current rounded-full opacity-60"></span>
-                      <span className="w-[1.5px] h-3.5 bg-current rounded-full"></span>
-                      <span className="w-[1.5px] h-2.5 bg-current rounded-full opacity-80"></span>
-                      <span className="w-[1.5px] h-1.5 bg-current rounded-full opacity-50"></span>
+                    <div className="flex items-center gap-[3px] h-3.5 px-0.5" title="Voice activity indicator">
+                      <span className="w-[2px] h-2 bg-current rounded-full opacity-60"></span>
+                      <span className="w-[2px] h-3.5 bg-current rounded-full"></span>
+                      <span className="w-[2px] h-2.5 bg-current rounded-full opacity-80"></span>
+                      <span className="w-[2px] h-1.5 bg-current rounded-full opacity-50"></span>
                     </div>
                   </div>
                 </div>
