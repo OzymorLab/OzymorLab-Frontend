@@ -494,7 +494,7 @@ export default function ExamsPage() {
       {step === 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cycle Selection Panel (Card 1) */}
-          <div className="lg:col-span-2 bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-8 shadow-sm flex flex-col gap-6">
+          <div className="lg:col-span-2 bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm flex flex-col" style={{ padding: "32px", gap: "24px" }}>
             <h3 className="text-[15.5px] font-bold text-[var(--text-primary)] flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-[#e0ff82]/20 text-[#2c302e] dark:text-[#e0ff82] flex items-center justify-center">
                 <Layers size={14} />
@@ -511,7 +511,7 @@ export default function ExamsPage() {
                   <span className="text-[12.5px] font-medium">Fetching exam cycles...</span>
                 </div>
               ) : cycles.length === 0 ? (
-                <div className="border border-dashed border-[var(--border-subtle)] rounded-2xl p-8 bg-[var(--surface-secondary)] transition-all duration-300 hover:border-[#e0ff82]/30 flex flex-col items-start text-left gap-4 relative overflow-hidden">
+                <div className="border border-dashed border-[var(--border-subtle)] rounded-2xl bg-[var(--surface-secondary)] transition-all duration-300 hover:border-[#e0ff82]/30 flex flex-col items-start text-left relative overflow-hidden" style={{ padding: "32px", gap: "20px", width: "100%" }}>
                   <div className="flex gap-4 items-start">
                     <div className="relative w-12 h-12 flex-shrink-0 flex items-center justify-center">
                       <div className="absolute inset-0 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-primary)]" />
@@ -662,7 +662,7 @@ export default function ExamsPage() {
             </div>
 
             {/* Create Cycle Panel (Card 2) */}
-            <div className="lg:col-span-1 bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-8 shadow-sm flex flex-col gap-6">
+            <div className="lg:col-span-1 bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm flex flex-col" style={{ padding: "32px", gap: "24px" }}>
               <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-1 flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-[#e0ff82]/20 text-[#2c302e] dark:text-[#e0ff82] flex items-center justify-center">
                   <Plus size={14} />
@@ -740,7 +740,7 @@ export default function ExamsPage() {
         )}
 
         {step > 0 && (
-          <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-8 shadow-sm">
+          <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm" style={{ padding: "32px" }}>
             {/* ── Step 1: Upload Question Paper ── */}
             {step === 1 && (
               <div className="animate-fade-in flex flex-col gap-6">
