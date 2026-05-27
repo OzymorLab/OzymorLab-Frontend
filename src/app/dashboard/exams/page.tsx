@@ -440,25 +440,22 @@ export default function ExamsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full animate-fade-in relative z-10">
+    <div className="flex flex-col gap-8 w-full animate-fade-in relative z-10">
       {/* Title Area */}
-      <div className="relative overflow-hidden bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 flex flex-col justify-between gap-4 shadow-sm backdrop-blur-md bg-opacity-80">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-brand-600 uppercase bg-brand-50 dark:bg-brand-950/20 px-2 py-0.5 rounded-full w-max">
-            <Sparkles size={11} className="animate-pulse" />
-            Assessment Engine
-          </div>
-          <h1 className="text-[20px] font-bold text-[var(--text-primary)] mt-2">Institutional Exam & Assessment Engine</h1>
-          <p className="text-[13px] text-[var(--text-secondary)]">
-            Group subject papers under institutional exam cycles, configure math/diagram rubrics, and run bulk graded evaluations.
-          </p>
+      <div className="flex flex-col gap-2.5 pb-4 mt-2">
+        <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-[#e0ff82] uppercase bg-[#e0ff82]/10 px-2.5 py-1 rounded-full w-max border border-[#e0ff82]/20">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#e0ff82] animate-pulse" />
+          Live Assessment Engine Active
         </div>
-        <div className="absolute right-0 top-0 w-[200px] h-full bg-gradient-to-l from-brand-500/5 to-transparent pointer-events-none" />
+        <h1 className="text-[24px] font-bold text-[var(--text-primary)] mt-1.5 tracking-tight">Institutional Exam & Assessment Engine</h1>
+        <p className="text-[13px] text-[var(--text-secondary)] max-w-3xl leading-relaxed">
+          Group subject papers under institutional exam cycles, configure math/diagram rubrics, and run bulk graded evaluations.
+        </p>
       </div>
 
       {/* Steps Indicator */}
       {step > 0 && (
-        <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-5 shadow-sm backdrop-blur-md bg-opacity-80 flex justify-between items-center gap-4">
+        <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-5 shadow-sm flex justify-between items-center gap-4">
           {[
             { num: 1, label: "Question Paper" },
             { num: 2, label: "Rubric & Approvals" },
@@ -468,7 +465,7 @@ export default function ExamsPage() {
             <div key={s.num} className="flex-1 flex items-center gap-3 relative">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold border transition-all duration-300 ${
                 step === s.num 
-                  ? "bg-brand-600 border-brand-600 text-white shadow-lg shadow-brand-500/20" 
+                  ? "bg-[#e0ff82] border-[#e0ff82] text-[#1f2223] shadow-md shadow-[#e0ff82]/10" 
                   : step > s.num 
                     ? "bg-emerald-500/10 border-emerald-500 text-emerald-600" 
                     : "bg-[var(--surface-secondary)] border-[var(--border-subtle)] text-[var(--text-tertiary)]"
@@ -477,7 +474,7 @@ export default function ExamsPage() {
               </div>
               <div className="flex flex-col">
                 <span className={`text-[11px] font-mono uppercase tracking-wider font-bold ${
-                  step === s.num ? "text-brand-600" : step > s.num ? "text-emerald-600" : "text-[var(--text-tertiary)]"
+                  step === s.num ? "text-[#e0ff82]" : step > s.num ? "text-emerald-600" : "text-[var(--text-tertiary)]"
                 }`}>Step 0{s.num}</span>
                 <span className={`text-[12.5px] font-medium leading-none mt-0.5 ${
                   step === s.num ? "text-[var(--text-primary)] font-semibold" : "text-[var(--text-secondary)]"
@@ -494,63 +491,99 @@ export default function ExamsPage() {
       )}
 
       {/* Wizard Body */}
-      <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 shadow-xl backdrop-blur-md bg-opacity-80">
-        
-        {/* ── Step 0: Cycle Selection ── */}
-        {step === 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Cycle Selection Panel */}
-            <div className="lg:col-span-2 flex flex-col gap-5">
-              <h3 className="text-[15px] font-bold text-[var(--text-primary)] flex items-center gap-2">
-                <div className="dash-card-title-icon brand" style={{width: '28px', height: '28px'}}>
-                  <Layers size={15} />
-                </div>
-                Select Institutional Exam Cycle
-              </h3>
-              <p className="text-[12.5px] text-[var(--text-secondary)] -mt-2">
-                Choose an active exam cycle to upload and decompose a new subject paper.
-              </p>
+      {step === 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Cycle Selection Panel (Card 1) */}
+          <div className="lg:col-span-2 bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-8 shadow-sm flex flex-col gap-6">
+            <h3 className="text-[15.5px] font-bold text-[var(--text-primary)] flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-[#e0ff82]/20 text-[#2c302e] dark:text-[#e0ff82] flex items-center justify-center">
+                <Layers size={14} />
+              </div>
+              Select Institutional Exam Cycle
+            </h3>
+            <p className="text-[12.5px] text-[var(--text-secondary)] -mt-2 leading-relaxed">
+              Choose an active exam cycle to upload and decompose a new subject paper.
+            </p>
 
               {isLoadingCycles ? (
-                <div className="py-12 text-center text-[var(--text-secondary)]">
-                  <Loader2 className="animate-spin mx-auto mb-2 text-brand-500" size={24} />
-                  Fetching exam cycles...
+                <div className="py-16 text-center text-[var(--text-secondary)]">
+                  <Loader2 className="animate-spin mx-auto mb-3 text-[#e0ff82]" size={26} />
+                  <span className="text-[12.5px] font-medium">Fetching exam cycles...</span>
                 </div>
               ) : cycles.length === 0 ? (
-                <div className="dash-empty-state border border-dashed border-[var(--border-subtle)] rounded-2xl p-12 text-center bg-[var(--surface-secondary)] bg-opacity-50">
-                  <div className="w-12 h-12 rounded-full bg-brand-500/10 text-brand-600 flex items-center justify-center mx-auto mb-3">
-                    <Layers size={22} />
+                <div className="border border-dashed border-[var(--border-subtle)] rounded-2xl p-8 bg-[var(--surface-secondary)] transition-all duration-300 hover:border-[#e0ff82]/30 flex flex-col items-start text-left gap-4 relative overflow-hidden">
+                  <div className="flex gap-4 items-start">
+                    <div className="relative w-12 h-12 flex-shrink-0 flex items-center justify-center">
+                      <div className="absolute inset-0 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-primary)]" />
+                      <div className="absolute inset-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-secondary)]" />
+                      <div className="relative w-6 h-6 rounded bg-[#e0ff82] text-[#1f2223] flex items-center justify-center shadow-sm">
+                        <Layers size={13} className="animate-pulse" />
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-[14px] font-bold text-[var(--text-primary)] mb-1">No Active Exam Cycles Found</h4>
+                      <p className="text-[12px] text-[var(--text-secondary)] leading-relaxed max-w-xl">
+                        Create a new cycle using the form on the right, or get started instantly with our pre-configured demo setup.
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-[13px] font-medium text-[var(--text-primary)]">No active exam cycles found</p>
-                  <p className="text-[11.5px] text-[var(--text-tertiary)] mt-1">Create one on the right to get started.</p>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      const today = new Date();
+                      const nextMonth = new Date();
+                      nextMonth.setMonth(today.getMonth() + 1);
+                      const formatDate = (d: Date) => {
+                        const yyyy = d.getFullYear();
+                        const mm = String(d.getMonth() + 1).padStart(2, '0');
+                        const dd = String(d.getDate()).padStart(2, '0');
+                        return `${yyyy}-${mm}-${dd}`;
+                      };
+                      setNewCycleName("Mid-Term Oct 2026");
+                      setNewCycleStart(formatDate(today));
+                      setNewCycleEnd(formatDate(nextMonth));
+                    }}
+                    className="btn-lp-accent cursor-pointer active:scale-[0.98] transition-transform duration-200 border-0 self-end mt-2"
+                  >
+                    <Sparkles size={13} />
+                    Quick Demo Setup
+                  </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {cycles.map((c) => (
                     <div 
                       key={c.id} 
-                      className={`border rounded-2xl p-5 cursor-pointer transition-all duration-200 hover:scale-[1.01] ${
+                      className={`border rounded-xl p-6 cursor-pointer transition-all duration-300 hover:scale-[1.01] hover:shadow-md ${
                         selectedCycleId === c.id 
-                          ? "border-brand-500 bg-brand-500/5 shadow-md shadow-brand-500/5" 
-                          : "border-[var(--border-subtle)] bg-[var(--surface-primary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-secondary)]/50"
+                          ? "border-[#e0ff82] border-l-4 bg-[var(--surface-secondary)] shadow-sm shadow-[#e0ff82]/5" 
+                          : "border-[var(--border-subtle)] bg-[var(--surface-primary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-secondary)]"
                       }`}
                       onClick={() => setSelectedCycleId(c.id)}
                     >
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-[13.5px] font-bold text-[var(--text-primary)]">{c.name}</span>
-                        <span className={`pill text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      <div className="flex justify-between items-start gap-2 mb-2">
+                        <span className="text-[13.5px] font-bold text-[var(--text-primary)] line-clamp-1">{c.name}</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border whitespace-nowrap ${
                           c.status === "ACTIVE" 
-                            ? "bg-emerald-500/10 text-emerald-600" 
-                            : "bg-blue-500/10 text-blue-600"
+                            ? "bg-[var(--color-success-bg)] text-[var(--color-success-text)] border-[var(--color-success-border)]/20" 
+                            : "bg-[var(--color-info-bg)] text-[var(--color-info-text)] border-[var(--color-info-border)]/20"
                         }`}>{c.status}</span>
                       </div>
-                      <div className="text-[11.5px] text-[var(--text-secondary)] flex items-center gap-2">
-                        <Calendar size={13} className="text-[var(--text-tertiary)]" />
-                        {c.start_date ? new Date(c.start_date).toLocaleDateString() : "TBD"} - {c.end_date ? new Date(c.end_date).toLocaleDateString() : "TBD"}
+                      <div className="text-[11.5px] text-[var(--text-secondary)] flex items-center gap-1.5 mb-3">
+                        <Calendar size={12} className="text-[var(--text-tertiary)]" />
+                        <span>
+                          {c.start_date ? new Date(c.start_date).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'}) : "TBD"}
+                        </span>
+                        <span className="text-[var(--text-tertiary)]">•</span>
+                        <span>
+                          {c.end_date ? new Date(c.end_date).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'}) : "TBD"}
+                        </span>
                       </div>
-                      <div className="text-[11.5px] text-brand-600 font-semibold mt-3 flex items-center gap-1.5">
-                        <div className="w-1.5 h-1.5 bg-brand-500 rounded-full" />
-                        {c.task_count} subject papers linked
+                      <div className="flex items-center gap-2 border-t border-[var(--border-subtle)] pt-2.5 mt-2.5 text-[11px] text-[var(--text-secondary)] font-medium">
+                        <Layers size={11} className="text-[#e0ff82]" />
+                        <span>
+                          <strong className="text-[var(--text-primary)] font-bold">{c.task_count}</strong> subject papers linked
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -559,29 +592,35 @@ export default function ExamsPage() {
 
               {selectedCycleId && (
                 <div className="mt-6 border-t border-[var(--border-subtle)] pt-6">
-                  <h4 className="text-[13.5px] font-bold text-[var(--text-primary)] mb-3 flex items-center gap-2">
-                    <FileText size={15} className="text-brand-600" />
+                  <h4 className="text-[13.5px] font-bold text-[var(--text-primary)] mb-3.5 flex items-center gap-2">
+                    <FileText size={14} className="text-[#e0ff82]" />
                     Existing Subject Papers in this Cycle:
                   </h4>
                   {isLoadingTasks ? (
-                    <div className="py-4 text-center text-[var(--text-secondary)]">
-                      <Loader2 className="animate-spin inline-block mr-2 text-brand-500" size={16} />
-                      Loading papers...
+                    <div className="py-6 text-center text-[var(--text-secondary)]">
+                      <Loader2 className="animate-spin inline-block mr-2 text-[#e0ff82]" size={18} />
+                      <span className="text-[12px] font-medium">Loading papers...</span>
                     </div>
                   ) : selectedCycleTasks.length === 0 ? (
-                    <p className="text-[12px] text-[var(--text-tertiary)]">No subject papers created yet in this cycle. Select & proceed below to upload one.</p>
+                    <p className="text-[12px] text-[var(--text-tertiary)] italic bg-[var(--surface-secondary)]/50 border border-[var(--border-subtle)] rounded-xl p-4 text-center">No subject papers created yet in this cycle. Select & proceed below to upload one.</p>
                   ) : (
                     <div className="flex flex-col gap-2.5">
                       {selectedCycleTasks.map((t) => (
-                        <div key={t.id} className="border border-[var(--border-subtle)] rounded-xl p-4 bg-[var(--surface-secondary)]/50 flex justify-between items-center hover:border-brand-500/30 hover:bg-[var(--surface-secondary)] transition-all duration-200">
+                        <div key={t.id} className="border border-[var(--border-subtle)] rounded-xl p-4 bg-[var(--surface-secondary)]/30 flex justify-between items-center hover:border-[var(--brand-600)]/20 hover:bg-[var(--surface-secondary)] transition-all duration-300">
                           <div>
                             <div className="text-[13px] font-bold text-[var(--text-primary)]">{t.title}</div>
-                            <div className="text-[11px] text-[var(--text-secondary)] mt-0.5">
-                              Subject: <strong className="text-[var(--text-primary)]">{t.subject}</strong> | Grade: <strong>{t.grade_level}</strong> | Set: <strong>{t.paper_set}</strong> | Max Marks: <strong>{t.max_marks}</strong>
+                            <div className="text-[11px] text-[var(--text-secondary)] mt-1 flex items-center gap-1.5 flex-wrap">
+                              <span>Subject: <strong className="text-[var(--text-primary)] font-semibold">{t.subject}</strong></span>
+                              <span className="text-[var(--text-tertiary)]">•</span>
+                              <span>Grade: <strong className="text-[var(--text-primary)] font-semibold">{t.grade_level}</strong></span>
+                              <span className="text-[var(--text-tertiary)]">•</span>
+                              <span>Set: <strong className="text-[var(--text-primary)] font-semibold">{t.paper_set}</strong></span>
+                              <span className="text-[var(--text-tertiary)]">•</span>
+                              <span>Max Marks: <strong className="text-[var(--text-primary)] font-semibold">{t.max_marks}</strong></span>
                             </div>
                           </div>
                           <button
-                            className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-3 py-1.5 text-[11.5px] font-semibold transition-all duration-200 flex items-center gap-1.5 shadow-sm shadow-brand-500/10 cursor-pointer"
+                            className="btn-lp-accent cursor-pointer active:scale-[0.98] transition-transform duration-200 border-0"
                             onClick={() => {
                               setTaskId(t.id);
                               setTitle(t.title);
@@ -604,9 +643,9 @@ export default function ExamsPage() {
               )}
 
               {cycles.length > 0 && (
-                <div className="flex justify-end pt-4 border-t border-[var(--border-subtle)] mt-6">
+                <div className="flex justify-end pt-5 border-t border-[var(--border-subtle)] mt-6">
                   <button 
-                    className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-5 py-2.5 text-[13px] font-bold transition-all duration-200 flex items-center gap-1.5 shadow-lg shadow-brand-500/10 cursor-pointer"
+                    className="btn-lp-accent cursor-pointer active:scale-[0.98] transition-transform duration-200 border-0"
                     onClick={() => {
                       const cycle = cycles.find(c => c.id === selectedCycleId);
                       if (cycle) {
@@ -622,49 +661,66 @@ export default function ExamsPage() {
               )}
             </div>
 
-            {/* Create Cycle Panel */}
-            <div className="lg:col-span-1 pl-0 lg:pl-8 border-t lg:border-t-0 lg:border-l border-[var(--border-subtle)] pt-6 lg:pt-0">
-              <h3 className="text-[14px] font-bold text-[var(--text-primary)] mb-5 flex items-center gap-2">
-                <div className="dash-card-title-icon brand" style={{width: '26px', height: '26px'}}>
+            {/* Create Cycle Panel (Card 2) */}
+            <div className="lg:col-span-1 bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-8 shadow-sm flex flex-col gap-6">
+              <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-1 flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-[#e0ff82]/20 text-[#2c302e] dark:text-[#e0ff82] flex items-center justify-center">
                   <Plus size={14} />
                 </div>
                 Create New Exam Cycle
               </h3>
 
-              <form onSubmit={handleCreateCycle} className="flex flex-col gap-4">
+              <form onSubmit={handleCreateCycle} className="flex flex-col gap-6">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase">Cycle Title</label>
-                  <input 
-                    type="text" 
-                    className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm w-full font-medium"
-                    placeholder="e.g. Mid-Term Oct 2026"
-                    value={newCycleName}
-                    onChange={(e) => setNewCycleName(e.target.value)}
-                    required
-                  />
+                  <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Cycle Title</label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] flex items-center pointer-events-none">
+                      <Layers size={14} />
+                    </div>
+                    <input 
+                      type="text" 
+                      className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-lg pl-10 pr-3.5 py-2.5 text-[12.5px] text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:border-[var(--text-primary)] focus:ring-[3px] focus:ring-[var(--border-subtle)] focus:bg-[var(--surface-primary)] shadow-sm w-full font-medium transition-all duration-200"
+                      placeholder="e.g. Mid-Term Oct 2026"
+                      value={newCycleName}
+                      onChange={(e) => setNewCycleName(e.target.value)}
+                      required
+                    />
+                  </div>
                 </div>
+
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase">Start Date</label>
-                  <input 
-                    type="date" 
-                    className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm w-full font-medium"
-                    value={newCycleStart}
-                    onChange={(e) => setNewCycleStart(e.target.value)}
-                  />
+                  <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Start Date</label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] flex items-center pointer-events-none">
+                      <Calendar size={14} />
+                    </div>
+                    <input 
+                      type="date" 
+                      className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-lg pl-10 pr-3.5 py-2.5 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] focus:ring-[3px] focus:ring-[var(--border-subtle)] focus:bg-[var(--surface-primary)] shadow-sm w-full font-medium transition-all duration-200"
+                      value={newCycleStart}
+                      onChange={(e) => setNewCycleStart(e.target.value)}
+                    />
+                  </div>
                 </div>
+
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase">End Date</label>
-                  <input 
-                    type="date" 
-                    className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm w-full font-medium"
-                    value={newCycleEnd}
-                    onChange={(e) => setNewCycleEnd(e.target.value)}
-                  />
+                  <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">End Date</label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] flex items-center pointer-events-none">
+                      <Calendar size={14} />
+                    </div>
+                    <input 
+                      type="date" 
+                      className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-lg pl-10 pr-3.5 py-2.5 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] focus:ring-[3px] focus:ring-[var(--border-subtle)] focus:bg-[var(--surface-primary)] shadow-sm w-full font-medium transition-all duration-200"
+                      value={newCycleEnd}
+                      onChange={(e) => setNewCycleEnd(e.target.value)}
+                    />
+                  </div>
                 </div>
 
                 <button 
                   type="submit" 
-                  className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-4 py-2.5 text-[12.5px] font-bold transition-all duration-200 flex justify-center items-center gap-2 shadow-md shadow-brand-500/10 cursor-pointer mt-2"
+                  className="btn-lp-accent cursor-pointer active:scale-[0.98] transition-transform duration-200 border-0 w-max self-end mt-3"
                   disabled={isCreatingCycle}
                 >
                   {isCreatingCycle ? (
@@ -683,9 +739,11 @@ export default function ExamsPage() {
           </div>
         )}
 
-        {/* ── Step 1: Upload Question Paper ── */}
-        {step === 1 && (
-          <div className="animate-fade-in flex flex-col gap-6">
+        {step > 0 && (
+          <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-8 shadow-sm">
+            {/* ── Step 1: Upload Question Paper ── */}
+            {step === 1 && (
+              <div className="animate-fade-in flex flex-col gap-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-2 flex flex-col gap-4">
                 <h3 className="text-[14.5px] font-bold text-[var(--text-primary)]">Exam Metadata</h3>
@@ -764,24 +822,24 @@ export default function ExamsPage() {
               </div>
             </div>
 
-            <div className="flex justify-between pt-4 border-t border-[var(--border-subtle)] mt-4">
-              <button className="bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-[var(--text-primary)] rounded-xl px-4 py-2 text-[12.5px] font-bold border border-[var(--border-subtle)] transition-all duration-200 flex items-center gap-1.5 cursor-pointer" onClick={() => setStep(0)}>
-                <ArrowLeft size={15} /> Change Cycle
+            <div className="flex justify-between pt-5 border-t border-[var(--border-subtle)] mt-6">
+              <button className="btn-lp-outline cursor-pointer" onClick={() => setStep(0)}>
+                <ArrowLeft size={14} /> Change Cycle
               </button>
               <button 
-                className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-5 py-2 text-[12.5px] font-bold transition-all duration-200 flex items-center gap-1.5 shadow-lg shadow-brand-500/10 cursor-pointer" 
+                className="btn-lp-accent border-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
                 onClick={processQuestionPaper} 
                 disabled={isProcessingPaper || !qpaperFile}
               >
                 {isProcessingPaper ? (
                   <>
-                    <Loader2 className="animate-spin" size={15} />
+                    <Loader2 className="animate-spin" size={14} />
                     AI Decomposing Paper...
                   </>
                 ) : (
                   <>
                     Decompose with Gemini
-                    <ArrowRight size={15} />
+                    <ArrowRight size={14} />
                   </>
                 )}
               </button>
@@ -818,20 +876,19 @@ export default function ExamsPage() {
                   
                   {/* Action buttons inside the wizard */}
                   {!taskId ? (
-                    <button className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-3 py-1.5 text-[12px] font-bold shadow-md shadow-brand-500/5 cursor-pointer" onClick={confirmRubric} disabled={isCreatingTask}>
+                    <button className="btn-lp-accent border-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" onClick={confirmRubric} disabled={isCreatingTask}>
                       {isCreatingTask ? <Loader2 className="animate-spin" size={12} /> : "Save Rubric Schema"}
                     </button>
                   ) : (
                     <div className="flex gap-2">
                       {rubricApprovalStatus === "DRAFT" && (
-                        <button className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-3 py-1.5 text-[12px] font-bold shadow-md shadow-brand-500/5 flex items-center gap-1.5 cursor-pointer" onClick={submitForApproval}>
+                        <button className="btn-lp-accent border-0 cursor-pointer flex items-center gap-1.5" onClick={submitForApproval}>
                           <ShieldCheck size={14} />
                           Submit for HOD Approval
                         </button>
                       )}
-                      {(user?.role === "hod" || user?.role === "principal" || user?.role === "admin") && 
-                       rubricApprovalStatus === "PENDING_APPROVAL" && (
-                        <button className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-3 py-1.5 text-[12px] font-bold shadow-md shadow-emerald-500/5 flex items-center gap-1.5 cursor-pointer" onClick={approveRubric}>
+                      {rubricApprovalStatus === "PENDING_APPROVAL" && (
+                        <button className="btn-lp-accent border-0 cursor-pointer flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white" onClick={approveRubric}>
                           <UserCheck size={14} />
                           Approve Rubric
                         </button>
@@ -931,19 +988,19 @@ export default function ExamsPage() {
               ))}
             </div>
 
-            <div className="flex justify-between pt-4 border-t border-[var(--border-subtle)]">
-              <button className="bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-[var(--text-primary)] rounded-xl px-4 py-2 text-[12.5px] font-bold border border-[var(--border-subtle)] transition-all duration-200 flex items-center gap-1.5 cursor-pointer" onClick={() => setStep(1)}>
-                <ArrowLeft size={15} /> Back
+            <div className="flex justify-between pt-5 border-t border-[var(--border-subtle)] mt-6">
+              <button className="btn-lp-outline cursor-pointer" onClick={() => setStep(1)}>
+                <ArrowLeft size={14} /> Back
               </button>
               
               <button 
-                className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-5 py-2 text-[12.5px] font-bold transition-all duration-200 flex items-center gap-1.5 shadow-lg shadow-brand-500/10 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
+                className="btn-lp-accent border-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
                 onClick={() => setStep(3)}
                 disabled={rubricApprovalStatus !== "APPROVED"}
                 title={rubricApprovalStatus !== "APPROVED" ? "HOD/Principal must approve the rubric before evaluations can begin." : ""}
               >
                 Proceed to Bulk Evaluation
-                <ArrowRight size={15} />
+                <ArrowRight size={14} />
               </button>
             </div>
           </div>
@@ -1012,24 +1069,24 @@ export default function ExamsPage() {
               </div>
             )}
 
-            <div className="flex justify-between pt-4 border-t border-[var(--border-subtle)]">
-              <button className="bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-[var(--text-primary)] rounded-xl px-4 py-2 text-[12.5px] font-bold border border-[var(--border-subtle)] transition-all duration-200 flex items-center gap-1.5 cursor-pointer" onClick={() => setStep(2)}>
-                <ArrowLeft size={15} /> Back
+            <div className="flex justify-between pt-5 border-t border-[var(--border-subtle)] mt-6">
+              <button className="btn-lp-outline cursor-pointer" onClick={() => setStep(2)}>
+                <ArrowLeft size={14} /> Back
               </button>
               <button 
-                className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-5 py-2 text-[12.5px] font-bold transition-all duration-200 flex items-center gap-1.5 shadow-lg shadow-brand-500/10 cursor-pointer disabled:opacity-50" 
+                className="btn-lp-accent border-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
                 onClick={uploadAndStartGrading} 
                 disabled={isUploadingAnswers || answerFiles.length === 0}
               >
                 {isUploadingAnswers ? (
                   <>
-                    <Loader2 className="animate-spin" size={15} />
+                    <Loader2 className="animate-spin" size={14} />
                     Uploading Answer Sheets...
                   </>
                 ) : (
                   <>
                     Upload & Start Evaluating
-                    <Play size={15} />
+                    <Play size={14} />
                   </>
                 )}
               </button>
@@ -1084,22 +1141,22 @@ export default function ExamsPage() {
             ) : (
               <div className="flex flex-col items-center gap-4">
                 <p className="text-[12.5px] text-[var(--text-tertiary)]">Waiting for upload task to trigger evaluations...</p>
-                <button className="bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-xl px-4 py-2 text-[12.5px] font-bold transition-all duration-200 flex items-center gap-2 cursor-pointer shadow-sm" onClick={startGradingManual}>
-                  <Loader2 className="animate-spin" size={14} /> Start Grading Manually
+                <button className="btn-lp-outline cursor-pointer" onClick={startGradingManual}>
+                  <Loader2 className="animate-spin" size={13} /> Start Grading Manually
                 </button>
               </div>
             )}
 
             <div className="mt-8 pt-6 border-t border-[var(--border-subtle)] w-full flex justify-center">
-              <a href="/dashboard" className="bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-5 py-2.5 text-[13px] font-bold transition-all duration-200 flex items-center gap-1.5 shadow-lg shadow-brand-500/10">
+              <a href="/dashboard" className="btn-lp-accent border-0 cursor-pointer">
                 Go to Evaluation Queue Dashboard
-                <ArrowRight size={16} />
+                <ArrowRight size={14} />
               </a>
             </div>
           </div>
         )}
-
       </div>
-    </div>
+    )}
+  </div>
   );
 }
