@@ -341,7 +341,7 @@ export default function ReviewsPage() {
             </span>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto px-6 pb-4">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] bg-opacity-30">
@@ -408,7 +408,7 @@ export default function ReviewsPage() {
           </span>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto px-6 pb-4">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] bg-opacity-30">
@@ -457,7 +457,7 @@ export default function ReviewsPage() {
                       <td className="px-6 py-5 font-bold font-mono text-[13px] text-[var(--text-primary)]">{r.grade} / {r.max_grade}</td>
                       <td className="px-6 py-5 text-right">
                         <button
-                          style={{ padding: "9px 18px", fontSize: "12.5px", borderRadius: "8px" }}
+                          style={{ padding: "7.5px 18px", fontSize: "12.5px", borderRadius: "8px" }}
                           className="inline-flex items-center justify-center gap-2 font-bold border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] group-hover:border-red-500 group-hover:bg-red-500 group-hover:text-white transition-all cursor-pointer shadow-sm whitespace-nowrap"
                         >
                           Inspect Verdict <ChevronRight size={14} />
