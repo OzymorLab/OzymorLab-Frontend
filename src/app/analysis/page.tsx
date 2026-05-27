@@ -904,13 +904,13 @@ function AnalysisHUDPageContent() {
         {/* ==========================================
             MAIN CONTAINER WITH PADDING & MARGINS
            ========================================== */}
-        <div style={{ maxWidth: 1280, width: "100%", margin: "0 auto", padding: "16px 20px 140px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0, gap: 16 }}>
+        <div style={{ maxWidth: 1280, width: "100%", margin: "0 auto", padding: "4px 20px 4px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0, gap: 0 }}>
 
           {/* ==========================================
           {/* ==========================================
               2. QUESTION BAR
              ========================================== */}
-          <section className="px-12 py-10 flex items-center gap-4 border border-[var(--border-subtle)] bg-[var(--surface-primary)] rounded-xl shadow-sm mx-10">
+          <section className="px-4 py-2 flex items-center gap-4 mx-10">
           
           {/* Question Selector */}
           <div className="flex-1 flex items-center gap-2">
@@ -921,13 +921,13 @@ function AnalysisHUDPageContent() {
               </div>
             ) : (
               <div className="flex-1 flex gap-2">
-                <div className="flex-1 h-12 px-4 rounded-xl text-[13.5px] font-bold bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center shadow-sm">
+                <div className="flex-1 h-10 px-4 text-[13.5px] font-bold text-[var(--text-primary)] flex items-center">
                   {activeQuestion.title || "No question selected"}
                 </div>
 
 
                 {/* Marks Box (Points adjustments very close to selectors) */}
-                <div className="h-12 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex items-center overflow-hidden flex-shrink-0 shadow-sm">
+                <div className="h-10 flex items-center overflow-hidden flex-shrink-0">
                   <div className="px-4 text-center">
                     <span className="text-[13px] font-mono font-bold text-[var(--text-primary)]">
                       {activeStudent.score?.toFixed(1) || "0.0"} pts
@@ -935,10 +935,10 @@ function AnalysisHUDPageContent() {
                   </div>
                   
                   {viewMode === "teacher" ? (
-                    <div className="flex flex-col h-full bg-[var(--surface-primary)] border-l border-[var(--border-subtle)]">
+                    <div className="flex flex-col h-full">
                       <button
                         onClick={() => adjustTotalMarks(0.5)}
-                        className="w-7 flex-1 flex items-center justify-center text-[10px] font-bold text-[var(--text-secondary)] hover:text-brand-600 hover:bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] cursor-pointer"
+                        className="w-7 flex-1 flex items-center justify-center text-[10px] font-bold text-[var(--text-secondary)] hover:text-brand-600 hover:bg-[var(--surface-secondary)] cursor-pointer"
                         disabled={!selectedStudentId}
                       >
                         +
@@ -952,7 +952,7 @@ function AnalysisHUDPageContent() {
                       </button>
                     </div>
                   ) : (
-                    <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-brand-600 bg-brand-500/10 border-l border-[var(--border-subtle)] font-mono flex items-center h-full">
+                    <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-brand-600 bg-brand-500/10 font-mono flex items-center h-full">
                       Locked
                     </div>
                   )}
@@ -963,7 +963,7 @@ function AnalysisHUDPageContent() {
             </div>
   
             {/* Confidence Score Display (Text) */}
-            <div className="h-10 px-3.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex items-center justify-center flex-shrink-0 text-[12px] font-bold font-mono text-[var(--text-primary)]"
+            <div className="h-10 px-3.5 flex items-center justify-center flex-shrink-0 text-[12px] font-bold font-mono text-[var(--text-secondary)]"
               title="AI Grading Confidence Score"
             >
               Confidence: {((submissionDetail?.confidence || activeQuestion.confidence || 0.95) * 100).toFixed(0)}%
@@ -977,7 +977,7 @@ function AnalysisHUDPageContent() {
                   [selectedStudentId]: !agreedSubmissions[selectedStudentId]
                 }));
               }}
-              className="h-10 px-4 rounded-xl text-[12.5px] font-bold transition-all hover:scale-105 cursor-pointer shadow-sm flex items-center gap-1.5 border"
+              className="h-10 px-4 rounded-xl text-[12.5px] font-bold transition-all hover:scale-105 cursor-pointer flex items-center gap-1.5 border"
               style={{
                 background: agreedSubmissions[selectedStudentId] ? "rgba(16,185,129,0.1)" : "var(--text-primary)",
                 color: agreedSubmissions[selectedStudentId] ? "#10b981" : "var(--surface-primary)",
@@ -992,7 +992,7 @@ function AnalysisHUDPageContent() {
           {/* ==========================================
               3. BODY LAYOUT
              ========================================== */}
-          <div className="flex flex-1 min-h-0 border border-[var(--border-subtle)] bg-[var(--surface-primary)] rounded-xl overflow-hidden shadow-sm mx-10" style={{ minHeight: "360px" }}>
+          <div className="analysis-body-scroll flex flex-1 min-h-0 border border-[var(--border-subtle)] bg-[var(--surface-primary)] rounded-xl overflow-hidden shadow-sm mx-10" style={{ height: "calc(100vh - 118px)", maxHeight: "calc(100vh - 118px)" }}>
 
           {/* ==========================================
               3A. SIDEBAR
@@ -1230,7 +1230,7 @@ function AnalysisHUDPageContent() {
                   <>
                     {/* Question Card */}
                     {activeQuestion.questionText && (
-                      <div className="mb-4 py-12 px-10 mx-10 min-h-[160px] flex flex-col justify-center bg-transparent border-none shadow-none" style={{ background: "transparent", border: "none", boxShadow: "none" }}>
+                      <div className="mb-2 py-4 px-6 mx-4 flex flex-col justify-center bg-transparent border-none shadow-none" style={{ background: "transparent", border: "none", boxShadow: "none" }}>
                         <span className="text-[10px] uppercase font-mono font-bold block mb-2 text-[var(--text-tertiary)] tracking-wider">
                           {viewMode === "self-eval" ? "Practice Exercise" : "Assigned Question"}
                         </span>
@@ -1239,7 +1239,7 @@ function AnalysisHUDPageContent() {
                     )}
 
                     {/* Manuscript Canvas (Premium Grid Background) - Handwritten Answer Sheet Scanned Image */}
-                    <div className="flex-1 min-h-[260px] rounded-xl border border-[var(--border-subtle)] relative overflow-hidden flex flex-col" 
+                    <div className="flex-1 min-h-[180px] rounded-xl border border-[var(--border-subtle)] relative overflow-hidden flex flex-col" 
                       style={{ 
                         background: "var(--surface-secondary)", 
                         backgroundImage: "radial-gradient(var(--border-strong) 1.5px, transparent 1.5px)",
@@ -1273,13 +1273,15 @@ function AnalysisHUDPageContent() {
               {/* RIGHT PANE: AI Step Traces / Conversation (30% width) */}
               <div 
                 ref={rightPaneRef}
-                className="flex-[3] p-8 overflow-y-auto flex flex-col gap-6 scroll-smooth bg-[var(--surface-primary)]"
+                className="flex-[3] flex flex-col overflow-hidden bg-[var(--surface-primary)]"
                 style={{
                   border: "1px solid var(--border-subtle)",
                   margin: "12px",
                   borderRadius: "16px",
                 }}
               >
+                {/* Scrollable conversation content */}
+                <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-6 scroll-smooth analysis-body-scroll">
                 <div className="flex items-center justify-between border-b pb-3 flex-shrink-0" style={{ borderBottomColor: "var(--border-subtle)" }}>
                   <h3 className="font-semibold text-[15px] flex items-center gap-2 text-[var(--text-primary)]">
                     <svg width="18" height="18" viewBox="0 0 28 28" fill="none" className="flex-shrink-0">
@@ -1309,13 +1311,13 @@ function AnalysisHUDPageContent() {
                         key={step.stepNum}
                         id={`step-card-${step.stepNum}`}
                         onClick={() => setHighlightedStep(step.stepNum)}
-                        className={`py-6 px-8 rounded-xl border transition-all duration-200 cursor-pointer relative overflow-hidden flex-shrink-0 flex flex-col gap-4 ${
-                          isStepHighlighted ? "bg-[var(--surface-secondary)] border-[var(--text-primary)]" : "bg-transparent border-[var(--border-subtle)]"
+                        className={`py-4 px-6 transition-all duration-200 cursor-pointer relative flex-shrink-0 flex flex-col gap-3 border-b border-[var(--border-subtle)] last:border-b-0 ${
+                          isStepHighlighted ? "bg-[var(--surface-secondary)]" : "bg-transparent"
                         }`}
                       >
                         <div className="flex justify-between items-center">
                           <span className="text-[11px] font-bold font-mono uppercase text-[var(--text-secondary)]">
-                            Step {step.stepNum} Trace
+                            Step {step.stepNum}
                           </span>
                           <span className="text-[11.5px] font-bold font-mono text-[var(--text-primary)]">
                             {step.marks} / {step.maxMarks} pts
@@ -1388,102 +1390,77 @@ function AnalysisHUDPageContent() {
                     </div>
                   </div>
                 )}
-
-              </div>
-
-            </div>
-
-            {/* ==========================================
-                4. CHAT BAR (Premium Rounded B&W Inputs)
-               ========================================== */}
-            {/* Highlight Banner */}
-            {highlightedStep && (
-              <div className="px-4 py-2 text-xs flex items-center justify-between rounded-lg mb-3 mx-4" 
-                style={{ background: "rgba(16,185,129,0.12)", color: "#10b981", border: "1px solid rgba(16,185,129,0.25)" }}>
-                <div className="flex items-center gap-2">
-                  <Sparkles size={12} className="animate-pulse" />
-                  <span>Aligned View to <strong className="font-mono">Step {highlightedStep}</strong> on the Manuscript OCR panel above.</span>
                 </div>
-                <button 
-                  onClick={() => setHighlightedStep(null)} 
-                  className="text-[11px] uppercase tracking-wider font-bold hover:underline cursor-pointer"
-                >
-                  Clear Link
-                </button>
-              </div>
-            )}
 
-      <footer 
-        style={{
-          position: "fixed",
-          bottom: "32px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 1000,
-          width: "70%",
-          maxWidth: "700px",
-          pointerEvents: "auto",
-        }}
-      >
-        
-        {/* Chat Input Box (Claude web style, centered, padded) */}
-        <div 
-          className="rounded-2xl flex flex-col p-5 gap-3.5 border transition-all shadow-xl"
-          style={{
-            background: "var(--surface-primary)",
-            borderColor: "var(--border-subtle)",
-            boxShadow: "0 10px 30px -10px rgba(0,0,0,0.3)",
-          }}
-        >
-          {/* Text input on top with padding */}
-          <input
-            type="text"
-            value={chatInput}
-            onChange={(e) => setChatInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleSendChat(chatInput);
-            }}
-            placeholder="Write a message..."
-            className="w-full bg-transparent border-none outline-none text-[14px] text-[var(--text-primary)] placeholder-gray-500 px-2 py-1"
-            disabled={!selectedStudentId}
-          />
-          
-          {/* Controls toolbar on bottom */}
-          <div className="flex items-center justify-between mt-1 pt-2 border-t border-[rgba(255,255,255,0.04)] px-2">
-            {/* Left: Plus icon */}
-            <button 
-              className="p-1 rounded-lg hover:bg-[rgba(255,255,255,0.06)] text-[var(--text-secondary)] transition-all cursor-pointer"
-              title="Add attachment"
-            >
-              <Plus size={18} />
-            </button>
-            
-            {/* Right: Mic, Waveform */}
-            <div className="flex items-center gap-4 text-[var(--text-secondary)]">
-              
-              {/* Mic Icon */}
-              <button 
-                className="p-1 hover:text-[var(--text-primary)] transition-all cursor-pointer"
-                title="Voice input"
-              >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-mic">
-                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
-                  <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
-                  <line x1="12" x2="12" y1="19" y2="22"/>
-                </svg>
-              </button>
-              
-              {/* Voice waveform icon */}
-              <div className="flex items-center gap-[3px] h-3.5 px-0.5" title="Voice activity indicator">
-                <span className="w-[2px] h-2 bg-current rounded-full opacity-60"></span>
-                <span className="w-[2px] h-3.5 bg-current rounded-full"></span>
-                <span className="w-[2px] h-2.5 bg-current rounded-full opacity-80"></span>
-                <span className="w-[2px] h-1.5 bg-current rounded-full opacity-50"></span>
+                {/* Chat Input Box pinned at bottom of conversation tab */}
+                <div 
+                  className="flex flex-col border-t flex-shrink-0"
+                  style={{
+                    borderTopColor: "var(--border-subtle)",
+                    background: "var(--surface-primary)",
+                  }}
+                >
+                  {/* Highlight Banner */}
+                  {highlightedStep && (
+                    <div className="px-3 py-1.5 mx-4 mt-2 text-xs flex items-center justify-between rounded-lg flex-shrink-0" 
+                      style={{ background: "rgba(16,185,129,0.12)", color: "#10b981", border: "1px solid rgba(16,185,129,0.25)" }}>
+                      <div className="flex items-center gap-2">
+                        <Sparkles size={12} className="animate-pulse" />
+                        <span>Step <strong className="font-mono">{highlightedStep}</strong></span>
+                      </div>
+                      <button 
+                        onClick={() => setHighlightedStep(null)} 
+                        className="text-[10px] uppercase tracking-wider font-bold hover:underline cursor-pointer ml-2"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+                  <textarea
+                    value={chatInput}
+                    onChange={(e) => {
+                      setChatInput(e.target.value);
+                      e.target.style.height = 'auto';
+                      e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendChat(chatInput);
+                      }
+                    }}
+                    placeholder="Write a message..."
+                    className="w-full bg-transparent border-none outline-none text-[13px] text-[var(--text-primary)] placeholder-gray-500 px-5 pt-3 pb-1 resize-none"
+                    disabled={!selectedStudentId}
+                    rows={2}
+                    style={{ minHeight: '52px', maxHeight: '120px' }}
+                  />
+                  <div className="flex items-center justify-between px-4 pb-2">
+                    <button 
+                      className="p-1 rounded-lg hover:bg-[rgba(255,255,255,0.06)] text-[var(--text-secondary)] transition-all cursor-pointer flex-shrink-0"
+                      title="Add attachment"
+                    >
+                      <Plus size={16} />
+                    </button>
+                    <button 
+                      onClick={() => handleSendChat(chatInput)}
+                      className="p-1 rounded-lg hover:bg-[rgba(255,255,255,0.06)] transition-all cursor-pointer flex-shrink-0"
+                      title="Send message"
+                      disabled={!chatInput.trim() || !selectedStudentId}
+                      style={{ opacity: chatInput.trim() ? 1 : 0.4 }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
+                        <rect width="28" height="28" rx="8" fill="#1f2223" />
+                        <path d="M8 14L14 8L20 14L14 20L8 14Z" fill="#e0ff82" stroke="#e0ff82" strokeWidth="1.5" strokeLinejoin="round" />
+                        <circle cx="14" cy="14" r="3" fill="#1f2223" />
+                      </svg>
+                    </button>
+                  </div>
+                  <p className="text-center text-[10px] text-[var(--text-tertiary)] pb-2 font-medium">AI can make mistakes, please double check it.</p>
+                </div>
               </div>
+
             </div>
-          </div>
-        </div>
-      </footer>
 
           </main>
 
@@ -1497,6 +1474,17 @@ function AnalysisHUDPageContent() {
         .dash-nav-desktop { display: flex !important; }
         .dash-nav-mobile-btn { display: none !important; }
         .dash-nav-mobile-menu { display: none; }
+
+        /* Hide scrollbar on body layout but keep scrolling */
+        .analysis-body-scroll,
+        .analysis-body-scroll * {
+          scrollbar-width: none; /* Firefox */
+          -ms-overflow-style: none; /* IE/Edge */
+        }
+        .analysis-body-scroll::-webkit-scrollbar,
+        .analysis-body-scroll *::-webkit-scrollbar {
+          display: none; /* Chrome/Safari */
+        }
 
         @media (max-width: 900px) {
           .dash-nav-desktop { display: none !important; }
