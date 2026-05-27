@@ -992,7 +992,7 @@ function AnalysisHUDPageContent() {
           {/* ==========================================
               3. BODY LAYOUT
              ========================================== */}
-          <div className="flex flex-1 min-h-0 border border-[var(--border-subtle)] bg-[var(--surface-primary)] rounded-xl overflow-hidden shadow-sm" style={{ minHeight: "360px" }}>
+          <div className="flex flex-1 min-h-0 border border-[var(--border-subtle)] bg-[var(--surface-primary)] rounded-xl overflow-hidden shadow-sm mx-10" style={{ minHeight: "360px" }}>
 
           {/* ==========================================
               3A. SIDEBAR
@@ -1305,7 +1305,7 @@ function AnalysisHUDPageContent() {
                         key={step.stepNum}
                         id={`step-card-${step.stepNum}`}
                         onClick={() => setHighlightedStep(step.stepNum)}
-                        className={`p-6 rounded-xl border transition-all duration-200 cursor-pointer relative overflow-hidden flex-shrink-0 flex flex-col gap-4 ${
+                        className={`py-6 px-8 rounded-xl border transition-all duration-200 cursor-pointer relative overflow-hidden flex-shrink-0 flex flex-col gap-4 ${
                           isStepHighlighted ? "bg-[var(--surface-secondary)] border-[var(--text-primary)]" : "bg-transparent border-[var(--border-subtle)]"
                         }`}
                       >
