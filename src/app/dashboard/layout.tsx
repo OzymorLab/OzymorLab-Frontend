@@ -3,37 +3,70 @@
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  LayoutDashboard, Users, Settings, BookOpen, LogOut, Key,
-  Bell, Search, Shield, GraduationCap, Sun, Moon, BarChart3, ShieldCheck, MessageSquare
+  LayoutDashboard, Users, Settings, BookOpen, LogOut,
+  Bell, Search, Shield, GraduationCap, BarChart3, ShieldCheck,
+  MessageSquare, ChevronDown, Sun, Moon
 } from "lucide-react";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import Link from "next/link";
+
+/* ── Diamond logo matching the landing page ── */
+const LogoIcon = () => (
+  <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+    <rect width="28" height="28" rx="8" fill="#1f2223" />
+    <path d="M8 14L14 8L20 14L14 20L8 14Z" fill="#e0ff82" stroke="#e0ff82" strokeWidth="1.5" strokeLinejoin="round" />
+    <circle cx="14" cy="14" r="3" fill="#1f2223" />
+  </svg>
+);
+
+const navItems = [
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, exact: true },
+  { label: "Exams Setup", href: "/dashboard/exams", icon: GraduationCap },
+  { label: "Submissions", href: "/dashboard/submissions", icon: BookOpen },
+  { label: "Students", href: "/dashboard/students", icon: Users },
+  { label: "Reviews", href: "/dashboard/reviews", icon: Shield },
+  { label: "Reports", href: "/dashboard/reports", icon: BarChart3 },
+  { label: "AI Copilot", href: "/analysis", icon: MessageSquare },
+];
 
 function DashboardShell({ children }: { children: React.ReactNode }) {
   const { user, isLoading, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  /* ── Auth guard ── */
   useEffect(() => {
-    if (!isLoading && !user) {
-      router.push("/login");
-    }
+    if (!isLoading && !user) router.push("/login");
   }, [user, isLoading, router]);
 
+  /* ── Restore theme from localStorage ── */
   useEffect(() => {
-    // Detect currently active theme from DOM
-    const activeTheme = document.documentElement.classList.contains("light") ? "light" : "dark";
-    setTheme(activeTheme);
+    const saved = typeof window !== "undefined" ? localStorage.getItem("theme") : null;
+    const active = saved || (document.documentElement.classList.contains("dark") ? "dark" : "light");
+    setTheme(active as "light" | "dark");
+    document.documentElement.classList.remove("light", "dark");
+    document.documentElement.classList.add(active);
+    document.documentElement.setAttribute("data-theme", active);
   }, []);
 
-  const toggleTheme = () => {
-    const nextTheme = theme === "dark" ? "light" : "dark";
+  /* ── Close menus on outside click ── */
+  useEffect(() => {
+    const handler = () => { setUserMenuOpen(false); setMobileMenuOpen(false); };
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, []);
+
+  const toggleTheme = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const next = theme === "dark" ? "light" : "dark";
     document.documentElement.classList.remove(theme);
-    document.documentElement.classList.add(nextTheme);
-    document.documentElement.setAttribute("data-theme", nextTheme);
-    localStorage.setItem("theme", nextTheme);
-    setTheme(nextTheme);
+    document.documentElement.classList.add(next);
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem("theme", next);
+    setTheme(next);
   };
 
   const isAdmin = user?.role === "admin" || user?.role === "principal";
@@ -41,206 +74,442 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
 
   if (isLoading || !user) {
     return (
-      <div className="auth-page">
-        <div className="auth-loading"><div className="auth-spinner" /></div>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--surface-page)" }}>
+        <div style={{ width: 28, height: 28, border: "2px solid #e0ff82", borderTopColor: "#1f2223", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
-  const initials = user.full_name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const initials = user.full_name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+
+  const isActive = (item: typeof navItems[0]) =>
+    item.exact ? pathname === item.href : pathname.startsWith(item.href);
 
   return (
-    <div className="app-shell relative min-h-screen w-screen overflow-hidden flex bg-[var(--surface-page)] text-[var(--text-primary)] font-sans transition-all duration-300">
-      
-      {/* Dynamic Background Glow Rings for "Cloudy" Aesthetics */}
-      <div className="absolute top-[-10%] left-[20%] w-[45vw] h-[45vw] rounded-full bg-gradient-to-tr from-brand-600/10 to-brand-400/5 blur-[120px] pointer-events-none z-0" />
-      <div className="absolute bottom-[-10%] right-[10%] w-[35vw] h-[35vw] rounded-full bg-gradient-to-tr from-brand-500/5 to-cyan-500/10 blur-[100px] pointer-events-none z-0" />
+    <div className="dash-shell" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--surface-page)", fontFamily: "'Onest', system-ui, -apple-system, sans-serif" }}>
 
-      {/* Sidebar */}
-      <aside className="sidebar w-[220px] shrink-0 bg-[var(--surface-primary)] border-r border-[var(--border-subtle)] flex flex-col z-10 backdrop-blur-md bg-opacity-90 relative">
-        <div className="sidebar-logo px-6 py-5 border-b border-[var(--border-subtle)] flex items-center gap-3">
-          <div className="w-[30px] h-[30px] bg-gradient-to-br from-brand-600 to-brand-800 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-brand-600/20">
-            Oz
-          </div>
-          <div>
-            <div className="logo-name font-semibold text-[13.5px] tracking-tight text-[var(--text-primary)]">OzymorLab HUD</div>
-            <div className="logo-tagline text-[10.5px] text-[var(--text-tertiary)] block font-mono uppercase tracking-wider -mt-0.5">Multi-Modal</div>
-          </div>
-        </div>
+      {/* ══════════════════════════════════════════
+          TOP NAVIGATION BAR
+      ══════════════════════════════════════════ */}
+      <header style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 100,
+        background: "#1f2223",
+        borderBottom: "1px solid rgba(255,255,255,0.08)",
+      }}>
+        <div style={{
+          maxWidth: 1280,
+          margin: "0 auto",
+          padding: "0 24px",
+          height: 56,
+          display: "flex",
+          alignItems: "center",
+          gap: 0,
+        }}>
 
-        <nav className="sidebar-nav flex-1 py-4 px-3 flex flex-col gap-0.5">
-          <div className="text-[10px] font-mono text-[var(--text-tertiary)] uppercase font-semibold px-3 mb-2 tracking-wider">EVALUATION</div>
-          
-          <Link href="/dashboard" className={`flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-medium rounded-lg transition-all cursor-pointer ${
-            pathname === "/dashboard" 
-              ? "bg-[var(--surface-secondary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold" 
-              : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)]/50 hover:text-[var(--text-primary)]"
-          }`}>
-            <LayoutDashboard size={15} />
-            Dashboard
-          </Link>
-          <Link href="/dashboard/exams" className={`flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-medium rounded-lg transition-all cursor-pointer ${
-            pathname.startsWith("/dashboard/exams") 
-              ? "bg-[var(--surface-secondary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold" 
-              : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)]/50 hover:text-[var(--text-primary)]"
-          }`}>
-            <GraduationCap size={15} />
-            Exams Setup
-          </Link>
-          <Link href="/dashboard/submissions" className={`flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-medium rounded-lg transition-all cursor-pointer ${
-            pathname.startsWith("/dashboard/submissions") 
-              ? "bg-[var(--surface-secondary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold" 
-              : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)]/50 hover:text-[var(--text-primary)]"
-          }`}>
-            <BookOpen size={15} />
-            Submissions
-          </Link>
-          <Link href="/dashboard/students" className={`flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-medium rounded-lg transition-all cursor-pointer ${
-            pathname.startsWith("/dashboard/students") 
-              ? "bg-[var(--surface-secondary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold" 
-              : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)]/50 hover:text-[var(--text-primary)]"
-          }`}>
-            <Users size={15} />
-            Students
-          </Link>
-          <Link href="/dashboard/reviews" className={`flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-medium rounded-lg transition-all cursor-pointer ${
-            pathname.startsWith("/dashboard/reviews") 
-              ? "bg-[var(--surface-secondary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold" 
-              : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)]/50 hover:text-[var(--text-primary)]"
-          }`}>
-            <Shield size={15} />
-            Reviews
-          </Link>
-          <Link href="/dashboard/reports" className={`flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-medium rounded-lg transition-all cursor-pointer ${
-            pathname.startsWith("/dashboard/reports") 
-              ? "bg-[var(--surface-secondary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold" 
-              : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)]/50 hover:text-[var(--text-primary)]"
-          }`}>
-            <BarChart3 size={15} />
-            Reports
-          </Link>
-          <Link href="/analysis" className={`flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-medium rounded-lg transition-all cursor-pointer ${
-            pathname.startsWith("/analysis") 
-              ? "bg-[var(--surface-secondary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold" 
-              : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)]/50 hover:text-[var(--text-primary)]"
-          }`}>
-            <MessageSquare size={15} />
-            AI Copilot Chat
+          {/* Logo */}
+          <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", marginRight: 32, flexShrink: 0 }}>
+            <LogoIcon />
+            <span style={{ fontSize: 15, fontWeight: 700, color: "#ffffff", letterSpacing: "-0.02em" }}>OzymorLab</span>
           </Link>
 
-          {(isAdmin || isHOD) && (
-            <>
-              <div className="h-[0.5px] bg-[var(--border-subtle)] my-3 mx-3" />
-              <div className="text-[10px] font-mono text-[var(--text-tertiary)] uppercase font-semibold px-3 mb-2 tracking-wider">ADMINISTRATION</div>
-              {isAdmin && (
-                <Link href="/dashboard/admin" className={`flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-medium rounded-lg transition-all cursor-pointer ${
-                  pathname.startsWith("/dashboard/admin") 
-                    ? "bg-[var(--surface-secondary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold" 
-                    : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)]/50 hover:text-[var(--text-primary)]"
-                }`}>
-                  <ShieldCheck size={15} />
-                  School Admin
+          {/* Desktop Nav Links */}
+          <nav style={{ display: "flex", alignItems: "center", gap: 2, flex: 1 }} className="dash-nav-desktop">
+            {navItems.map((item) => {
+              const active = isActive(item);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "6px 12px",
+                    borderRadius: 8,
+                    fontSize: 13.5,
+                    fontWeight: active ? 600 : 400,
+                    color: active ? "#ffffff" : "rgba(255,255,255,0.55)",
+                    background: active ? "rgba(255,255,255,0.12)" : "transparent",
+                    textDecoration: "none",
+                    transition: "all 0.15s",
+                    whiteSpace: "nowrap",
+                  }}
+                  onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.color = "#ffffff"; }}
+                  onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.55)"; }}
+                >
+                  <item.icon size={14} strokeWidth={active ? 2.5 : 2} />
+                  {item.label}
                 </Link>
-              )}
-            </>
-          )}
+              );
+            })}
 
-          <div className="h-[0.5px] bg-[var(--border-subtle)] my-3 mx-3" />
+            {/* Admin link — only for admin/principal */}
+            {isAdmin && (
+              <Link
+                href="/dashboard/admin"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "6px 12px",
+                  borderRadius: 8,
+                  fontSize: 13.5,
+                  fontWeight: pathname.startsWith("/dashboard/admin") ? 600 : 400,
+                  color: pathname.startsWith("/dashboard/admin") ? "#ffffff" : "rgba(255,255,255,0.55)",
+                  background: pathname.startsWith("/dashboard/admin") ? "rgba(255,255,255,0.12)" : "transparent",
+                  textDecoration: "none",
+                  transition: "all 0.15s",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <ShieldCheck size={14} />
+                Admin
+              </Link>
+            )}
+          </nav>
 
-          <div className="text-[10px] font-mono text-[var(--text-tertiary)] uppercase font-semibold px-3 mb-2 tracking-wider">ACCOUNT</div>
-          <Link href="/dashboard/settings" className={`flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-medium rounded-lg transition-all cursor-pointer ${
-            pathname === "/dashboard/settings" 
-              ? "bg-[var(--surface-secondary)] text-brand-600 shadow-sm border border-[var(--border-subtle)] font-semibold" 
-              : "text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)]/50 hover:text-[var(--text-primary)]"
-          }`}>
-            <Settings size={15} />
-            Settings
-          </Link>
-        </nav>
+          {/* Right side: Search + Theme + User */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto", flexShrink: 0 }}>
 
-        {/* Sidebar Footer with Theme Toggle */}
-        <div className="sidebar-footer p-4 border-t border-[var(--border-subtle)] flex flex-col gap-3">
-          {/* Theme Switcher Button */}
-          <button 
-            onClick={toggleTheme}
-            className="flex items-center justify-between px-3 py-2 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-lg cursor-pointer hover:border-brand-500 transition-all w-full text-[11.5px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-          >
-            <div className="flex items-center gap-2">
-              {theme === "dark" ? <Moon size={13} className="text-brand-600 animate-pulse" /> : <Sun size={13} className="text-amber-500" />}
-              <span>{theme === "dark" ? "Dark Theme" : "Light Theme"}</span>
-            </div>
-            <span className="text-[9px] font-mono opacity-60 uppercase">Mode</span>
-          </button>
-
-          <div className="flex items-center gap-2.5 px-1 py-0.5">
-            <div className="w-[30px] h-[30px] rounded-full bg-brand-50 dark:bg-brand-950/20 text-brand-600 font-bold text-[11px] flex items-center justify-center border border-brand-500/20 shadow-sm select-none">
-              {initials}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[12.5px] font-semibold text-[var(--text-primary)] truncate leading-none">{user.full_name}</div>
-              <div className="text-[10px] text-[var(--text-tertiary)] uppercase font-mono mt-0.5 leading-none">{user.role}</div>
-            </div>
-            <button
-              onClick={() => { logout(); router.push("/login"); }}
-              className="text-[var(--text-tertiary)] hover:text-brand-600 transition-colors p-1"
-              title="Logout"
-              style={{ background: "none", border: "none" }}
+            {/* Search */}
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              background: "rgba(255,255,255,0.08)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: 8,
+              padding: "5px 12px",
+              width: 220,
+              transition: "all 0.2s",
+            }}
+              className="dash-search-box"
             >
-              <LogOut size={15} />
+              <Search size={13} style={{ color: "rgba(255,255,255,0.4)", flexShrink: 0 }} />
+              <input
+                type="text"
+                placeholder="Search..."
+                style={{
+                  flex: 1,
+                  border: "none",
+                  outline: "none",
+                  background: "transparent",
+                  fontSize: 13,
+                  color: "#ffffff",
+                  fontFamily: "inherit",
+                }}
+              />
+              <kbd style={{
+                fontSize: 10,
+                color: "rgba(255,255,255,0.35)",
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                borderRadius: 4,
+                padding: "1px 5px",
+                fontFamily: "inherit",
+              }}>⌘K</kbd>
+            </div>
+
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              title={theme === "dark" ? "Switch to light" : "Switch to dark"}
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 8,
+                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(255,255,255,0.08)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                color: "rgba(255,255,255,0.6)",
+                transition: "all 0.15s",
+                flexShrink: 0,
+              }}
+            >
+              {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
+            </button>
+
+            {/* Notification bell */}
+            <button style={{
+              width: 34,
+              height: 34,
+              borderRadius: 8,
+              border: "1px solid rgba(255,255,255,0.12)",
+              background: "rgba(255,255,255,0.08)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              color: "rgba(255,255,255,0.6)",
+              position: "relative",
+              flexShrink: 0,
+            }}>
+              <Bell size={14} />
+              <span style={{
+                position: "absolute",
+                top: 7,
+                right: 7,
+                width: 6,
+                height: 6,
+                background: "#e0ff82",
+                borderRadius: "50%",
+                border: "1.5px solid #1f2223",
+              }} />
+            </button>
+
+            {/* User menu */}
+            <div style={{ position: "relative" }} onClick={e => e.stopPropagation()}>
+              <button
+                onClick={() => setUserMenuOpen(v => !v)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "5px 10px 5px 6px",
+                  borderRadius: 8,
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  background: "rgba(255,255,255,0.08)",
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                }}
+              >
+                {/* Avatar */}
+                <div style={{
+                  width: 26,
+                  height: 26,
+                  borderRadius: "50%",
+                  background: "#e0ff82",
+                  color: "#1f2223",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  letterSpacing: "-0.02em",
+                }}>
+                  {initials}
+                </div>
+                <div style={{ textAlign: "left" }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 600, color: "#ffffff", lineHeight: 1.2, whiteSpace: "nowrap" }}>{user.full_name}</div>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.45)", textTransform: "capitalize", lineHeight: 1.2 }}>{user.role}</div>
+                </div>
+                <ChevronDown size={12} style={{ color: "rgba(255,255,255,0.4)", transform: userMenuOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+              </button>
+
+              {/* Dropdown */}
+              {userMenuOpen && (
+                <div style={{
+                  position: "absolute",
+                  top: "calc(100% + 6px)",
+                  right: 0,
+                  minWidth: 180,
+                  background: "var(--surface-primary)",
+                  border: "1px solid var(--border-subtle)",
+                  borderRadius: 10,
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+                  overflow: "hidden",
+                  zIndex: 200,
+                }}>
+                  <div style={{ padding: "12px 14px", borderBottom: "1px solid var(--border-subtle)" }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 600, color: "var(--text-primary)" }}>{user.full_name}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 2 }}>{user.email}</div>
+                  </div>
+                  <Link
+                    href="/dashboard/settings"
+                    onClick={() => setUserMenuOpen(false)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "9px 14px",
+                      fontSize: 13,
+                      color: "var(--text-secondary)",
+                      textDecoration: "none",
+                      transition: "background 0.1s",
+                    }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--surface-secondary)"}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
+                  >
+                    <Settings size={13} />
+                    Settings
+                  </Link>
+                  <button
+                    onClick={() => { logout(); router.push("/login"); }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "9px 14px",
+                      fontSize: 13,
+                      color: "#E24B4A",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      width: "100%",
+                      textAlign: "left",
+                      transition: "background 0.1s",
+                      fontFamily: "inherit",
+                    }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--surface-secondary)"}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
+                  >
+                    <LogOut size={13} />
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile hamburger */}
+            <button
+              className="dash-nav-mobile-btn"
+              onClick={e => { e.stopPropagation(); setMobileMenuOpen(v => !v); }}
+              style={{
+                display: "none",
+                width: 34,
+                height: 34,
+                borderRadius: 8,
+                border: "1px solid var(--border-subtle)",
+                background: "var(--surface-secondary)",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                color: "var(--text-secondary)",
+                flexShrink: 0,
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <line x1="2" y1="4" x2="14" y2="4" />
+                <line x1="2" y1="8" x2="14" y2="8" />
+                <line x1="2" y1="12" x2="14" y2="12" />
+              </svg>
             </button>
           </div>
         </div>
-      </aside>
 
-      {/* Main Area */}
-      <div className="main-area flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
-        <header className="h-[56px] px-6 bg-[var(--surface-primary)] border-b border-[var(--border-subtle)] flex items-center justify-between shrink-0 z-10 backdrop-blur-md bg-opacity-80">
-          <div className="flex items-center gap-3 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] px-3 py-1.5 rounded-lg w-[280px] hover:border-brand-500/60 focus-within:border-brand-600 transition-all duration-300">
-            <Search size={14} className="text-[var(--text-tertiary)]" />
-            <input
-              type="text"
-              placeholder="Search student, batch, or key..."
-              className="bg-transparent border-none outline-none text-[12px] text-[var(--text-primary)] placeholder-[var(--text-tertiary)] w-full font-mono"
-            />
-            <div className="hidden sm:flex items-center gap-0.5 shrink-0 text-[10px] font-mono text-[var(--text-tertiary)] bg-[var(--surface-primary)] border border-[var(--border-subtle)] px-1 py-0.2 rounded shadow-sm">
-              <span>⌘K</span>
-            </div>
+        {/* Mobile dropdown menu */}
+        {mobileMenuOpen && (
+          <div
+            className="dash-nav-mobile-menu"
+            style={{
+              borderTop: "1px solid var(--border-subtle)",
+              background: "var(--surface-primary)",
+              padding: "8px 16px 12px",
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {navItems.map((item) => {
+              const active = isActive(item);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "9px 12px",
+                    borderRadius: 8,
+                    fontSize: 14,
+                    fontWeight: active ? 600 : 400,
+                    color: active ? "var(--text-primary)" : "var(--text-secondary)",
+                    background: active ? "var(--surface-secondary)" : "transparent",
+                    textDecoration: "none",
+                    marginBottom: 2,
+                  }}
+                >
+                  <item.icon size={15} />
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <span className="block text-[12.5px] font-semibold text-[var(--text-primary)] leading-none">{user.full_name}</span>
-              <span className="text-[10px] text-[var(--text-tertiary)] font-mono uppercase tracking-wider block mt-0.5">{user.role}</span>
-            </div>
-            <div className="w-[34px] h-[34px] border border-[var(--border-subtle)] rounded-lg bg-[var(--surface-secondary)] flex items-center justify-center cursor-pointer hover:bg-[var(--surface-primary)] hover:border-brand-500 transition-all relative">
-              <Bell size={15} />
-              <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-brand-600 rounded-full animate-ping" />
-              <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-brand-600 rounded-full" />
-            </div>
-          </div>
-        </header>
+        )}
+      </header>
 
-        <main className="flex-1 overflow-y-auto p-6 relative">
-          {children}
-        </main>
-      </div>
+      {/* ══════════════════════════════════════════
+          PAGE CONTENT
+      ══════════════════════════════════════════ */}
+      <main style={{ flex: 1, maxWidth: 1280, width: "100%", margin: "0 auto", padding: "28px 24px", boxSizing: "border-box" }}>
+        {children}
+      </main>
+
+      {/* Responsive styles */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap');
+
+        /* Apply Onest font to entire dashboard */
+        body, .dash-shell * {
+          font-family: 'Onest', system-ui, -apple-system, sans-serif !important;
+        }
+
+        .dash-nav-desktop { display: flex !important; }
+        .dash-nav-mobile-btn { display: none !important; }
+        .dash-nav-mobile-menu { display: none; }
+
+        @media (max-width: 900px) {
+          .dash-nav-desktop { display: none !important; }
+          .dash-nav-mobile-btn { display: flex !important; }
+          .dash-nav-mobile-menu { display: block !important; }
+          .dash-search-box { display: none !important; }
+        }
+
+        .dash-search-box:focus-within {
+          border-color: #1f2223 !important;
+          box-shadow: 0 0 0 3px rgba(31,34,35,0.06);
+        }
+
+        /* Landing-style button variants for dashboard */
+        .btn-lp-primary {
+          display: inline-flex; align-items: center; gap: 6px;
+          padding: 8px 16px; border-radius: 10px; font-size: 12.5px; font-weight: 500;
+          background: #1f2223; color: #ffffff; border: none; cursor: pointer;
+          transition: all 0.2s ease; white-space: nowrap; text-decoration: none;
+          font-family: 'Onest', system-ui, sans-serif;
+        }
+        .btn-lp-primary:hover { background: #333; color: #ffffff; text-decoration: none; }
+
+        .btn-lp-outline {
+          display: inline-flex; align-items: center; gap: 6px;
+          padding: 8px 16px; border-radius: 10px; font-size: 12.5px; font-weight: 500;
+          background: transparent; color: #1f2223; border: 1px solid rgb(229,230,230); cursor: pointer;
+          transition: all 0.2s ease; white-space: nowrap; text-decoration: none;
+          font-family: 'Onest', system-ui, sans-serif;
+        }
+        .btn-lp-outline:hover { background: rgb(247,248,248); text-decoration: none; }
+
+        .btn-lp-accent {
+          display: inline-flex; align-items: center; gap: 6px;
+          padding: 8px 16px; border-radius: 10px; font-size: 12.5px; font-weight: 500;
+          background: rgb(224,255,130); color: #1f2223; border: none; cursor: pointer;
+          transition: all 0.2s ease; white-space: nowrap; text-decoration: none;
+          font-family: 'Onest', system-ui, sans-serif;
+        }
+        .btn-lp-accent:hover { background: rgb(231,255,161); text-decoration: none; }
+
+        /* Landing-style card */
+        .card-lp {
+          background: #ffffff; border: 1px solid rgb(229,230,230);
+          border-radius: 12px; transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .card-lp:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+      `}</style>
     </div>
   );
 }
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
       <DashboardShell>{children}</DashboardShell>
     </AuthProvider>
   );
 }
-
