@@ -1230,7 +1230,7 @@ function AnalysisHUDPageContent() {
                   <>
                     {/* Question Card */}
                     {activeQuestion.questionText && (
-                      <div className="mb-4 py-12 px-10 mx-10 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-primary)] shadow-sm min-h-[160px] flex flex-col justify-center">
+                      <div className="mb-4 py-12 px-10 mx-10 min-h-[160px] flex flex-col justify-center bg-transparent border-none shadow-none" style={{ background: "transparent", border: "none", boxShadow: "none" }}>
                         <span className="text-[10px] uppercase font-mono font-bold block mb-2 text-[var(--text-tertiary)] tracking-wider">
                           {viewMode === "self-eval" ? "Practice Exercise" : "Assigned Question"}
                         </span>
@@ -1380,6 +1380,7 @@ function AnalysisHUDPageContent() {
                           </div>
                         </div>
                       )}
+                      <div ref={chatBottomRef} />
                     </div>
                   </div>
                 )}
@@ -1407,14 +1408,6 @@ function AnalysisHUDPageContent() {
                 </button>
               </div>
             )}
-
-          </main>
-
-        </div>
-
-      </div>
-
-      </div>
 
       <footer 
         style={{
@@ -1487,6 +1480,14 @@ function AnalysisHUDPageContent() {
           </div>
         </div>
       </footer>
+
+          </main>
+
+        </div>
+
+      </div>
+
+      </div>
 
       <style>{`
         .dash-nav-desktop { display: flex !important; }
