@@ -88,6 +88,7 @@ export default function ReviewsPage() {
   const [activeTab, setActiveTab] = useState<"evaluation" | "student_answer">("evaluation");
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const [visibleReviewsCount, setVisibleReviewsCount] = useState(10);
 
   // Moderation state
   const [newGrade, setNewGrade] = useState<number | "">("");
@@ -433,7 +434,7 @@ export default function ReviewsPage() {
                   </td>
                 </tr>
               ) : (
-                reviews.map((r) => {
+                reviews.slice(0, visibleReviewsCount).map((r) => {
                   const reason = r.review_reasons && r.review_reasons.length > 0 
                     ? r.review_reasons.join(", ") 
                     : "Low Confidence drift score (< 80%)";
@@ -444,15 +445,7 @@ export default function ReviewsPage() {
                       className="hover:bg-red-500/5 cursor-pointer transition-colors duration-150 group"
                     >
                       <td className="px-6 py-5 text-[13px] text-[var(--text-primary)] font-semibold">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="rounded-full bg-gradient-to-tr from-brand-600/20 to-brand-400/10 text-brand-600 border border-brand-500/20 flex items-center justify-center font-bold shrink-0"
-                            style={{ width: 36, height: 36, fontSize: "12px" }}
-                          >
-                            {generateStudentName(r.student_id).initials}
-                          </div>
-                          {generateStudentName(r.student_id).name}
-                        </div>
+                        {generateStudentName(r.student_id).name}
                       </td>
                       <td className="px-6 py-5 text-[12.5px] text-[var(--text-secondary)] font-medium">{r.task_title}</td>
                       <td className="px-6 py-5 text-[12px] text-red-500 font-semibold">
@@ -477,6 +470,26 @@ export default function ReviewsPage() {
             </tbody>
           </table>
         </div>
+        {reviews.length > 10 && (
+          <div className="flex justify-center gap-3 p-4 border-t border-[var(--border-subtle)] bg-[var(--surface-secondary)] bg-opacity-20">
+            {visibleReviewsCount < reviews.length && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setVisibleReviewsCount(prev => prev + 5); }}
+                className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-primary)] text-[var(--text-primary)] hover:border-brand-500 hover:text-brand-600 transition-all cursor-pointer shadow-sm"
+              >
+                See More +5
+              </button>
+            )}
+            {visibleReviewsCount > 10 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setVisibleReviewsCount(10); }}
+                className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-primary)] text-[var(--text-primary)] hover:border-red-500 hover:text-red-600 transition-all cursor-pointer shadow-sm"
+              >
+                Show Less
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Moderation Inspect Overlay Slider */}
@@ -501,12 +514,6 @@ export default function ReviewsPage() {
             
             <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
               <div className="flex items-center gap-3 bg-[var(--surface-secondary)] bg-opacity-40 border border-[var(--border-subtle)] p-4 rounded-xl">
-                <div
-                  className="rounded-full bg-gradient-to-tr from-brand-600/20 to-brand-400/10 text-brand-600 border border-brand-500/20 flex items-center justify-center font-bold shrink-0"
-                  style={{ width: 46, height: 46, fontSize: "14px" }}
-                >
-                  {generateStudentName(selectedSub.student_id).initials}
-                </div>
                 <div>
                   <div className="text-[15px] font-bold text-[var(--text-primary)]">
                     {generateStudentName(selectedSub.student_id).name}

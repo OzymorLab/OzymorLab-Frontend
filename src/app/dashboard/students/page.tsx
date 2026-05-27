@@ -58,6 +58,7 @@ export default function StudentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [cohortFilter, setCohortFilter] = useState("ALL");
   const [isLoading, setIsLoading] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(10);
 
   const processSubmissionsIntoStudents = (subs: Submission[]) => {
     const groups: { [key: string]: { list: Submission[] } } = {};
@@ -280,7 +281,7 @@ export default function StudentsPage() {
 
       {/* ── Student Cards Grid ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredStudents.map((student) => (
+        {filteredStudents.slice(0, visibleCount).map((student) => (
           <div
             key={student.id}
             className="group relative bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl flex flex-col shadow-sm hover:shadow-xl hover:border-brand-500/30 hover:-translate-y-1 transition-all duration-300"
@@ -288,22 +289,13 @@ export default function StudentsPage() {
           >
             {/* Student Info Row */}
             <div className="flex justify-between items-start">
-              <div className="flex items-center gap-3">
-                {/* Avatar */}
-                <div
-                  className="rounded-full bg-gradient-to-tr from-brand-600/20 to-brand-400/10 text-brand-600 border border-brand-500/20 flex items-center justify-center font-bold shadow-sm shrink-0"
-                  style={{ width: 44, height: 44, fontSize: "14px" }}
-                >
-                  {student.initials}
-                </div>
-                <div>
-                  <h3 className="text-[14px] font-bold text-[var(--text-primary)] leading-tight">
-                    {student.name}
-                  </h3>
-                  <span className="text-[11px] text-[var(--text-tertiary)] font-medium mt-0.5 block">
-                    {student.cohort}
-                  </span>
-                </div>
+              <div>
+                <h3 className="text-[14px] font-bold text-[var(--text-primary)] leading-tight">
+                  {student.name}
+                </h3>
+                <span className="text-[11px] text-[var(--text-tertiary)] font-medium mt-0.5 block">
+                  {student.cohort}
+                </span>
               </div>
 
               {/* Grade Badge */}
@@ -357,6 +349,27 @@ export default function StudentsPage() {
           </div>
         )}
       </div>
+
+      {filteredStudents.length > 10 && (
+        <div className="flex justify-center gap-3 mt-6">
+          {visibleCount < filteredStudents.length && (
+            <button
+              onClick={() => setVisibleCount((prev) => prev + 5)}
+              className="flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl text-[12.5px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-primary)] text-[var(--text-primary)] hover:border-brand-500 hover:text-brand-600 transition-all cursor-pointer shadow-sm"
+            >
+              See More +5
+            </button>
+          )}
+          {visibleCount > 10 && (
+            <button
+              onClick={() => setVisibleCount(10)}
+              className="flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl text-[12.5px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-primary)] text-[var(--text-primary)] hover:border-red-500 hover:text-red-600 transition-all cursor-pointer shadow-sm"
+            >
+              Show Less
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
