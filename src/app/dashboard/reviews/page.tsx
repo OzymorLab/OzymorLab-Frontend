@@ -411,11 +411,11 @@ export default function ReviewsPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] bg-opacity-30">
-                <th className="px-6 py-4 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Student Name</th>
-                <th className="px-6 py-4 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Subject Exam</th>
-                <th className="px-6 py-4 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Flagged Reason</th>
-                <th className="px-6 py-4 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Current Score</th>
-                <th className="px-6 py-4 text-right text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Action</th>
+                <th className="px-6 py-5 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Student Name</th>
+                <th className="px-6 py-5 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Subject Exam</th>
+                <th className="px-6 py-5 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Flagged Reason</th>
+                <th className="px-6 py-5 text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Current Score</th>
+                <th className="px-6 py-5 text-right text-[11px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-subtle)]">
@@ -443,28 +443,31 @@ export default function ReviewsPage() {
                       onClick={() => setSelectedSub(r)} 
                       className="hover:bg-red-500/5 cursor-pointer transition-colors duration-150 group"
                     >
-                      <td className="px-6 py-4 text-[13px] text-[var(--text-primary)] font-semibold">
-                        <div className="flex items-center gap-2.5">
+                      <td className="px-6 py-5 text-[13px] text-[var(--text-primary)] font-semibold">
+                        <div className="flex items-center gap-3">
                           <div
                             className="rounded-full bg-gradient-to-tr from-brand-600/20 to-brand-400/10 text-brand-600 border border-brand-500/20 flex items-center justify-center font-bold shrink-0"
-                            style={{ width: 32, height: 32, fontSize: "11px" }}
+                            style={{ width: 36, height: 36, fontSize: "12px" }}
                           >
                             {generateStudentName(r.student_id).initials}
                           </div>
                           {generateStudentName(r.student_id).name}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-[12.5px] text-[var(--text-secondary)] font-medium">{r.task_title}</td>
-                      <td className="px-6 py-4 text-[12px] text-red-500 font-semibold">
-                        <div className="flex items-center gap-1.5 bg-red-500/5 border border-red-500/10 rounded-lg px-2.5 py-1 w-max">
+                      <td className="px-6 py-5 text-[12.5px] text-[var(--text-secondary)] font-medium">{r.task_title}</td>
+                      <td className="px-6 py-5 text-[12px] text-red-500 font-semibold">
+                        <div className="flex items-center gap-1.5 bg-red-500/5 border border-red-500/10 rounded-lg px-2.5 py-1.5 w-max">
                           <AlertCircle size={13} className="shrink-0" />
                           {reason}
                         </div>
                       </td>
-                      <td className="px-6 py-4 font-bold font-mono text-[12px] text-[var(--text-primary)]">{r.grade} / {r.max_grade}</td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="inline-flex items-center justify-center gap-1.5 py-1.5 px-3.5 rounded-lg text-[11.5px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] group-hover:border-red-500 group-hover:bg-red-500 group-hover:text-white transition-all cursor-pointer shadow-sm">
-                          Inspect Verdict <ChevronRight size={12} />
+                      <td className="px-6 py-5 font-bold font-mono text-[13px] text-[var(--text-primary)]">{r.grade} / {r.max_grade}</td>
+                      <td className="px-6 py-5 text-right">
+                        <button
+                          style={{ padding: "9px 18px", fontSize: "12.5px", borderRadius: "8px" }}
+                          className="inline-flex items-center justify-center gap-2 font-bold border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] group-hover:border-red-500 group-hover:bg-red-500 group-hover:text-white transition-all cursor-pointer shadow-sm whitespace-nowrap"
+                        >
+                          Inspect Verdict <ChevronRight size={14} />
                         </button>
                       </td>
                     </tr>
