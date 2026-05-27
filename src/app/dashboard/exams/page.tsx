@@ -674,12 +674,13 @@ export default function ExamsPage() {
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Cycle Title</label>
                   <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] flex items-center pointer-events-none">
-                      <Layers size={14} />
+                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] flex items-center pointer-events-none">
+                      <Layers size={15} />
                     </div>
                     <input 
                       type="text" 
-                      className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-lg pl-10 pr-3.5 py-2.5 text-[12.5px] text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:border-[var(--text-primary)] focus:ring-[3px] focus:ring-[var(--border-subtle)] focus:bg-[var(--surface-primary)] shadow-sm w-full font-medium transition-all duration-200"
+                      className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:border-[var(--text-primary)] focus:ring-[3px] focus:ring-[var(--border-subtle)] focus:bg-[var(--surface-primary)] shadow-sm w-full font-medium transition-all duration-200"
+                      style={{ paddingLeft: "42px", paddingRight: "16px", paddingTop: "14px", paddingBottom: "14px", fontSize: "14px" }}
                       placeholder="e.g. Mid-Term Oct 2026"
                       value={newCycleName}
                       onChange={(e) => setNewCycleName(e.target.value)}
@@ -690,32 +691,24 @@ export default function ExamsPage() {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Start Date</label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] flex items-center pointer-events-none">
-                      <Calendar size={14} />
-                    </div>
-                    <input 
-                      type="date" 
-                      className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-lg pl-10 pr-3.5 py-2.5 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] focus:ring-[3px] focus:ring-[var(--border-subtle)] focus:bg-[var(--surface-primary)] shadow-sm w-full font-medium transition-all duration-200"
-                      value={newCycleStart}
-                      onChange={(e) => setNewCycleStart(e.target.value)}
-                    />
-                  </div>
+                  <input 
+                    type="date" 
+                    className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] focus:ring-[3px] focus:ring-[var(--border-subtle)] focus:bg-[var(--surface-primary)] shadow-sm w-full font-medium transition-all duration-200"
+                    style={{ paddingLeft: "16px", paddingRight: "16px", paddingTop: "14px", paddingBottom: "14px", fontSize: "14px" }}
+                    value={newCycleStart}
+                    onChange={(e) => setNewCycleStart(e.target.value)}
+                  />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[9.5px] font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">End Date</label>
-                  <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] flex items-center pointer-events-none">
-                      <Calendar size={14} />
-                    </div>
-                    <input 
-                      type="date" 
-                      className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-lg pl-10 pr-3.5 py-2.5 text-[12.5px] text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] focus:ring-[3px] focus:ring-[var(--border-subtle)] focus:bg-[var(--surface-primary)] shadow-sm w-full font-medium transition-all duration-200"
-                      value={newCycleEnd}
-                      onChange={(e) => setNewCycleEnd(e.target.value)}
-                    />
-                  </div>
+                  <input 
+                    type="date" 
+                    className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)] focus:ring-[3px] focus:ring-[var(--border-subtle)] focus:bg-[var(--surface-primary)] shadow-sm w-full font-medium transition-all duration-200"
+                    style={{ paddingLeft: "16px", paddingRight: "16px", paddingTop: "14px", paddingBottom: "14px", fontSize: "14px" }}
+                    value={newCycleEnd}
+                    onChange={(e) => setNewCycleEnd(e.target.value)}
+                  />
                 </div>
 
                 <button 
