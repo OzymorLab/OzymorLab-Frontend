@@ -6,10 +6,20 @@ import {
   Settings, LogOut, Search, Bell, Sparkles, AlertTriangle, 
   CheckCircle2, ChevronRight, MessageSquare, Send, RefreshCw, 
   ArrowLeftRight, HelpCircle, Check, X, ShieldAlert, FileText,
-  User, Play, Award, HelpCircle as QuestionIcon, Upload, Loader2, Plus
+  User, Play, Award, HelpCircle as QuestionIcon, Upload, Loader2, Plus,
+  Sun, Moon, ChevronDown, Shield
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth, AuthProvider } from "../context/AuthContext";
+
+const navItems = [
+  { label: "Exams Setup", href: "/dashboard/exams", icon: GraduationCap },
+  { label: "Submissions", href: "/dashboard/submissions", icon: BookOpen },
+  { label: "Students", href: "/dashboard/students", icon: Users },
+  { label: "Reviews", href: "/dashboard/reviews", icon: Shield },
+  { label: "Reports", href: "/dashboard/reports", icon: BarChart3 },
+  { label: "AI Copilot", href: "/analysis", icon: MessageSquare },
+];
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.com/api/v1";
 
@@ -78,10 +88,17 @@ interface ChatMessage {
 }
 
 function AnalysisHUDPageContent() {
-  const { user, fetchWithAuth } = useAuth();
+  const { user, fetchWithAuth, logout } = useAuth();
 
   // Mode & Core Data
   const [viewMode, setViewMode] = useState<"teacher" | "student" | "self-eval">("teacher");
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  const isAdmin = user?.role === "admin" || user?.role === "principal";
+
   const [tasks, setTasks] = useState<Task[]>([]);
   const [roster, setRoster] = useState<Submission[]>([]);
   const [submissionDetail, setSubmissionDetail] = useState<Submission | null>(null);
@@ -116,6 +133,39 @@ function AnalysisHUDPageContent() {
   // Refs
   const rightPaneRef = useRef<HTMLDivElement>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
+
+  // Restore theme from localStorage
+  useEffect(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("theme") : null;
+    const active = saved || (document.documentElement.classList.contains("dark") ? "dark" : "light");
+    setTheme(active as "light" | "dark");
+  }, []);
+
+  // Click outside user menu handler
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+      setMobileMenuOpen(false);
+    };
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, []);
+
+  const toggleTheme = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const next = theme === "dark" ? "light" : "dark";
+    document.documentElement.classList.remove(theme);
+    document.documentElement.classList.add(next);
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem("theme", next);
+    setTheme(next);
+  };
+
+  const initials = user?.full_name
+    ? user.full_name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()
+    : "U";
 
   // Set view mode based on user role
   useEffect(() => {
@@ -568,12 +618,12 @@ function AnalysisHUDPageContent() {
 
             {/* Desktop Nav Links */}
             <nav style={{ display: "flex", alignItems: "center", gap: 2, flex: 1 }} className="dash-nav-desktop">
-              {activeNavTabs.map((tab, idx) => {
-                const active = tab.active;
+              {navItems.map((item) => {
+                const active = item.href === "/analysis";
                 return (
                   <Link
-                    key={idx}
-                    href={tab.href}
+                    key={item.href}
+                    href={item.href}
                     style={{
                       display: "flex",
                       alignItems: "center",
@@ -588,140 +638,369 @@ function AnalysisHUDPageContent() {
                       transition: "all 0.15s",
                       whiteSpace: "nowrap",
                     }}
+                    onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.color = "#ffffff"; }}
+                    onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.55)"; }}
                   >
-                    {tab.name}
+                    <item.icon size={14} strokeWidth={active ? 2.5 : 2} />
+                    {item.label}
                   </Link>
                 );
               })}
+
+              {/* Admin link — only for admin/principal */}
+              {isAdmin && (
+                <Link
+                  href="/dashboard/admin"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "6px 12px",
+                    borderRadius: 8,
+                    fontSize: 13.5,
+                    fontWeight: 400,
+                    color: "rgba(255,255,255,0.55)",
+                    background: "transparent",
+                    textDecoration: "none",
+                    transition: "all 0.15s",
+                    whiteSpace: "nowrap",
+                  }}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#ffffff"}
+                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.55)"}
+                >
+                  <ShieldCheck size={14} />
+                  Admin
+                </Link>
+              )}
             </nav>
 
-            {/* View Mode Switcher */}
+            {/* Right side: Search + Theme + User */}
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto", flexShrink: 0 }}>
-              {user?.role === "student" ? (
-                <>
-                  <button
-                    onClick={() => switchViewMode("student")}
-                    style={{
-                      padding: "6px 16px",
-                      borderRadius: 12,
-                      fontSize: 12,
-                      fontWeight: viewMode === "student" ? 600 : 500,
-                      cursor: "pointer",
-                      border: viewMode === "student" ? "none" : "1px solid rgba(255,255,255,0.12)",
-                      background: viewMode === "student" ? "#ffffff" : "transparent",
-                      color: viewMode === "student" ? "#1f2223" : "rgba(255,255,255,0.6)",
-                      fontFamily: "inherit",
-                      transition: "all 0.15s"
-                    }}
-                  >
-                    Evaluations
-                  </button>
-                  <button
-                    onClick={() => switchViewMode("self-eval")}
-                    style={{
-                      padding: "6px 16px",
-                      borderRadius: 12,
-                      fontSize: 12,
-                      fontWeight: viewMode === "self-eval" ? 600 : 500,
-                      cursor: "pointer",
-                      border: viewMode === "self-eval" ? "none" : "1px solid rgba(255,255,255,0.12)",
-                      background: viewMode === "self-eval" ? "#ffffff" : "transparent",
-                      color: viewMode === "self-eval" ? "#1f2223" : "rgba(255,255,255,0.6)",
-                      fontFamily: "inherit",
-                      transition: "all 0.15s"
-                    }}
-                  >
-                    Self-Eval
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => switchViewMode("teacher")}
-                    style={{
-                      padding: "6px 16px",
-                      borderRadius: 12,
-                      fontSize: 12,
-                      fontWeight: viewMode === "teacher" ? 600 : 500,
-                      cursor: "pointer",
-                      border: viewMode === "teacher" ? "none" : "1px solid rgba(255,255,255,0.12)",
-                      background: viewMode === "teacher" ? "#ffffff" : "transparent",
-                      color: viewMode === "teacher" ? "#1f2223" : "rgba(255,255,255,0.6)",
-                      fontFamily: "inherit",
-                      transition: "all 0.15s"
-                    }}
-                  >
-                    Teacher
-                  </button>
-                  <button
-                    onClick={() => switchViewMode("student")}
-                    style={{
-                      padding: "6px 16px",
-                      borderRadius: 12,
-                      fontSize: 12,
-                      fontWeight: viewMode === "student" ? 600 : 500,
-                      cursor: "pointer",
-                      border: viewMode === "student" ? "none" : "1px solid rgba(255,255,255,0.12)",
-                      background: viewMode === "student" ? "#ffffff" : "transparent",
-                      color: viewMode === "student" ? "#1f2223" : "rgba(255,255,255,0.6)",
-                      fontFamily: "inherit",
-                      transition: "all 0.15s"
-                    }}
-                  >
-                    Student
-                  </button>
-                  <button
-                    onClick={() => switchViewMode("self-eval")}
-                    style={{
-                      padding: "6px 16px",
-                      borderRadius: 12,
-                      fontSize: 12,
-                      fontWeight: viewMode === "self-eval" ? 600 : 500,
-                      cursor: "pointer",
-                      border: viewMode === "self-eval" ? "none" : "1px solid rgba(255,255,255,0.12)",
-                      background: viewMode === "self-eval" ? "#ffffff" : "transparent",
-                      color: viewMode === "self-eval" ? "#1f2223" : "rgba(255,255,255,0.6)",
-                      fontFamily: "inherit",
-                      transition: "all 0.15s"
-                    }}
-                  >
-                    Sandbox
-                  </button>
-                </>
-              )}
-              
-              <button
-                onClick={() => {
-                  window.location.href = "/login";
-                }}
-                style={{
-                  padding: "6px 16px",
-                  borderRadius: 12,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  border: "1px solid rgba(239,68,68,0.2)",
-                  background: "rgba(239,68,68,0.1)",
-                  color: "#f87171",
+
+              {/* View Switchers inside Right Navbar Area */}
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginRight: 16 }}>
+                {user?.role === "student" ? (
+                  <>
+                    <button
+                      onClick={() => switchViewMode("student")}
+                      style={{
+                        padding: "4px 12px",
+                        borderRadius: 8,
+                        fontSize: 11.5,
+                        fontWeight: viewMode === "student" ? 600 : 500,
+                        cursor: "pointer",
+                        border: viewMode === "student" ? "none" : "1px solid rgba(255,255,255,0.12)",
+                        background: viewMode === "student" ? "#ffffff" : "transparent",
+                        color: viewMode === "student" ? "#1f2223" : "rgba(255,255,255,0.6)",
+                        fontFamily: "inherit",
+                        transition: "all 0.15s"
+                      }}
+                    >
+                      Evaluations
+                    </button>
+                    <button
+                      onClick={() => switchViewMode("self-eval")}
+                      style={{
+                        padding: "4px 12px",
+                        borderRadius: 8,
+                        fontSize: 11.5,
+                        fontWeight: viewMode === "self-eval" ? 600 : 500,
+                        cursor: "pointer",
+                        border: viewMode === "self-eval" ? "none" : "1px solid rgba(255,255,255,0.12)",
+                        background: viewMode === "self-eval" ? "#ffffff" : "transparent",
+                        color: viewMode === "self-eval" ? "#1f2223" : "rgba(255,255,255,0.6)",
+                        fontFamily: "inherit",
+                        transition: "all 0.15s"
+                      }}
+                    >
+                      Self-Eval
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => switchViewMode("teacher")}
+                      style={{
+                        padding: "4px 12px",
+                        borderRadius: 8,
+                        fontSize: 11.5,
+                        fontWeight: viewMode === "teacher" ? 600 : 500,
+                        cursor: "pointer",
+                        border: viewMode === "teacher" ? "none" : "1px solid rgba(255,255,255,0.12)",
+                        background: viewMode === "teacher" ? "#ffffff" : "transparent",
+                        color: viewMode === "teacher" ? "#1f2223" : "rgba(255,255,255,0.6)",
+                        fontFamily: "inherit",
+                        transition: "all 0.15s"
+                      }}
+                    >
+                      Teacher
+                    </button>
+                    <button
+                      onClick={() => switchViewMode("student")}
+                      style={{
+                        padding: "4px 12px",
+                        borderRadius: 8,
+                        fontSize: 11.5,
+                        fontWeight: viewMode === "student" ? 600 : 500,
+                        cursor: "pointer",
+                        border: viewMode === "student" ? "none" : "1px solid rgba(255,255,255,0.12)",
+                        background: viewMode === "student" ? "#ffffff" : "transparent",
+                        color: viewMode === "student" ? "#1f2223" : "rgba(255,255,255,0.6)",
+                        fontFamily: "inherit",
+                        transition: "all 0.15s"
+                      }}
+                    >
+                      Student
+                    </button>
+                    <button
+                      onClick={() => switchViewMode("self-eval")}
+                      style={{
+                        padding: "4px 12px",
+                        borderRadius: 8,
+                        fontSize: 11.5,
+                        fontWeight: viewMode === "self-eval" ? 600 : 500,
+                        cursor: "pointer",
+                        border: viewMode === "self-eval" ? "none" : "1px solid rgba(255,255,255,0.12)",
+                        background: viewMode === "self-eval" ? "#ffffff" : "transparent",
+                        color: viewMode === "self-eval" ? "#1f2223" : "rgba(255,255,255,0.6)",
+                        fontFamily: "inherit",
+                        transition: "all 0.15s"
+                      }}
+                    >
+                      Sandbox
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* Search box matching layout.tsx */}
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                borderRadius: 8,
+                padding: "5px 12px",
+                width: 220,
+                transition: "all 0.2s",
+              }}
+                className="dash-search-box"
+              >
+                <Search size={13} style={{ color: "rgba(255,255,255,0.4)", flexShrink: 0 }} />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  style={{
+                    flex: 1,
+                    border: "none",
+                    outline: "none",
+                    background: "transparent",
+                    fontSize: 13,
+                    color: "#ffffff",
+                    fontFamily: "inherit",
+                  }}
+                />
+                <kbd style={{
+                  fontSize: 10,
+                  color: "rgba(255,255,255,0.35)",
+                  background: "rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: 4,
+                  padding: "1px 5px",
                   fontFamily: "inherit",
+                }}>⌘K</kbd>
+              </div>
+
+              {/* Theme toggle */}
+              <button
+                onClick={toggleTheme}
+                title={theme === "dark" ? "Switch to light" : "Switch to dark"}
+                style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: 8,
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  background: "rgba(255,255,255,0.08)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  color: "rgba(255,255,255,0.6)",
                   transition: "all 0.15s",
-                  marginLeft: 4
-                }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLElement).style.background = "#ef4444";
-                  (e.currentTarget as HTMLElement).style.color = "#ffffff";
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLElement).style.background = "rgba(239,68,68,0.1)";
-                  (e.currentTarget as HTMLElement).style.color = "#f87171";
+                  flexShrink: 0,
                 }}
               >
-                Log-Out
+                {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
               </button>
+
+              {/* User menu avatar and dropdown menu exactly like layout.tsx */}
+              <div ref={userMenuRef} style={{ position: "relative" }}>
+                <button
+                  onClick={() => setUserMenuOpen(v => !v)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    padding: "3px 6px 3px 3px",
+                    borderRadius: 8,
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    background: "rgba(255,255,255,0.08)",
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  <div style={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: "50%",
+                    background: "#e0ff82",
+                    color: "#1f2223",
+                    fontSize: 9,
+                    fontWeight: 700,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    letterSpacing: "-0.02em",
+                  }}>
+                    {initials}
+                  </div>
+                  <ChevronDown size={10} style={{ color: "rgba(255,255,255,0.4)", transform: userMenuOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+                </button>
+
+                {userMenuOpen && user && (
+                  <div style={{
+                    position: "absolute",
+                    top: "calc(100% + 6px)",
+                    right: 0,
+                    minWidth: 180,
+                    background: "var(--surface-primary)",
+                    border: "1px solid var(--border-subtle)",
+                    borderRadius: 10,
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+                    overflow: "hidden",
+                    zIndex: 200,
+                  }}>
+                    <div style={{ padding: "12px 14px", borderBottom: "1px solid var(--border-subtle)" }}>
+                      <div style={{ fontSize: 12.5, fontWeight: 600, color: "var(--text-primary)" }}>{user.full_name}</div>
+                      <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 2 }}>{user.email}</div>
+                    </div>
+                    <Link
+                      href="/dashboard/settings"
+                      onClick={() => setUserMenuOpen(false)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        padding: "9px 14px",
+                        fontSize: 13,
+                        color: "var(--text-secondary)",
+                        textDecoration: "none",
+                        transition: "background 0.1s",
+                      }}
+                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--surface-secondary)"}
+                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
+                    >
+                      <Settings size={13} />
+                      Settings
+                    </Link>
+                    <button
+                      onClick={() => { logout(); window.location.href = "/login"; }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        padding: "9px 14px",
+                        fontSize: 13,
+                        color: "#E24B4A",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        width: "100%",
+                        textAlign: "left",
+                        transition: "background 0.1s",
+                        fontFamily: "inherit",
+                      }}
+                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--surface-secondary)"}
+                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
+                    >
+                      <LogOut size={13} />
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
+
             </div>
+
+            {/* Mobile hamburger */}
+            <button
+              className="dash-nav-mobile-btn"
+              onClick={e => { e.stopPropagation(); setMobileMenuOpen(v => !v); }}
+              style={{
+                display: "none",
+                width: 34,
+                height: 34,
+                borderRadius: 8,
+                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(255,255,255,0.08)",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                color: "rgba(255,255,255,0.6)",
+                flexShrink: 0,
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <line x1="2" y1="4" x2="14" y2="4" />
+                <line x1="2" y1="8" x2="14" y2="8" />
+                <line x1="2" y1="12" x2="14" y2="12" />
+              </svg>
+            </button>
 
           </div>
         </header>
+
+        {/* Mobile dropdown menu */}
+        {mobileMenuOpen && (
+          <div
+            className="dash-nav-mobile-menu"
+            style={{
+              borderBottom: "1px solid var(--border-subtle)",
+              background: "var(--surface-primary)",
+              padding: "8px 16px 12px",
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {navItems.map((item) => {
+              const active = item.href === "/analysis";
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "9px 12px",
+                    borderRadius: 8,
+                    fontSize: 14,
+                    fontWeight: active ? 600 : 400,
+                    color: active ? "var(--text-primary)" : "var(--text-secondary)",
+                    background: active ? "var(--surface-secondary)" : "transparent",
+                    textDecoration: "none",
+                    marginBottom: 2,
+                  }}
+                >
+                  <item.icon size={15} />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+        )}
 
         {/* ==========================================
             MAIN CONTAINER WITH PADDING & MARGINS
@@ -979,24 +1258,23 @@ function AnalysisHUDPageContent() {
                   <Loader2 className="animate-spin text-[var(--text-primary)]" size={12} />
                   <span>Loading submission details...</span>
                 </div>
-              ) : activeSteps.length > 0 ? (
+              ) : activeStudent.studentName ? (
                 <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-brand-500" />
-                  <span className="font-bold font-mono uppercase text-brand-600">
-                    {activeSteps.length} Steps Digitized
+                  <User size={13} className="text-[var(--text-secondary)]" />
+                  <span className="font-bold uppercase tracking-wider text-[var(--text-primary)]" style={{ fontSize: "11px" }}>
+                    {activeStudent.studentName}
                   </span>
-                  <span>• Student: {activeStudent.studentName}</span>
                 </div>
               ) : (
-                <span>No steps available</span>
+                <span>No submission selected</span>
               )}
             </div>
 
-            {/* Double-Pane Workspace */}
+            {/* Double-Pane Workspace (Left Pane 70% / Right Pane 30%) */}
             <div className="flex-1 flex flex-col md:flex-row min-h-0 bg-[var(--surface-secondary)]">
               
-              {/* LEFT PANE: Digital Manuscript */}
-              <div className="flex-1 p-4 overflow-y-auto border-r border-[var(--border-subtle)]" style={{ background: "var(--surface-secondary)", minHeight: "220px" }}>
+              {/* LEFT PANE: Digital Manuscript (70% width) */}
+              <div className="flex-[7] p-4 overflow-y-auto border-r border-[var(--border-subtle)] flex flex-col" style={{ background: "var(--surface-secondary)", minHeight: "220px" }}>
                 
                 {isCreatingPractice ? (
                   /* Practice Creation Form */
@@ -1129,22 +1407,15 @@ function AnalysisHUDPageContent() {
                       </div>
                     )}
 
-                    {/* Manuscript Canvas (Premium Grid Background) */}
+                    {/* Manuscript Canvas (Premium Grid Background) - OCR exact unmanipulated text display */}
                     <div className="flex-1 min-h-[260px] rounded-xl border border-[var(--border-subtle)] relative overflow-hidden flex flex-col" 
                       style={{ 
                         background: "var(--surface-secondary)", 
                         backgroundImage: "radial-gradient(var(--border-strong) 1.5px, transparent 1.5px)",
                         backgroundSize: "18px 18px"
                       }}>
-                      
-                      <div className="border-b border-dashed border-[var(--border-subtle)] py-3 px-4 flex justify-between items-center text-[10px] uppercase text-[var(--text-tertiary)] font-bold flex-shrink-0">
-                        <span>Sheet #{selectedStudentId?.slice(-4) || "0000"} - OCR Manuscript</span>
-                        <span className="font-semibold text-brand-600">
-                          {activeSteps.length > 0 ? "Verified" : "Pending"}
-                        </span>
-                      </div>
 
-                      <div className="flex-1 p-6 relative flex flex-col justify-around gap-4 overflow-y-auto">
+                      <div className="flex-1 p-6 relative flex flex-col justify-start gap-5 overflow-y-auto">
                         
                         {isLoadingDetail ? (
                           <div className="flex items-center justify-center flex-1">
@@ -1156,44 +1427,11 @@ function AnalysisHUDPageContent() {
                           </div>
                         ) : (
                           activeSteps.map((step) => {
-                            const isStepHighlighted = highlightedStep === step.stepNum;
-                            const isStepErroneous = step.sympyValid === false;
-
                             return (
-                              <div
-                                key={step.stepNum}
-                                onClick={() => setHighlightedStep(step.stepNum)}
-                                className={`relative p-3 rounded-lg border border-dashed transition-all duration-300 cursor-pointer ${
-                                  isStepHighlighted ? "shadow-md scale-[1.01]" : "hover:bg-white/5"
-                                }`}
-                                style={{
-                                  background: isStepHighlighted ? "var(--surface-primary)" : "transparent",
-                                  borderColor: isStepErroneous ? "rgba(239,68,68,0.4)" : isStepHighlighted ? "var(--text-primary)" : "transparent"
-                                }}
-                              >
-                                <div className="absolute -top-2 left-2 text-[var(--text-primary)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] font-mono font-bold text-[8px] px-1.5 py-0.5 rounded shadow uppercase z-10">
-                                  Step {step.stepNum} (OCR)
-                                </div>
-
-                                <div className="pl-4 py-1">
-                                  <code className="text-sm font-mono font-bold text-[var(--text-primary)]">{step.latex}</code>
-                                  <span className="text-xs text-[var(--text-secondary)] italic block mt-0.5">{step.text}</span>
-                                </div>
-
-                                <div className="absolute right-2 top-2 flex items-center gap-1.5">
-                                  {step.sympyValid === true && (
-                                    <span className="w-5 h-5 rounded flex items-center justify-center" 
-                                      style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", border: "1px solid rgba(16,185,129,0.3)" }}>
-                                      <Check size={11} strokeWidth={3} />
-                                    </span>
-                                  )}
-                                  {step.sympyValid === false && (
-                                    <span className="w-5 h-5 rounded flex items-center justify-center" 
-                                      style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }}>
-                                      <X size={11} strokeWidth={3} />
-                                    </span>
-                                  )}
-                                </div>
+                              <div key={step.stepNum} className="py-3 px-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-primary)] shadow-sm font-mono text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>
+                                <div className="text-[10px] uppercase font-sans font-bold text-[var(--text-tertiary)] mb-1">Digitized Transcription Step {step.stepNum}</div>
+                                <div className="font-bold text-[14.5px] font-mono select-all">{step.latex}</div>
+                                <div className="text-[12px] text-[var(--text-secondary)] italic mt-1 font-sans">{step.text}</div>
                               </div>
                             );
                           })
@@ -1206,15 +1444,15 @@ function AnalysisHUDPageContent() {
 
               </div>
 
-              {/* RIGHT PANE: AI Step Traces */}
+              {/* RIGHT PANE: AI Step Traces (30% width) */}
               <div 
                 ref={rightPaneRef}
-                className="flex-1 p-4 overflow-y-auto flex flex-col gap-3 scroll-smooth bg-[var(--surface-primary)]"
+                className="flex-[3] p-4 overflow-y-auto flex flex-col gap-3 scroll-smooth bg-[var(--surface-primary)]"
               >
                 <div className="flex items-center justify-between border-b pb-2.5 flex-shrink-0" style={{ borderBottomColor: "var(--border-subtle)" }}>
                   <h3 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)]">
                     <Sparkles size={14} className="text-brand-600" />
-                    AI Grading Step Traces
+                    AI Evaluation & Explanation
                   </h3>
                   <span className="text-[10px] font-mono font-bold uppercase rounded-lg border border-[var(--border-subtle)] px-2.5 py-0.5 text-[var(--text-secondary)] bg-[var(--surface-secondary)]">
                     {activeSteps.length} Steps
@@ -1239,73 +1477,29 @@ function AnalysisHUDPageContent() {
                         key={step.stepNum}
                         id={`step-card-${step.stepNum}`}
                         onClick={() => setHighlightedStep(step.stepNum)}
-                        className={`p-4 rounded-xl border transition-all duration-300 cursor-pointer relative overflow-hidden flex-shrink-0 ${
-                          isStepHighlighted ? "shadow-md scale-[1.01]" : ""
+                        className={`p-3.5 rounded-xl border transition-all duration-200 cursor-pointer relative overflow-hidden flex-shrink-0 flex flex-col gap-2 ${
+                          isStepHighlighted ? "bg-[var(--surface-secondary)] border-[var(--text-primary)]" : "bg-transparent border-[var(--border-subtle)]"
                         }`}
-                        style={{
-                          background: isStepHighlighted ? "var(--surface-secondary)" : "var(--surface-primary)",
-                          borderColor: isStepErroneous ? "rgba(239,68,68,0.25)" : isStepHighlighted ? "var(--text-primary)" : "var(--border-subtle)"
-                        }}
                       >
-                        {isStepHighlighted && (
-                          <div className="absolute top-0 left-0 w-1.5 h-full bg-[var(--text-primary)]" />
+                        <div className="flex justify-between items-center">
+                          <span className="text-[11px] font-bold font-mono uppercase text-[var(--text-secondary)]">
+                            Step {step.stepNum} Trace
+                          </span>
+                          <span className="text-[11.5px] font-bold font-mono text-[var(--text-primary)]">
+                            {step.marks} / {step.maxMarks} pts
+                          </span>
+                        </div>
+
+                        <p className="text-[12.5px] text-[var(--text-primary)] leading-relaxed font-medium">
+                          {step.justification}
+                        </p>
+
+                        {isStepErroneous && (
+                          <div className="mt-1.5 text-[11px] font-semibold text-red-500 bg-red-500/5 border border-red-500/10 rounded-lg p-2 flex items-center gap-1.5">
+                            <AlertTriangle size={11} className="shrink-0" />
+                            <span>Error: {step.errorType || "Inconsistent algebraic evaluation transition."}</span>
+                          </div>
                         )}
-
-                        <div className="flex justify-between items-start mb-2.5">
-                          <div>
-                            <span className="text-[10px] font-mono font-bold uppercase block" style={{ color: isStepErroneous ? "#ef4444" : "var(--text-secondary)" }}>
-                              Step {step.stepNum}: {step.type}
-                            </span>
-                            <code className="text-sm font-mono font-bold block mt-0.5 text-[var(--text-primary)]">{step.latex}</code>
-                          </div>
-                          
-                          <div className="text-right">
-                            <span className="text-sm font-bold font-mono text-[var(--text-primary)]">
-                              {step.marks} <span className="text-[10px] text-[var(--text-tertiary)]">/ {step.maxMarks}</span>
-                            </span>
-                          </div>
-                        </div>
-
-                        <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-3 font-medium">{step.justification}</p>
-
-                        <div className="flex flex-wrap gap-2 items-center text-[10px]">
-                          
-                          <div className="px-2 py-0.5 rounded-lg flex items-center gap-1 font-mono uppercase text-[9px]"
-                            style={{
-                              background: step.sympyValid === true ? "var(--surface-secondary)" : step.sympyValid === false ? "rgba(239,68,68,0.06)" : "var(--surface-secondary)",
-                              color: step.sympyValid === true ? "var(--text-secondary)" : step.sympyValid === false ? "#f87171" : "var(--text-tertiary)",
-                              border: `1px solid ${step.sympyValid === true ? "var(--border-default)" : step.sympyValid === false ? "rgba(239,68,68,0.15)" : "var(--border-subtle)"}`
-                            }}>
-                            {step.sympyValid === true ? (
-                              <>
-                                <CheckCircle2 size={10} />
-                                <span>SymPy: Valid</span>
-                              </>
-                            ) : step.sympyValid === false ? (
-                              <>
-                                <AlertTriangle size={10} />
-                                <span>SymPy: Inconsistent</span>
-                              </>
-                            ) : (
-                              <>
-                                <HelpCircle size={10} />
-                                <span>Not Evaluated</span>
-                              </>
-                            )}
-                          </div>
-
-                          {step.errorType && (
-                            <div className="px-2 py-0.5 rounded-lg font-mono uppercase text-[9px] flex items-center gap-1" 
-                              style={{ 
-                                background: "rgba(239,68,68,0.06)", 
-                                color: "#f87171", 
-                                border: "1px solid rgba(239,68,68,0.15)" 
-                              }}>
-                              <AlertTriangle size={10} />
-                              {step.errorType}
-                            </div>
-                          )}
-                        </div>
                       </div>
                     );
                   })
@@ -1429,6 +1623,19 @@ function AnalysisHUDPageContent() {
       </div>
 
       </div>
+
+      <style>{`
+        .dash-nav-desktop { display: flex !important; }
+        .dash-nav-mobile-btn { display: none !important; }
+        .dash-nav-mobile-menu { display: none; }
+
+        @media (max-width: 900px) {
+          .dash-nav-desktop { display: none !important; }
+          .dash-nav-mobile-btn { display: flex !important; }
+          .dash-nav-mobile-menu { display: block !important; }
+          .dash-search-box { display: none !important; }
+        }
+      `}</style>
 
     </div>
   );
