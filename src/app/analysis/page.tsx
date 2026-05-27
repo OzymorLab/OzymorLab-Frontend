@@ -55,6 +55,7 @@ interface Submission {
   errorType?: string;
   submissionTime: string;
   steps?: Step[];
+  fileKey?: string;
 }
 
 interface Task {
@@ -1020,24 +1021,34 @@ function AnalysisHUDPageContent() {
                 <span className="text-[12.5px] font-medium">Loading submissions...</span>
               </div>
             ) : (
-              <select
-                value={selectedQuestionId}
-                onChange={(e) => {
-                  setSelectedQuestionId(e.target.value);
-                  setHighlightedStep(null);
-                  setChatMessages([]);
-                }}
-                className="flex-1 h-12 px-4 rounded-xl text-[13px] font-bold bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm cursor-pointer"
-                disabled={tasks.length === 0}
-              >
-                {tasks.length === 0 ? (
-                  <option value="">No questions available</option>
-                ) : (
-                  tasks.map((q) => (
-                    <option key={q.id} value={q.id}>{q.title}</option>
-                  ))
+              <div className="flex-1 flex gap-2">
+                <div className="flex-1 h-12 px-4 rounded-xl text-[13.5px] font-bold bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)] flex items-center shadow-sm">
+                  {activeQuestion.title || "No question selected"}
+                </div>
+                
+                {viewMode === "teacher" && (
+                  <select
+                    value={selectedStudentId}
+                    onChange={(e) => {
+                      setSelectedStudentId(e.target.value);
+                      setHighlightedStep(null);
+                      setChatMessages([]);
+                    }}
+                    className="h-12 px-4 rounded-xl text-[13px] font-bold bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm cursor-pointer min-w-[200px]"
+                    disabled={roster.length === 0}
+                  >
+                    {roster.length === 0 ? (
+                      <option value="">No submissions available</option>
+                    ) : (
+                      roster.map((student) => (
+                        <option key={student.id} value={student.id}>
+                          {student.studentName} ({student.score.toFixed(1)}/{activeQuestion.maxMarks} pts)
+                        </option>
+                      ))
+                    )}
+                  </select>
                 )}
-              </select>
+              </div>
             )}
             
             {activeQuestion.id && (
@@ -1123,53 +1134,8 @@ function AnalysisHUDPageContent() {
              ========================================== */}
           <aside className="w-14 flex flex-col items-center gap-3 py-4 border-r border-[var(--border-subtle)] overflow-y-auto shrink-0 bg-[var(--surface-primary)]">
             
-            {/* Teacher Roster Flags */}
-            {viewMode === "teacher" && !isLoadingRoster && roster.map((student) => {
-              const flagColors: Record<string, string> = {
-                "red-d": "#c62828",
-                "red": "#ef5350",
-                "red-l": "#ef9a9a",
-                "white": "var(--surface-secondary)",
-                "green-l": "#a5d6a7",
-                "green": "#66bb6a",
-                "green-d": "#2e7d32"
-              };
-
-              const isActive = selectedStudentId === student.id;
-
-              return (
-                <button
-                  key={student.id}
-                  onClick={() => {
-                    setSelectedStudentId(student.id);
-                    setHighlightedStep(null);
-                    setChatMessages([]);
-                  }}
-                  className={`w-9 h-7 rounded-lg flex items-center justify-center font-bold text-[11px] relative group transition-all flex-shrink-0 cursor-pointer ${
-                    isActive ? "ring-2 ring-brand-500 ring-offset-1 ring-offset-[var(--surface-primary)] scale-105" : "opacity-80 hover:opacity-100 hover:scale-105"
-                  }`}
-                  style={{ 
-                    background: flagColors[student.flagColor] || "#fff",
-                    border: student.flagColor === "white" ? "1px solid var(--border-subtle)" : "none",
-                    color: ["white", "green-l", "red-l"].includes(student.flagColor) ? "var(--text-primary)" : "#fff"
-                  }}
-                  title={`${student.studentName} - Score: ${student.score}/${student.maxScore}`}
-                >
-                  {student.avatar || student.studentName?.charAt(0) || "?"}
-                </button>
-              );
-            })}
-
-            {viewMode === "teacher" && isLoadingRoster && (
-              <Loader2 className="animate-spin mt-2 text-[var(--text-primary)]" size={16} />
-            )}
-
-            {viewMode === "teacher" && !isLoadingRoster && roster.length === 0 && (
-              <span className="text-[9px] text-[var(--text-tertiary)] font-bold text-center px-1 font-mono uppercase">None</span>
-            )}
-
-            {/* Student Question Flags */}
-            {viewMode === "student" && tasks.map((question, index) => {
+            {/* Teacher & Student Question navigation buttons */}
+            {(viewMode === "teacher" || viewMode === "student") && tasks.map((question, index) => {
               const isSelected = selectedQuestionId === question.id;
               return (
                 <button
@@ -1407,7 +1373,7 @@ function AnalysisHUDPageContent() {
                       </div>
                     )}
 
-                    {/* Manuscript Canvas (Premium Grid Background) - OCR exact unmanipulated text display */}
+                    {/* Manuscript Canvas (Premium Grid Background) - Handwritten Answer Sheet Scanned Image */}
                     <div className="flex-1 min-h-[260px] rounded-xl border border-[var(--border-subtle)] relative overflow-hidden flex flex-col" 
                       style={{ 
                         background: "var(--surface-secondary)", 
@@ -1415,27 +1381,22 @@ function AnalysisHUDPageContent() {
                         backgroundSize: "18px 18px"
                       }}>
 
-                      <div className="flex-1 p-6 relative flex flex-col justify-start gap-5 overflow-y-auto">
+                      <div className="flex-1 p-6 relative flex flex-col justify-center items-center overflow-y-auto">
                         
                         {isLoadingDetail ? (
                           <div className="flex items-center justify-center flex-1">
                             <Loader2 className="animate-spin text-[var(--text-primary)]" size={24} />
                           </div>
-                        ) : activeSteps.length === 0 ? (
-                          <div className="flex items-center justify-center flex-1 text-[var(--text-tertiary)] text-xs font-mono font-bold uppercase tracking-wider">
-                            {selectedStudentId ? "No OCR steps available for this submission" : "Select a submission to view OCR steps"}
-                          </div>
-                        ) : (
-                          activeSteps.map((step) => {
-                            return (
-                              <div key={step.stepNum} className="py-3 px-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-primary)] shadow-sm font-mono text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>
-                                <div className="text-[10px] uppercase font-sans font-bold text-[var(--text-tertiary)] mb-1">Digitized Transcription Step {step.stepNum}</div>
-                                <div className="font-bold text-[14.5px] font-mono select-all">{step.latex}</div>
-                                <div className="text-[12px] text-[var(--text-secondary)] italic mt-1 font-sans">{step.text}</div>
-                              </div>
-                            );
-                          })
-                        )}
+                        ) : submissionDetail?.fileKey ? (
+                          <img 
+                            src={`/${submissionDetail.fileKey}`} 
+                            alt={`${activeStudent.studentName || 'Student'}'s Answer Sheet`} 
+                            className="max-w-full max-h-[500px] object-contain rounded-lg border border-[var(--border-subtle)] shadow-sm bg-[var(--surface-primary)] p-2"
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = 'none';
+                            }}
+                          />
+                        ) : null}
 
                       </div>
                     </div>
@@ -1448,6 +1409,11 @@ function AnalysisHUDPageContent() {
               <div 
                 ref={rightPaneRef}
                 className="flex-[3] p-4 overflow-y-auto flex flex-col gap-3 scroll-smooth bg-[var(--surface-primary)]"
+                style={{
+                  border: "1px solid var(--border-subtle)",
+                  margin: "1px",
+                  borderRadius: "12px",
+                }}
               >
                 <div className="flex items-center justify-between border-b pb-2.5 flex-shrink-0" style={{ borderBottomColor: "var(--border-subtle)" }}>
                   <h3 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)]">
@@ -1512,12 +1478,12 @@ function AnalysisHUDPageContent() {
             {/* ==========================================
                 4. CHAT BAR (Premium Rounded B&W Inputs)
                ========================================== */}
-            <footer className="border-t border-[var(--border-subtle)] flex-shrink-0 bg-[var(--surface-primary)]">
+            <footer className="border-t border-[var(--border-subtle)] flex-shrink-0 bg-[var(--surface-primary)] p-4">
               
               {/* Highlight Banner */}
               {highlightedStep && (
-                <div className="px-4 py-2 text-xs flex items-center justify-between" 
-                  style={{ background: "rgba(16,185,129,0.12)", color: "#10b981", borderBottom: "1px solid rgba(16,185,129,0.25)" }}>
+                <div className="px-4 py-2 text-xs flex items-center justify-between rounded-lg mb-3" 
+                  style={{ background: "rgba(16,185,129,0.12)", color: "#10b981", border: "1px solid rgba(16,185,129,0.25)" }}>
                   <div className="flex items-center gap-2">
                     <Sparkles size={12} className="animate-pulse" />
                     <span>Aligned View to <strong className="font-mono">Step {highlightedStep}</strong> on the Manuscript OCR panel above.</span>
@@ -1533,7 +1499,7 @@ function AnalysisHUDPageContent() {
 
               {/* Chat Messages */}
               {chatMessages.length > 0 && (
-                <div className="max-h-[140px] overflow-y-auto px-4 py-3 flex flex-col gap-2.5">
+                <div className="max-h-[140px] overflow-y-auto px-4 py-3 flex flex-col gap-2.5 mb-3">
                   {chatMessages.map((msg, idx) => (
                     <div
                       key={idx}
@@ -1582,37 +1548,66 @@ function AnalysisHUDPageContent() {
                 </div>
               )}
 
-
-
-              {/* Chat Input */}
-              <div className="p-3.5 flex items-center gap-2.5">
-                <div className="flex-1 h-11 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex items-center px-4 gap-2 focus-within:border-brand-500 transition-colors">
-                  <QuestionIcon size={14} className="text-[var(--text-tertiary)] flex-shrink-0" />
-                  <input
-                    type="text"
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleSendChat(chatInput);
-                    }}
-                    placeholder="Ask the AI Copilot to analyze a specific step or override scores..."
-                    className="flex-1 bg-transparent border-none outline-none text-xs placeholder-gray-500 text-[var(--text-primary)]"
-                    disabled={!selectedStudentId}
-                  />
-                </div>
-
-                <button
-                  onClick={() => handleSendChat(chatInput)}
-                  disabled={!chatInput.trim() || !selectedStudentId}
-                  style={{
-                    background: "var(--text-primary)",
-                    color: "var(--surface-primary)",
-                    borderRadius: "12px"
+              {/* Chat Input Box (Exact replication of screenshot capsule) */}
+              <div 
+                className="w-full rounded-2xl flex flex-col p-3 gap-2 border transition-all"
+                style={{
+                  background: "var(--surface-secondary)",
+                  borderColor: "var(--border-subtle)",
+                }}
+              >
+                {/* Text input on top */}
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSendChat(chatInput);
                   }}
-                  className="h-11 w-11 flex items-center justify-center transition-all hover:scale-105 disabled:opacity-50 flex-shrink-0 cursor-pointer shadow-sm"
-                >
-                  <Send size={13} />
-                </button>
+                  placeholder="Write a message..."
+                  className="w-full bg-transparent border-none outline-none text-[13.5px] text-[var(--text-primary)] placeholder-gray-500 px-1"
+                  disabled={!selectedStudentId}
+                />
+                
+                {/* Controls toolbar on bottom */}
+                <div className="flex items-center justify-between mt-1 pt-1.5 border-t border-[rgba(255,255,255,0.03)]">
+                  {/* Left: Plus icon */}
+                  <button 
+                    className="p-1 rounded-lg hover:bg-[rgba(255,255,255,0.06)] text-[var(--text-secondary)] transition-all cursor-pointer"
+                    title="Add attachment"
+                  >
+                    <Plus size={16} />
+                  </button>
+                  
+                  {/* Right: Model Selector, Mic, Waveform */}
+                  <div className="flex items-center gap-4 text-[var(--text-secondary)]">
+                    {/* Model Selector */}
+                    <div className="flex items-center gap-1 text-[12px] font-medium hover:text-[var(--text-primary)] cursor-pointer">
+                      <span>Sonnet 4.6</span>
+                      <ChevronDown size={12} className="opacity-70" />
+                    </div>
+                    
+                    {/* Mic Icon */}
+                    <button 
+                      className="p-1 hover:text-[var(--text-primary)] transition-all cursor-pointer"
+                      title="Voice input"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-mic">
+                        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                        <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+                        <line x1="12" x2="12" y1="19" y2="22"/>
+                      </svg>
+                    </button>
+                    
+                    {/* Voice waveform icon */}
+                    <div className="flex items-center gap-[2.5px] h-3 px-0.5" title="Voice activity indicator">
+                      <span className="w-[1.5px] h-2 bg-current rounded-full opacity-60"></span>
+                      <span className="w-[1.5px] h-3.5 bg-current rounded-full"></span>
+                      <span className="w-[1.5px] h-2.5 bg-current rounded-full opacity-80"></span>
+                      <span className="w-[1.5px] h-1.5 bg-current rounded-full opacity-50"></span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </footer>
 
