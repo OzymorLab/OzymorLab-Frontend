@@ -530,9 +530,9 @@ function AnalysisHUDPageContent() {
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col font-sans" style={{ background: "#0c0d0e" }}>
+    <div className="min-h-screen w-full flex flex-col font-sans" style={{ background: "var(--surface-page)" }}>
       
-      <div className="flex-1 w-full flex flex-col" style={{ background: "#0c0d0e" }}>
+      <div className="flex-1 w-full flex flex-col" style={{ background: "var(--surface-page)" }}>
         
         {/* ==========================================
             1. TOP NAVIGATION (Premium Dark Themed Header)
@@ -903,7 +903,7 @@ function AnalysisHUDPageContent() {
             <div className="flex-1 flex flex-col md:flex-row min-h-0 bg-[var(--surface-secondary)]">
               
               {/* LEFT PANE: Digital Manuscript */}
-              <div className="flex-1 p-4 overflow-y-auto border-r border-[var(--border-subtle)]" style={{ background: "#161718", minHeight: "220px" }}>
+              <div className="flex-1 p-4 overflow-y-auto border-r border-[var(--border-subtle)]" style={{ background: "var(--surface-secondary)", minHeight: "220px" }}>
                 
                 {isCreatingPractice ? (
                   /* Practice Creation Form */
@@ -1023,8 +1023,8 @@ function AnalysisHUDPageContent() {
                     {/* Manuscript Canvas (Premium Grid Background) */}
                     <div className="flex-1 min-h-[260px] rounded-xl border border-[var(--border-subtle)] relative overflow-hidden flex flex-col" 
                       style={{ 
-                        background: "#161718", 
-                        backgroundImage: "radial-gradient(rgba(255,255,255,0.05) 1.5px, transparent 1.5px)",
+                        background: "var(--surface-secondary)", 
+                        backgroundImage: "radial-gradient(var(--border-strong) 1.5px, transparent 1.5px)",
                         backgroundSize: "18px 18px"
                       }}>
                       
