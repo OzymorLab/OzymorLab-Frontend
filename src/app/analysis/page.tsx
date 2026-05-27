@@ -941,7 +941,7 @@ function AnalysisHUDPageContent() {
                     ) : (
                       roster.map((student) => (
                         <option key={student.id} value={student.id}>
-                          {student.studentName} ({student.score.toFixed(1)}/{activeQuestion.maxMarks} pts)
+                          {student.studentName}
                         </option>
                       ))
                     )}
@@ -1430,80 +1430,6 @@ function AnalysisHUDPageContent() {
               </div>
             )}
 
-            <footer 
-              className="flex-shrink-0 bg-[var(--surface-primary)] p-4 flex justify-center items-center"
-              style={{
-                position: "fixed",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                zIndex: 50,
-                borderTop: "1px solid var(--border-subtle)",
-                boxShadow: "0 -4px 12px rgba(0,0,0,0.05)",
-              }}
-            >
-              
-              {/* Chat Input Box (Claude web style, 70% width, centered, padded) */}
-              <div 
-                className="rounded-2xl flex flex-col p-5 gap-3.5 border transition-all shadow-sm"
-                style={{
-                  width: "70%",
-                  maxWidth: "700px",
-                  background: "var(--surface-secondary)",
-                  borderColor: "var(--border-subtle)",
-                  margin: "16px auto",
-                }}
-              >
-                {/* Text input on top with padding */}
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleSendChat(chatInput);
-                  }}
-                  placeholder="Write a message..."
-                  className="w-full bg-transparent border-none outline-none text-[14px] text-[var(--text-primary)] placeholder-gray-500 px-2 py-1"
-                  disabled={!selectedStudentId}
-                />
-                
-                {/* Controls toolbar on bottom */}
-                <div className="flex items-center justify-between mt-1 pt-2 border-t border-[rgba(255,255,255,0.04)] px-2">
-                  {/* Left: Plus icon */}
-                  <button 
-                    className="p-1 rounded-lg hover:bg-[rgba(255,255,255,0.06)] text-[var(--text-secondary)] transition-all cursor-pointer"
-                    title="Add attachment"
-                  >
-                    <Plus size={18} />
-                  </button>
-                  
-                  {/* Right: Mic, Waveform */}
-                  <div className="flex items-center gap-4 text-[var(--text-secondary)]">
-                    
-                    {/* Mic Icon */}
-                    <button 
-                      className="p-1 hover:text-[var(--text-primary)] transition-all cursor-pointer"
-                      title="Voice input"
-                    >
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-mic">
-                        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
-                        <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
-                        <line x1="12" x2="12" y1="19" y2="22"/>
-                      </svg>
-                    </button>
-                    
-                    {/* Voice waveform icon */}
-                    <div className="flex items-center gap-[3px] h-3.5 px-0.5" title="Voice activity indicator">
-                      <span className="w-[2px] h-2 bg-current rounded-full opacity-60"></span>
-                      <span className="w-[2px] h-3.5 bg-current rounded-full"></span>
-                      <span className="w-[2px] h-2.5 bg-current rounded-full opacity-80"></span>
-                      <span className="w-[2px] h-1.5 bg-current rounded-full opacity-50"></span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </footer>
-
           </main>
 
         </div>
@@ -1511,6 +1437,80 @@ function AnalysisHUDPageContent() {
       </div>
 
       </div>
+
+      <footer 
+        className="flex-shrink-0 bg-[var(--surface-primary)] p-4 flex justify-center items-center"
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 50,
+          borderTop: "1px solid var(--border-subtle)",
+          boxShadow: "0 -4px 12px rgba(0,0,0,0.05)",
+        }}
+      >
+        
+        {/* Chat Input Box (Claude web style, 70% width, centered, padded) */}
+        <div 
+          className="rounded-2xl flex flex-col p-5 gap-3.5 border transition-all shadow-sm"
+          style={{
+            width: "70%",
+            maxWidth: "700px",
+            background: "var(--surface-secondary)",
+            borderColor: "var(--border-subtle)",
+            margin: "16px auto",
+          }}
+        >
+          {/* Text input on top with padding */}
+          <input
+            type="text"
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSendChat(chatInput);
+            }}
+            placeholder="Write a message..."
+            className="w-full bg-transparent border-none outline-none text-[14px] text-[var(--text-primary)] placeholder-gray-500 px-2 py-1"
+            disabled={!selectedStudentId}
+          />
+          
+          {/* Controls toolbar on bottom */}
+          <div className="flex items-center justify-between mt-1 pt-2 border-t border-[rgba(255,255,255,0.04)] px-2">
+            {/* Left: Plus icon */}
+            <button 
+              className="p-1 rounded-lg hover:bg-[rgba(255,255,255,0.06)] text-[var(--text-secondary)] transition-all cursor-pointer"
+              title="Add attachment"
+            >
+              <Plus size={18} />
+            </button>
+            
+            {/* Right: Mic, Waveform */}
+            <div className="flex items-center gap-4 text-[var(--text-secondary)]">
+              
+              {/* Mic Icon */}
+              <button 
+                className="p-1 hover:text-[var(--text-primary)] transition-all cursor-pointer"
+                title="Voice input"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-mic">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                  <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+                  <line x1="12" x2="12" y1="19" y2="22"/>
+                </svg>
+              </button>
+              
+              {/* Voice waveform icon */}
+              <div className="flex items-center gap-[3px] h-3.5 px-0.5" title="Voice activity indicator">
+                <span className="w-[2px] h-2 bg-current rounded-full opacity-60"></span>
+                <span className="w-[2px] h-3.5 bg-current rounded-full"></span>
+                <span className="w-[2px] h-2.5 bg-current rounded-full opacity-80"></span>
+                <span className="w-[2px] h-1.5 bg-current rounded-full opacity-50"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
 
       <style>{`
         .dash-nav-desktop { display: flex !important; }
