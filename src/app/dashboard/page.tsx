@@ -104,6 +104,8 @@ export default function DashboardPage() {
   const [gradeDetail, setGradeDetail] = useState<GradeDetail | null>(null);
   const [activeTab, setActiveTab] = useState<"evaluation" | "student_answer">("evaluation");
   const [gradeMap, setGradeMap] = useState<Record<string, GradeDetail>>({});
+  const [submissionsLimit, setSubmissionsLimit] = useState(5);
+  const [liveEventsLimit, setLiveEventsLimit] = useState(5);
 
   const fetchSubmissions = async () => {
     try {
@@ -142,9 +144,10 @@ export default function DashboardPage() {
   const latencies = Object.values(gradeMap).map(g => g.latency_ms).filter(Boolean);
   const avgLatency = latencies.length ? (latencies.reduce((a, b) => a + b, 0) / latencies.length / 1000).toFixed(1) + "s" : "—";
   const throughputData = buildThroughput(submissions);
+  const displayedSubmissions = submissions.slice(0, submissionsLimit);
 
   /* live activity */
-  const liveEvents = submissions.slice(0, 10).flatMap(s => {
+  const allLiveEvents = submissions.flatMap(s => {
     const g = gradeMap[s.id];
     const sid = (s.student_id || s.id).slice(-8).toUpperCase();
     const ago = timeAgo(s.created_at);
@@ -153,6 +156,8 @@ export default function DashboardPage() {
     if (s.status === "GRADING") return [`${sid} grading in progress · ${ago}`];
     return [];
   });
+
+  const displayedLiveEvents = allLiveEvents.slice(0, liveEventsLimit);
 
   const todayCount = submissions.filter(s => new Date(s.created_at).toDateString() === new Date().toDateString()).length;
 
@@ -210,7 +215,7 @@ export default function DashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {submissions.map((sub) => {
+              {displayedSubmissions.map((sub) => {
                 const g = gradeMap[sub.id];
                 return (
                   <tr
@@ -249,6 +254,50 @@ export default function DashboardPage() {
             </tbody>
           </table>
         </div>
+        { (submissions.length > submissionsLimit || submissionsLimit > 5) && (
+          <div style={{ padding: "12px", borderTop: "1px solid rgb(229,230,230)", display: "flex", justifyContent: "center", gap: 16 }}>
+            {submissions.length > submissionsLimit && (
+              <button
+                onClick={() => setSubmissionsLimit(prev => prev + 5)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#1f2223",
+                  fontWeight: 600,
+                  fontSize: 12.5,
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                  fontFamily: "inherit"
+                }}
+              >
+                See more (+5)
+                <ArrowRight size={12} style={{ transform: "rotate(90deg)" }} />
+              </button>
+            )}
+            {submissionsLimit > 5 && (
+              <button
+                onClick={() => setSubmissionsLimit(5)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#E24B4A",
+                  fontWeight: 600,
+                  fontSize: 12.5,
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                  fontFamily: "inherit"
+                }}
+              >
+                See less
+                <ArrowRight size={12} style={{ transform: "rotate(-90deg)" }} />
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ── Bottom row: chart + live activity ── */}
@@ -273,18 +322,62 @@ export default function DashboardPage() {
             </span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-            {liveEvents.length === 0 ? (
+            {displayedLiveEvents.length === 0 ? (
               <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 0" }}>
                 <Activity size={14} style={{ color: "rgb(179,189,189)" }} />
                 <span style={{ fontSize: 12, color: "rgb(179,189,189)" }}>No recent activity</span>
               </div>
-            ) : liveEvents.map((ev, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 0", borderBottom: i < liveEvents.length - 1 ? "1px solid rgb(247,248,248)" : "none" }}>
+            ) : displayedLiveEvents.map((ev, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 0", borderBottom: i < displayedLiveEvents.length - 1 ? "1px solid rgb(247,248,248)" : "none" }}>
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: ev.includes("flagged") || ev.includes("error") ? "#ef4444" : "#1f2223", marginTop: 5, flexShrink: 0 }} />
                 <span style={{ fontSize: 12, color: "rgb(31,34,35)", lineHeight: 1.5 }}>{ev}</span>
               </div>
             ))}
           </div>
+          { (allLiveEvents.length > liveEventsLimit || liveEventsLimit > 5) && (
+            <div style={{ marginTop: 12, borderTop: "1px solid rgb(247,248,248)", paddingTop: 12, display: "flex", justifyContent: "center", gap: 16 }}>
+              {allLiveEvents.length > liveEventsLimit && (
+                <button
+                  onClick={() => setLiveEventsLimit(prev => prev + 5)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#1f2223",
+                    fontWeight: 600,
+                    fontSize: 12,
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 4,
+                    fontFamily: "inherit"
+                  }}
+                >
+                  See more (+5)
+                  <ArrowRight size={11} style={{ transform: "rotate(90deg)" }} />
+                </button>
+              )}
+              {liveEventsLimit > 5 && (
+                <button
+                  onClick={() => setLiveEventsLimit(5)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#E24B4A",
+                    fontWeight: 600,
+                    fontSize: 12,
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 4,
+                    fontFamily: "inherit"
+                  }}
+                >
+                  See less
+                  <ArrowRight size={11} style={{ transform: "rotate(-90deg)" }} />
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
       </div>

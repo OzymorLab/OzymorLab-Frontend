@@ -122,7 +122,17 @@ const integrationChips = ["Handwriting Normalization", "Multimodal OCR Parse", "
 export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [logoHref, setLogoHref] = useState("/");
   const pathname = usePathname();
+
+  useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("ozymorlab_token") : null;
+    if (token) {
+      setLogoHref("/dashboard");
+    } else {
+      setLogoHref("/");
+    }
+  }, []);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20);
@@ -148,7 +158,7 @@ export default function LandingPage() {
       {/* ─── NAV ─── */}
       <nav className={`lp-nav ${scrolled ? "lp-nav--scrolled" : ""}`}>
         <div className="lp-nav__inner">
-          <Link href="/" className="lp-nav__logo"><LogoIcon /><span>OzymorLab</span></Link>
+          <Link href={logoHref} className="lp-nav__logo"><LogoIcon /><span>OzymorLab</span></Link>
           <div className="lp-nav__links">
             {navLinks.map(l => <Link key={l.label} href={l.href} className="lp-nav__link">{l.label}</Link>)}
           </div>
@@ -447,7 +457,7 @@ export default function LandingPage() {
           <div className="lp-footer__inner">
             <div className="lp-footer__top">
               <div className="lp-footer__brand">
-                <div className="lp-footer__logo"><LogoIcon /><span>OzymorLab</span></div>
+                <Link href={logoHref} className="lp-footer__logo" style={{ textDecoration: "none" }}><LogoIcon /><span>OzymorLab</span></Link>
                 <p className="lp-footer__tagline">Join the 40,000+ businesses using OzymorLab, today</p>
                 <div className="lp-footer__form">
                   <input className="lp-footer__input" placeholder="Get updated" type="email" />

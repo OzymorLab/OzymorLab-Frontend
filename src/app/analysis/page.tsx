@@ -18,7 +18,6 @@ const navItems = [
   { label: "Students", href: "/dashboard/students", icon: Users },
   { label: "Reviews", href: "/dashboard/reviews", icon: Shield },
   { label: "Reports", href: "/dashboard/reports", icon: BarChart3 },
-  { label: "AI Copilot", href: "/analysis", icon: MessageSquare },
 ];
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.com/api/v1";
@@ -710,15 +709,6 @@ function AnalysisHUDPageContent() {
                     fontFamily: "inherit",
                   }}
                 />
-                <kbd style={{
-                  fontSize: 10,
-                  color: "rgba(255,255,255,0.35)",
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  borderRadius: 4,
-                  padding: "1px 5px",
-                  fontFamily: "inherit",
-                }}>⌘K</kbd>
               </div>
 
               {/* Theme toggle */}
@@ -914,12 +904,13 @@ function AnalysisHUDPageContent() {
         {/* ==========================================
             MAIN CONTAINER WITH PADDING & MARGINS
            ========================================== */}
-        <div style={{ maxWidth: 1280, width: "100%", margin: "0 auto", padding: "16px 20px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0, gap: 16 }}>
+        <div style={{ maxWidth: 1280, width: "100%", margin: "0 auto", padding: "16px 20px 140px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0, gap: 16 }}>
 
+          {/* ==========================================
           {/* ==========================================
               2. QUESTION BAR
              ========================================== */}
-          <section className="px-5 py-3.5 flex items-center gap-3 border border-[var(--border-subtle)] bg-[var(--surface-primary)] rounded-xl shadow-sm">
+          <section className="px-12 py-10 flex items-center gap-4 border border-[var(--border-subtle)] bg-[var(--surface-primary)] rounded-xl shadow-sm mx-10">
           
           {/* Question Selector */}
           <div className="flex-1 flex items-center gap-2">
@@ -956,6 +947,38 @@ function AnalysisHUDPageContent() {
                     )}
                   </select>
                 )}
+
+                {/* Marks Box (Points adjustments very close to selectors) */}
+                <div className="h-12 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex items-center overflow-hidden flex-shrink-0 shadow-sm">
+                  <div className="px-4 text-center">
+                    <span className="text-[13px] font-mono font-bold text-[var(--text-primary)]">
+                      {activeStudent.score?.toFixed(1) || "0.0"} pts
+                    </span>
+                  </div>
+                  
+                  {viewMode === "teacher" ? (
+                    <div className="flex flex-col h-full bg-[var(--surface-primary)] border-l border-[var(--border-subtle)]">
+                      <button
+                        onClick={() => adjustTotalMarks(0.5)}
+                        className="w-7 flex-1 flex items-center justify-center text-[10px] font-bold text-[var(--text-secondary)] hover:text-brand-600 hover:bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] cursor-pointer"
+                        disabled={!selectedStudentId}
+                      >
+                        +
+                      </button>
+                      <button
+                        onClick={() => adjustTotalMarks(-0.5)}
+                        className="w-7 flex-1 flex items-center justify-center text-[10px] font-bold text-[var(--text-secondary)] hover:text-brand-600 hover:bg-[var(--surface-secondary)] cursor-pointer"
+                        disabled={!selectedStudentId}
+                      >
+                        -
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-brand-600 bg-brand-500/10 border-l border-[var(--border-subtle)] font-mono flex items-center h-full">
+                      Locked
+                    </div>
+                  )}
+                </div>
               </div>
             )}
             
@@ -968,7 +991,7 @@ function AnalysisHUDPageContent() {
               Confidence: {((submissionDetail?.confidence || activeQuestion.confidence || 0.95) * 100).toFixed(0)}%
             </div>
   
-            {/* Agree with AI Button (Tick) */}
+            {/* Save Button (Agree with AI replacement) */}
             <button
               onClick={() => {
                 setAgreedSubmissions(prev => ({
@@ -984,41 +1007,9 @@ function AnalysisHUDPageContent() {
               }}
             >
               <Check size={14} strokeWidth={3} />
-              {agreedSubmissions[selectedStudentId] ? "Agreed" : "Agree with AI"}
+              {agreedSubmissions[selectedStudentId] ? "Saved" : "Save"}
             </button>
-  
-            {/* Marks Box */}
-            <div className="h-10 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-secondary)] flex items-center overflow-hidden flex-shrink-0">
-              <div className="px-4 text-center">
-                <span className="text-[13px] font-mono font-bold text-[var(--text-primary)]">
-                  {activeStudent.score?.toFixed(1) || "0.0"} pts
-                </span>
-              </div>
-              
-              {viewMode === "teacher" ? (
-                <div className="flex flex-col h-full bg-[var(--surface-primary)] border-l border-[var(--border-subtle)]">
-                  <button
-                    onClick={() => adjustTotalMarks(0.5)}
-                    className="w-7 flex-1 flex items-center justify-center text-[10px] font-bold text-[var(--text-secondary)] hover:text-brand-600 hover:bg-[var(--surface-secondary)] border-b border-[var(--border-subtle)] cursor-pointer"
-                    disabled={!selectedStudentId}
-                  >
-                    +
-                  </button>
-                  <button
-                    onClick={() => adjustTotalMarks(-0.5)}
-                    className="w-7 flex-1 flex items-center justify-center text-[10px] font-bold text-[var(--text-secondary)] hover:text-brand-600 hover:bg-[var(--surface-secondary)] cursor-pointer"
-                    disabled={!selectedStudentId}
-                  >
-                    -
-                  </button>
-                </div>
-              ) : (
-                <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-brand-600 bg-brand-500/10 border-l border-[var(--border-subtle)] font-mono flex items-center h-full">
-                Locked
-              </div>
-            )}
-          </div>
-        </section>
+          </section>
 
           {/* ==========================================
               3. BODY LAYOUT
@@ -1261,7 +1252,7 @@ function AnalysisHUDPageContent() {
                   <>
                     {/* Question Card */}
                     {activeQuestion.questionText && (
-                      <div className="mb-4 py-8 px-6 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-primary)] shadow-sm min-h-[120px] flex flex-col justify-center">
+                      <div className="mb-4 py-12 px-10 mx-10 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-primary)] shadow-sm min-h-[160px] flex flex-col justify-center">
                         <span className="text-[10px] uppercase font-mono font-bold block mb-2 text-[var(--text-tertiary)] tracking-wider">
                           {viewMode === "self-eval" ? "Practice Exercise" : "Assigned Question"}
                         </span>
@@ -1301,24 +1292,21 @@ function AnalysisHUDPageContent() {
 
               </div>
 
-              {/* RIGHT PANE: AI Step Traces (30% width) */}
+              {/* RIGHT PANE: AI Step Traces / Conversation (30% width) */}
               <div 
                 ref={rightPaneRef}
-                className="flex-[3] p-4 overflow-y-auto flex flex-col gap-3 scroll-smooth bg-[var(--surface-primary)]"
+                className="flex-[3] p-6 overflow-y-auto flex flex-col gap-4 scroll-smooth bg-[var(--surface-primary)]"
                 style={{
                   border: "1px solid var(--border-subtle)",
-                  margin: "1px",
+                  margin: "8px",
                   borderRadius: "12px",
                 }}
               >
-                <div className="flex items-center justify-between border-b pb-2.5 flex-shrink-0" style={{ borderBottomColor: "var(--border-subtle)" }}>
-                  <h3 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)]">
-                    <Sparkles size={14} className="text-brand-600" />
-                    AI Evaluation & Explanation
+                <div className="flex items-center justify-between border-b pb-3 flex-shrink-0" style={{ borderBottomColor: "var(--border-subtle)" }}>
+                  <h3 className="font-semibold text-[15px] flex items-center gap-2 text-[var(--text-primary)]">
+                    <MessageSquare size={16} className="text-brand-600" />
+                    Conversation
                   </h3>
-                  <span className="text-[10px] font-mono font-bold uppercase rounded-lg border border-[var(--border-subtle)] px-2.5 py-0.5 text-[var(--text-secondary)] bg-[var(--surface-secondary)]">
-                    {activeSteps.length} Steps
-                  </span>
                 </div>
 
                 {isLoadingDetail ? (
@@ -1442,17 +1430,28 @@ function AnalysisHUDPageContent() {
               </div>
             )}
 
-            <footer className="flex-shrink-0 bg-[var(--surface-primary)] p-4 flex justify-center items-center">
+            <footer 
+              className="flex-shrink-0 bg-[var(--surface-primary)] p-4 flex justify-center items-center"
+              style={{
+                position: "fixed",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                zIndex: 50,
+                borderTop: "1px solid var(--border-subtle)",
+                boxShadow: "0 -4px 12px rgba(0,0,0,0.05)",
+              }}
+            >
               
               {/* Chat Input Box (Claude web style, 70% width, centered, padded) */}
               <div 
-                className="rounded-2xl flex flex-col p-4 gap-3 border transition-all shadow-sm"
+                className="rounded-2xl flex flex-col p-5 gap-3.5 border transition-all shadow-sm"
                 style={{
                   width: "70%",
                   maxWidth: "700px",
                   background: "var(--surface-secondary)",
                   borderColor: "var(--border-subtle)",
-                  margin: "12px auto",
+                  margin: "16px auto",
                 }}
               >
                 {/* Text input on top with padding */}
@@ -1478,7 +1477,7 @@ function AnalysisHUDPageContent() {
                     <Plus size={18} />
                   </button>
                   
-                  {/* Right: Mic, Waveform (Model Selector Removed!) */}
+                  {/* Right: Mic, Waveform */}
                   <div className="flex items-center gap-4 text-[var(--text-secondary)]">
                     
                     {/* Mic Icon */}

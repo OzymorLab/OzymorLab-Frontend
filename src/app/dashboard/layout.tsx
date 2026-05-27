@@ -25,7 +25,6 @@ const navItems = [
   { label: "Students", href: "/dashboard/students", icon: Users },
   { label: "Reviews", href: "/dashboard/reviews", icon: Shield },
   { label: "Reports", href: "/dashboard/reports", icon: BarChart3 },
-  { label: "AI Copilot", href: "/analysis", icon: MessageSquare },
 ];
 
 function DashboardShell({ children }: { children: React.ReactNode }) {
@@ -207,15 +206,6 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
                   fontFamily: "inherit",
                 }}
               />
-              <kbd style={{
-                fontSize: 10,
-                color: "rgba(255,255,255,0.35)",
-                background: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                borderRadius: 4,
-                padding: "1px 5px",
-                fontFamily: "inherit",
-              }}>⌘K</kbd>
             </div>
 
             {/* Theme toggle */}
