@@ -137,6 +137,21 @@
   --brand-900: #CECBF6;
 }
 
+/* ── Custom Live Status Badge Legibility Fix ── */
+.live-status-badge {
+  color: #000000 !important;
+}
+:root.dark .live-status-badge, :root[data-theme="dark"] .live-status-badge {
+  color: #ffffff !important;
+}
+
+.live-status-dot {
+  background-color: #000000 !important;
+}
+:root.dark .live-status-dot, :root[data-theme="dark"] .live-status-dot {
+  background-color: #ffffff !important;
+}
+
 
 *, *::before, *::after {
   box-sizing: border-box;
