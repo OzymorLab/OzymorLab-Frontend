@@ -13,6 +13,15 @@ import { useAuth, AuthProvider } from "../context/AuthContext";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.com/api/v1";
 
+/* ── Diamond logo matching the landing page ── */
+const LogoIcon = () => (
+  <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+    <rect width="28" height="28" rx="8" fill="#1f2223" />
+    <path d="M8 14L14 8L20 14L14 20L8 14Z" fill="#e0ff82" stroke="#e0ff82" strokeWidth="1.5" strokeLinejoin="round" />
+    <circle cx="14" cy="14" r="3" fill="#1f2223" />
+  </svg>
+);
+
 interface Step {
   stepNum: number;
   type: string;
@@ -537,101 +546,183 @@ function AnalysisHUDPageContent() {
         {/* ==========================================
             1. TOP NAVIGATION (Premium Dark Themed Header)
            ========================================== */}
-        <header className="h-16 px-6 border-b border-[var(--border-subtle)] bg-[var(--surface-primary)] flex items-center justify-between sticky top-0 z-40 backdrop-blur-md bg-opacity-80 gap-4">
-          
-          {/* Logo */}
-          <Link href="/dashboard" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-8 h-8 rounded bg-gradient-to-tr from-brand-600 to-brand-400 text-white flex items-center justify-center font-bold text-[13px] shadow-sm">
-              Oz
-            </div>
-            <span className="hidden sm:inline text-[15px] font-bold text-[var(--text-primary)] tracking-tight">OzymorLab</span>
-          </Link>
-
-          {/* Navigation Tabs */}
-          <nav className="hidden lg:flex items-center gap-1.5 flex-1">
-            {activeNavTabs.map((tab, idx) => (
-              <Link
-                key={idx}
-                href={tab.href}
-                className={`px-3 py-1.5 rounded-xl text-[12px] font-bold transition-all ${
-                  tab.active 
-                    ? "bg-[var(--surface-secondary)] border border-[var(--border-subtle)] text-brand-600 shadow-sm"
-                    : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
-                }`}
-              >
-                {tab.name}
-              </Link>
-            ))}
-          </nav>
-
-          {/* View Mode Switcher */}
-          <div className="flex items-center gap-2 ml-auto">
-            {user?.role === "student" ? (
-              <>
-                <button
-                  onClick={() => switchViewMode("student")}
-                  className={`h-8 px-3.5 rounded-xl text-[11px] font-bold transition-all border cursor-pointer ${
-                    viewMode === "student"
-                      ? "bg-brand-500 text-white border-brand-500"
-                      : "bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]"
-                  }`}
-                >
-                  Evaluations
-                </button>
-                <button
-                  onClick={() => switchViewMode("self-eval")}
-                  className={`h-8 px-3.5 rounded-xl text-[11px] font-bold transition-all border cursor-pointer ${
-                    viewMode === "self-eval"
-                      ? "bg-brand-500 text-white border-brand-500"
-                      : "bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]"
-                  }`}
-                >
-                  Self-Eval
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => switchViewMode("teacher")}
-                  className={`h-8 px-3.5 rounded-xl text-[11px] font-bold transition-all border cursor-pointer ${
-                    viewMode === "teacher"
-                      ? "bg-brand-500 text-white border-brand-500"
-                      : "bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]"
-                  }`}
-                >
-                  Teacher
-                </button>
-                <button
-                  onClick={() => switchViewMode("student")}
-                  className={`h-8 px-3.5 rounded-xl text-[11px] font-bold transition-all border cursor-pointer ${
-                    viewMode === "student"
-                      ? "bg-brand-500 text-white border-brand-500"
-                      : "bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]"
-                  }`}
-                >
-                  Student
-                </button>
-                <button
-                  onClick={() => switchViewMode("self-eval")}
-                  className={`h-8 px-3.5 rounded-xl text-[11px] font-bold transition-all border cursor-pointer ${
-                    viewMode === "self-eval"
-                      ? "bg-brand-500 text-white border-brand-500"
-                      : "bg-[var(--surface-secondary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]"
-                  }`}
-                >
-                  Sandbox
-                </button>
-              </>
-            )}
+        <header style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
+          background: "#1f2223",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+        }}>
+          <div style={{
+            maxWidth: 1280,
+            margin: "0 auto",
+            padding: "0 24px",
+            height: 56,
+            display: "flex",
+            alignItems: "center",
+            gap: 0,
+          }}>
             
-            <button
-              onClick={() => {
-                window.location.href = "/login";
-              }}
-              className="h-8 px-3.5 rounded-xl text-[11px] font-bold bg-red-600/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all cursor-pointer ml-1"
-            >
-              Log-Out
-            </button>
+            {/* Logo */}
+            <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", marginRight: 32, flexShrink: 0 }}>
+              <LogoIcon />
+              <span style={{ fontSize: 15, fontWeight: 700, color: "#ffffff", letterSpacing: "-0.02em" }}>OzymorLab</span>
+            </Link>
+
+            {/* Desktop Nav Links */}
+            <nav style={{ display: "flex", alignItems: "center", gap: 2, flex: 1 }} className="dash-nav-desktop">
+              {activeNavTabs.map((tab, idx) => {
+                const active = tab.active;
+                return (
+                  <Link
+                    key={idx}
+                    href={tab.href}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      padding: "6px 12px",
+                      borderRadius: 8,
+                      fontSize: 13.5,
+                      fontWeight: active ? 600 : 400,
+                      color: active ? "#ffffff" : "rgba(255,255,255,0.55)",
+                      background: active ? "rgba(255,255,255,0.12)" : "transparent",
+                      textDecoration: "none",
+                      transition: "all 0.15s",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {tab.name}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* View Mode Switcher */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto", flexShrink: 0 }}>
+              {user?.role === "student" ? (
+                <>
+                  <button
+                    onClick={() => switchViewMode("student")}
+                    style={{
+                      padding: "6px 16px",
+                      borderRadius: 12,
+                      fontSize: 12,
+                      fontWeight: viewMode === "student" ? 600 : 500,
+                      cursor: "pointer",
+                      border: viewMode === "student" ? "none" : "1px solid rgba(255,255,255,0.12)",
+                      background: viewMode === "student" ? "#ffffff" : "transparent",
+                      color: viewMode === "student" ? "#1f2223" : "rgba(255,255,255,0.6)",
+                      fontFamily: "inherit",
+                      transition: "all 0.15s"
+                    }}
+                  >
+                    Evaluations
+                  </button>
+                  <button
+                    onClick={() => switchViewMode("self-eval")}
+                    style={{
+                      padding: "6px 16px",
+                      borderRadius: 12,
+                      fontSize: 12,
+                      fontWeight: viewMode === "self-eval" ? 600 : 500,
+                      cursor: "pointer",
+                      border: viewMode === "self-eval" ? "none" : "1px solid rgba(255,255,255,0.12)",
+                      background: viewMode === "self-eval" ? "#ffffff" : "transparent",
+                      color: viewMode === "self-eval" ? "#1f2223" : "rgba(255,255,255,0.6)",
+                      fontFamily: "inherit",
+                      transition: "all 0.15s"
+                    }}
+                  >
+                    Self-Eval
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => switchViewMode("teacher")}
+                    style={{
+                      padding: "6px 16px",
+                      borderRadius: 12,
+                      fontSize: 12,
+                      fontWeight: viewMode === "teacher" ? 600 : 500,
+                      cursor: "pointer",
+                      border: viewMode === "teacher" ? "none" : "1px solid rgba(255,255,255,0.12)",
+                      background: viewMode === "teacher" ? "#ffffff" : "transparent",
+                      color: viewMode === "teacher" ? "#1f2223" : "rgba(255,255,255,0.6)",
+                      fontFamily: "inherit",
+                      transition: "all 0.15s"
+                    }}
+                  >
+                    Teacher
+                  </button>
+                  <button
+                    onClick={() => switchViewMode("student")}
+                    style={{
+                      padding: "6px 16px",
+                      borderRadius: 12,
+                      fontSize: 12,
+                      fontWeight: viewMode === "student" ? 600 : 500,
+                      cursor: "pointer",
+                      border: viewMode === "student" ? "none" : "1px solid rgba(255,255,255,0.12)",
+                      background: viewMode === "student" ? "#ffffff" : "transparent",
+                      color: viewMode === "student" ? "#1f2223" : "rgba(255,255,255,0.6)",
+                      fontFamily: "inherit",
+                      transition: "all 0.15s"
+                    }}
+                  >
+                    Student
+                  </button>
+                  <button
+                    onClick={() => switchViewMode("self-eval")}
+                    style={{
+                      padding: "6px 16px",
+                      borderRadius: 12,
+                      fontSize: 12,
+                      fontWeight: viewMode === "self-eval" ? 600 : 500,
+                      cursor: "pointer",
+                      border: viewMode === "self-eval" ? "none" : "1px solid rgba(255,255,255,0.12)",
+                      background: viewMode === "self-eval" ? "#ffffff" : "transparent",
+                      color: viewMode === "self-eval" ? "#1f2223" : "rgba(255,255,255,0.6)",
+                      fontFamily: "inherit",
+                      transition: "all 0.15s"
+                    }}
+                  >
+                    Sandbox
+                  </button>
+                </>
+              )}
+              
+              <button
+                onClick={() => {
+                  window.location.href = "/login";
+                }}
+                style={{
+                  padding: "6px 16px",
+                  borderRadius: 12,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  border: "1px solid rgba(239,68,68,0.2)",
+                  background: "rgba(239,68,68,0.1)",
+                  color: "#f87171",
+                  fontFamily: "inherit",
+                  transition: "all 0.15s",
+                  marginLeft: 4
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.background = "#ef4444";
+                  (e.currentTarget as HTMLElement).style.color = "#ffffff";
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.background = "rgba(239,68,68,0.1)";
+                  (e.currentTarget as HTMLElement).style.color = "#f87171";
+                }}
+              >
+                Log-Out
+              </button>
+            </div>
+
           </div>
         </header>
 
@@ -985,14 +1076,30 @@ function AnalysisHUDPageContent() {
                           setPracticeFile(null);
                           setPracticeError("");
                         }}
-                        className="flex-1 py-2.5 rounded-xl text-[12px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-primary)] cursor-pointer"
+                        style={{
+                          border: "1px solid var(--border-default)",
+                          background: "transparent",
+                          color: "var(--text-primary)",
+                          borderRadius: "12px",
+                          fontWeight: 600,
+                          fontSize: "12.5px"
+                        }}
+                        className="flex-1 py-2.5 transition-all hover:bg-[var(--surface-secondary)] cursor-pointer text-center"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={handleRunPracticeGrading}
                         disabled={isGradingPractice || !practiceFile || !practiceRubric}
-                        className="flex-1 py-2.5 rounded-xl text-[12px] font-bold text-white transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5 bg-brand-500 hover:bg-brand-600 cursor-pointer"
+                        style={{
+                          background: "var(--text-primary)",
+                          color: "var(--surface-primary)",
+                          borderRadius: "12px",
+                          fontWeight: 600,
+                          fontSize: "12.5px",
+                          border: "none"
+                        }}
+                        className="flex-1 py-2.5 transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         {isGradingPractice ? (
                           <>
@@ -1291,7 +1398,13 @@ function AnalysisHUDPageContent() {
                     <button
                       key={idx}
                       onClick={() => handleSendChat(chip.query)}
-                      className="px-3 py-1 rounded-full border border border-[var(--border-subtle)] text-[11px] font-bold bg-[var(--surface-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-brand-500 transition-all cursor-pointer shadow-sm"
+                      style={{
+                        border: "1px solid var(--border-default)",
+                        borderRadius: "100px",
+                        background: "var(--surface-primary)",
+                        color: "var(--text-secondary)"
+                      }}
+                      className="px-3 py-1 text-[11px] font-bold hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-primary)] transition-all cursor-pointer shadow-sm"
                     >
                       {chip.text}
                     </button>
@@ -1319,7 +1432,12 @@ function AnalysisHUDPageContent() {
                 <button
                   onClick={() => handleSendChat(chatInput)}
                   disabled={!chatInput.trim() || !selectedStudentId}
-                  className="h-11 w-11 rounded-xl flex items-center justify-center text-white transition-all hover:scale-105 disabled:opacity-50 flex-shrink-0 bg-brand-500 hover:bg-brand-600 cursor-pointer shadow-sm"
+                  style={{
+                    background: "var(--text-primary)",
+                    color: "var(--surface-primary)",
+                    borderRadius: "12px"
+                  }}
+                  className="h-11 w-11 flex items-center justify-center transition-all hover:scale-105 disabled:opacity-50 flex-shrink-0 cursor-pointer shadow-sm"
                 >
                   <Send size={13} />
                 </button>
