@@ -234,11 +234,8 @@ function AnalysisHUDPageContent() {
       if (json.data) {
         setSubmissionDetail(json.data);
         
-        // Initialize chat with welcome message
-        setChatMessages([{
-          sender: "ai",
-          text: "Welcome to the Edexia AIOS Question Copilot! Ask me anything about the OCR digitizations, SymPy algebraic validations, or rubric justifications on this question."
-        }]);
+        // Initialize chat with empty messages
+        setChatMessages([]);
       }
     } catch (e) {
       console.error("Failed to load submission details", e);
@@ -727,9 +724,14 @@ function AnalysisHUDPageContent() {
         </header>
 
         {/* ==========================================
-            2. QUESTION BAR
+            MAIN CONTAINER WITH PADDING & MARGINS
            ========================================== */}
-        <section className="px-6 py-4 flex items-center gap-3 border-b border-[var(--border-subtle)] bg-[var(--surface-secondary)] bg-opacity-40">
+        <div style={{ maxWidth: 1280, width: "100%", margin: "0 auto", padding: "16px 20px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0, gap: 16 }}>
+
+          {/* ==========================================
+              2. QUESTION BAR
+             ========================================== */}
+          <section className="px-5 py-3.5 flex items-center gap-3 border border-[var(--border-subtle)] bg-[var(--surface-primary)] rounded-xl shadow-sm">
           
           {/* Question Selector */}
           <div className="flex-1 flex items-center gap-2">
@@ -832,10 +834,10 @@ function AnalysisHUDPageContent() {
           </div>
         </section>
 
-        {/* ==========================================
-            3. BODY LAYOUT
-           ========================================== */}
-        <div className="flex flex-1 min-h-0" style={{ minHeight: "360px" }}>
+          {/* ==========================================
+              3. BODY LAYOUT
+             ========================================== */}
+          <div className="flex flex-1 min-h-0 border border-[var(--border-subtle)] bg-[var(--surface-primary)] rounded-xl overflow-hidden shadow-sm" style={{ minHeight: "360px" }}>
 
           {/* ==========================================
               3A. SIDEBAR
@@ -1165,8 +1167,8 @@ function AnalysisHUDPageContent() {
                                   isStepHighlighted ? "shadow-md scale-[1.01]" : "hover:bg-white/5"
                                 }`}
                                 style={{
-                                  background: isStepHighlighted ? "rgba(16,185,129,0.08)" : "transparent",
-                                  borderColor: isStepErroneous ? "rgba(239,68,68,0.4)" : isStepHighlighted ? "#10b981" : "transparent"
+                                  background: isStepHighlighted ? "var(--surface-primary)" : "transparent",
+                                  borderColor: isStepErroneous ? "rgba(239,68,68,0.4)" : isStepHighlighted ? "var(--text-primary)" : "transparent"
                                 }}
                               >
                                 <div className="absolute -top-2 left-2 text-[var(--text-primary)] bg-[var(--surface-secondary)] border border-[var(--border-subtle)] font-mono font-bold text-[8px] px-1.5 py-0.5 rounded shadow uppercase z-10">
@@ -1241,17 +1243,17 @@ function AnalysisHUDPageContent() {
                           isStepHighlighted ? "shadow-md scale-[1.01]" : ""
                         }`}
                         style={{
-                          background: isStepHighlighted ? "rgba(16,185,129,0.08)" : "var(--surface-secondary)",
-                          borderColor: isStepErroneous ? "rgba(239,68,68,0.4)" : isStepHighlighted ? "#10b981" : "var(--border-subtle)"
+                          background: isStepHighlighted ? "var(--surface-secondary)" : "var(--surface-primary)",
+                          borderColor: isStepErroneous ? "rgba(239,68,68,0.25)" : isStepHighlighted ? "var(--text-primary)" : "var(--border-subtle)"
                         }}
                       >
                         {isStepHighlighted && (
-                          <div className="absolute top-0 left-0 w-1.5 h-full bg-[#10b981]" />
+                          <div className="absolute top-0 left-0 w-1.5 h-full bg-[var(--text-primary)]" />
                         )}
 
                         <div className="flex justify-between items-start mb-2.5">
                           <div>
-                            <span className="text-[10px] font-mono font-bold uppercase block text-[#10b981]">
+                            <span className="text-[10px] font-mono font-bold uppercase block" style={{ color: isStepErroneous ? "#ef4444" : "var(--text-secondary)" }}>
                               Step {step.stepNum}: {step.type}
                             </span>
                             <code className="text-sm font-mono font-bold block mt-0.5 text-[var(--text-primary)]">{step.latex}</code>
@@ -1270,9 +1272,9 @@ function AnalysisHUDPageContent() {
                           
                           <div className="px-2 py-0.5 rounded-lg flex items-center gap-1 font-mono uppercase text-[9px]"
                             style={{
-                              background: step.sympyValid === true ? "rgba(16,185,129,0.15)" : step.sympyValid === false ? "rgba(239,68,68,0.15)" : "var(--surface-secondary)",
-                              color: step.sympyValid === true ? "#10b981" : step.sympyValid === false ? "#ef4444" : "var(--text-tertiary)",
-                              border: `1px solid ${step.sympyValid === true ? "rgba(16,185,129,0.3)" : step.sympyValid === false ? "rgba(239,68,68,0.3)" : "var(--border-subtle)"}`
+                              background: step.sympyValid === true ? "var(--surface-secondary)" : step.sympyValid === false ? "rgba(239,68,68,0.06)" : "var(--surface-secondary)",
+                              color: step.sympyValid === true ? "var(--text-secondary)" : step.sympyValid === false ? "#f87171" : "var(--text-tertiary)",
+                              border: `1px solid ${step.sympyValid === true ? "var(--border-default)" : step.sympyValid === false ? "rgba(239,68,68,0.15)" : "var(--border-subtle)"}`
                             }}>
                             {step.sympyValid === true ? (
                               <>
@@ -1295,9 +1297,9 @@ function AnalysisHUDPageContent() {
                           {step.errorType && (
                             <div className="px-2 py-0.5 rounded-lg font-mono uppercase text-[9px] flex items-center gap-1" 
                               style={{ 
-                                background: "rgba(239,68,68,0.15)", 
-                                color: "#ef4444", 
-                                border: "1px solid rgba(239,68,68,0.3)" 
+                                background: "rgba(239,68,68,0.06)", 
+                                color: "#f87171", 
+                                border: "1px solid rgba(239,68,68,0.15)" 
                               }}>
                               <AlertTriangle size={10} />
                               {step.errorType}
@@ -1386,31 +1388,7 @@ function AnalysisHUDPageContent() {
                 </div>
               )}
 
-              {/* Quick Action Chips (Premium fully refactored B&W Pills) */}
-              {activeSteps.length > 0 && (
-                <div className="flex flex-wrap gap-2 px-4 py-2 border-t border-[var(--border-subtle)] bg-[var(--surface-secondary)] bg-opacity-35">
-                  <span className="text-[10px] text-[var(--text-tertiary)] self-center uppercase font-mono font-bold mr-1">Ask AI:</span>
-                  {[
-                    { text: "Why did Step 2 fail?", query: "Explain Step 2 coefficients and why it failed." },
-                    { text: "Audit Step 4 constants", query: "Check the notation constant compliance check in Step 4." },
-                    { text: "Scan Step 3 logical anomaly", query: "What logic anomaly was flagged in Step 3?" }
-                  ].map((chip, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleSendChat(chip.query)}
-                      style={{
-                        border: "1px solid var(--border-default)",
-                        borderRadius: "100px",
-                        background: "var(--surface-primary)",
-                        color: "var(--text-secondary)"
-                      }}
-                      className="px-3 py-1 text-[11px] font-bold hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-primary)] transition-all cursor-pointer shadow-sm"
-                    >
-                      {chip.text}
-                    </button>
-                  ))}
-                </div>
-              )}
+
 
               {/* Chat Input */}
               <div className="p-3.5 flex items-center gap-2.5">
@@ -1447,6 +1425,8 @@ function AnalysisHUDPageContent() {
           </main>
 
         </div>
+
+      </div>
 
       </div>
 
