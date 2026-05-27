@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   LayoutDashboard, Users, Settings, BookOpen, LogOut,
   Bell, Search, Shield, GraduationCap, BarChart3, ShieldCheck,
@@ -20,7 +20,6 @@ const LogoIcon = () => (
 );
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, exact: true },
   { label: "Exams Setup", href: "/dashboard/exams", icon: GraduationCap },
   { label: "Submissions", href: "/dashboard/submissions", icon: BookOpen },
   { label: "Students", href: "/dashboard/students", icon: Users },
@@ -36,6 +35,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   /* ── Auth guard ── */
   useEffect(() => {
@@ -54,7 +54,12 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
 
   /* ── Close menus on outside click ── */
   useEffect(() => {
-    const handler = () => { setUserMenuOpen(false); setMobileMenuOpen(false); };
+    const handler = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+      setMobileMenuOpen(false);
+    };
     document.addEventListener("click", handler);
     return () => document.removeEventListener("click", handler);
   }, []);
@@ -83,7 +88,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
 
   const initials = user.full_name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
 
-  const isActive = (item: typeof navItems[0]) =>
+  const isActive = (item: any) =>
     item.exact ? pathname === item.href : pathname.startsWith(item.href);
 
   return (
@@ -235,43 +240,15 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
               {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
             </button>
 
-            {/* Notification bell */}
-            <button style={{
-              width: 34,
-              height: 34,
-              borderRadius: 8,
-              border: "1px solid rgba(255,255,255,0.12)",
-              background: "rgba(255,255,255,0.08)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              color: "rgba(255,255,255,0.6)",
-              position: "relative",
-              flexShrink: 0,
-            }}>
-              <Bell size={14} />
-              <span style={{
-                position: "absolute",
-                top: 7,
-                right: 7,
-                width: 6,
-                height: 6,
-                background: "#e0ff82",
-                borderRadius: "50%",
-                border: "1.5px solid #1f2223",
-              }} />
-            </button>
-
             {/* User menu */}
-            <div style={{ position: "relative" }} onClick={e => e.stopPropagation()}>
+            <div ref={userMenuRef} style={{ position: "relative" }}>
               <button
                 onClick={() => setUserMenuOpen(v => !v)}
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 8,
-                  padding: "5px 10px 5px 6px",
+                  gap: 4,
+                  padding: "3px 6px 3px 3px",
                   borderRadius: 8,
                   border: "1px solid rgba(255,255,255,0.12)",
                   background: "rgba(255,255,255,0.08)",
@@ -281,12 +258,12 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
               >
                 {/* Avatar */}
                 <div style={{
-                  width: 26,
-                  height: 26,
+                  width: 22,
+                  height: 22,
                   borderRadius: "50%",
                   background: "#e0ff82",
                   color: "#1f2223",
-                  fontSize: 10,
+                  fontSize: 9,
                   fontWeight: 700,
                   display: "flex",
                   alignItems: "center",
@@ -296,11 +273,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
                 }}>
                   {initials}
                 </div>
-                <div style={{ textAlign: "left" }}>
-                  <div style={{ fontSize: 12.5, fontWeight: 600, color: "#ffffff", lineHeight: 1.2, whiteSpace: "nowrap" }}>{user.full_name}</div>
-                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.45)", textTransform: "capitalize", lineHeight: 1.2 }}>{user.role}</div>
-                </div>
-                <ChevronDown size={12} style={{ color: "rgba(255,255,255,0.4)", transform: userMenuOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+                <ChevronDown size={10} style={{ color: "rgba(255,255,255,0.4)", transform: userMenuOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
               </button>
 
               {/* Dropdown */}
@@ -480,11 +453,11 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
         .btn-lp-outline {
           display: inline-flex; align-items: center; gap: 6px;
           padding: 8px 16px; border-radius: 10px; font-size: 12.5px; font-weight: 500;
-          background: transparent; color: #1f2223; border: 1px solid rgb(229,230,230); cursor: pointer;
+          background: transparent; color: var(--text-primary); border: 1px solid var(--border-subtle); cursor: pointer;
           transition: all 0.2s ease; white-space: nowrap; text-decoration: none;
           font-family: 'Onest', system-ui, sans-serif;
         }
-        .btn-lp-outline:hover { background: rgb(247,248,248); text-decoration: none; }
+        .btn-lp-outline:hover { background: var(--surface-secondary); text-decoration: none; }
 
         .btn-lp-accent {
           display: inline-flex; align-items: center; gap: 6px;
@@ -501,6 +474,18 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
           border-radius: 12px; transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
         .card-lp:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+
+        @media (max-width: 1024px) {
+          main {
+            max-width: 90% !important;
+          }
+        }
+        @media (max-width: 600px) {
+          main {
+            max-width: 100% !important;
+            padding: 16px 12px !important;
+          }
+        }
       `}</style>
     </div>
   );
