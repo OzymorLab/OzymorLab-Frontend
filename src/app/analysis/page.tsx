@@ -1282,7 +1282,11 @@ function AnalysisHUDPageContent() {
               >
                 <div className="flex items-center justify-between border-b pb-3 flex-shrink-0" style={{ borderBottomColor: "var(--border-subtle)" }}>
                   <h3 className="font-semibold text-[15px] flex items-center gap-2 text-[var(--text-primary)]">
-                    <MessageSquare size={16} className="text-brand-600" />
+                    <svg width="18" height="18" viewBox="0 0 28 28" fill="none" className="flex-shrink-0">
+                      <rect width="28" height="28" rx="8" fill="#1f2223" />
+                      <path d="M8 14L14 8L20 14L14 20L8 14Z" fill="#e0ff82" stroke="#e0ff82" strokeWidth="1.5" strokeLinejoin="round" />
+                      <circle cx="14" cy="14" r="3" fill="#1f2223" />
+                    </svg>
                     Conversation
                   </h3>
                 </div>
