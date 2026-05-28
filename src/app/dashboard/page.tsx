@@ -332,8 +332,8 @@ export default function DashboardPage() {
         {/* Throughput chart */}
         <div className="card-lp" style={{ padding: "20px 24px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "rgb(31,34,35)" }}>Throughput — Last 7 Days</span>
-            <span style={{ fontSize: 11, color: "rgb(90,109,119)" }}>Avg {throughputData.length ? (throughputData.reduce((a, b) => a + b.count, 0) / 7).toFixed(1) : 0}/day</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>Throughput — Last 7 Days</span>
+            <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>Avg {throughputData.length ? (throughputData.reduce((a, b) => a + b.count, 0) / 7).toFixed(1) : 0}/day</span>
           </div>
           <BarChart data={throughputData} />
         </div>
@@ -341,7 +341,7 @@ export default function DashboardPage() {
         {/* Live activity */}
         <div className="card-lp" style={{ padding: "20px 24px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "rgb(31,34,35)" }}>Live Activity</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>Live Activity</span>
             <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10, fontWeight: 600, color: "#15803d" }}>
               <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e", display: "inline-block" }} />
               Streaming
@@ -350,25 +350,25 @@ export default function DashboardPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
             {displayedLiveEvents.length === 0 ? (
               <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 0" }}>
-                <Activity size={14} style={{ color: "rgb(179,189,189)" }} />
-                <span style={{ fontSize: 12, color: "rgb(179,189,189)" }}>No recent activity</span>
+                <Activity size={14} style={{ color: "var(--text-tertiary)" }} />
+                <span style={{ fontSize: 12, color: "var(--text-tertiary)" }}>No recent activity</span>
               </div>
             ) : displayedLiveEvents.map((ev, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 0", borderBottom: i < displayedLiveEvents.length - 1 ? "1px solid rgb(247,248,248)" : "none" }}>
-                <span style={{ width: 6, height: 6, borderRadius: "50%", background: ev.includes("flagged") || ev.includes("error") ? "#ef4444" : "#1f2223", marginTop: 5, flexShrink: 0 }} />
-                <span style={{ fontSize: 12, color: "rgb(31,34,35)", lineHeight: 1.5 }}>{ev}</span>
+              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 0", borderBottom: i < displayedLiveEvents.length - 1 ? "1px solid var(--border-subtle)" : "none" }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: ev.includes("flagged") || ev.includes("error") ? "#ef4444" : "var(--text-primary)", marginTop: 5, flexShrink: 0 }} />
+                <span style={{ fontSize: 12, color: "var(--text-primary)", lineHeight: 1.5 }}>{ev}</span>
               </div>
             ))}
           </div>
           { (allLiveEvents.length > liveEventsLimit || liveEventsLimit > 5) && (
-            <div style={{ marginTop: 12, borderTop: "1px solid rgb(247,248,248)", paddingTop: 12, display: "flex", justifyContent: "center", gap: 16 }}>
+            <div style={{ marginTop: 12, borderTop: "1px solid var(--border-subtle)", paddingTop: 12, display: "flex", justifyContent: "center", gap: 16 }}>
               {allLiveEvents.length > liveEventsLimit && (
                 <button
                   onClick={() => setLiveEventsLimit(prev => prev + 5)}
                   style={{
                     background: "none",
                     border: "none",
-                    color: "#1f2223",
+                    color: "var(--text-primary)",
                     fontWeight: 600,
                     fontSize: 12,
                     cursor: "pointer",
