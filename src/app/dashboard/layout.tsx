@@ -85,10 +85,17 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const initials = user.full_name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
-
   const isActive = (item: any) =>
     item.exact ? pathname === item.href : pathname.startsWith(item.href);
+
+  const initials = user.full_name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+
+  const activeNavItems = user?.role === "student"
+    ? [
+        { label: "Submissions", href: "/dashboard/submissions", icon: BookOpen },
+        { label: "Classroom", href: "/dashboard/students", icon: Users },
+      ]
+    : navItems;
 
   return (
     <div className="dash-shell" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--surface-page)", fontFamily: "'Onest', system-ui, -apple-system, sans-serif" }}>
@@ -121,7 +128,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
 
           {/* Desktop Nav Links */}
           <nav style={{ display: "flex", alignItems: "center", gap: 2, flex: 1 }} className="dash-nav-desktop">
-            {navItems.map((item) => {
+            {activeNavItems.map((item) => {
               const active = isActive(item);
               return (
                 <Link
@@ -368,7 +375,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
             }}
             onClick={e => e.stopPropagation()}
           >
-            {navItems.map((item) => {
+            {activeNavItems.map((item) => {
               const active = isActive(item);
               return (
                 <Link

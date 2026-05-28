@@ -443,7 +443,7 @@ export default function ExamsPage() {
     <div className="flex flex-col gap-8 w-full animate-fade-in relative z-10">
       {/* Title Area */}
       <div className="flex flex-col gap-2.5 pb-4 mt-2">
-        <div className="live-status-badge flex items-center gap-2.5 text-[11px] font-mono font-bold uppercase bg-[#e0ff82]/10 px-6 py-2 rounded-full w-max border border-[#e0ff82] shadow-sm shadow-[#e0ff82]/10 mt-1 mb-3">
+        <div className="live-status-badge flex items-center gap-2.5 text-[11px] font-mono font-bold uppercase bg-[#e0ff82]/10 px-6 py-2 rounded-full w-max mt-1 mb-3">
           <span className="live-status-dot w-1.5 h-1.5 rounded-full animate-pulse" />
           Live Assessment Engine Active
         </div>
