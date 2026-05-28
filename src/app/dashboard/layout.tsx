@@ -460,7 +460,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
 
         /* Landing-style card */
         .card-lp {
-          background: #ffffff; border: 1px solid rgb(229,230,230);
+          background: var(--surface-primary); border: 1px solid var(--border-subtle);
           border-radius: 12px; transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
         .card-lp:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.06); }

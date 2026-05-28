@@ -67,10 +67,10 @@ function ScoreBar({ score, max }: { score: number; max: number }) {
   const pct = max > 0 ? Math.min((score / max) * 100, 100) : 0;
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 130 }}>
-      <div style={{ flex: 1, height: 4, background: "rgb(229,230,230)", borderRadius: 2, overflow: "hidden" }}>
-        <div style={{ width: `${pct}%`, height: "100%", background: "#1f2223", borderRadius: 2 }} />
+      <div style={{ flex: 1, height: 4, background: "var(--border-subtle)", borderRadius: 2, overflow: "hidden" }}>
+        <div style={{ width: `${pct}%`, height: "100%", background: "var(--text-primary)", borderRadius: 2 }} />
       </div>
-      <span style={{ fontSize: 11, fontWeight: 600, color: "rgb(31,34,35)", minWidth: 22, textAlign: "right" }}>{score}</span>
+      <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-primary)", minWidth: 22, textAlign: "right" }}>{score}</span>
     </div>
   );
 }
@@ -84,9 +84,9 @@ function StatusBadge({ status }: { status: string }) {
     IDENTITY_EXTRACTED: { label: "Verified", bg: "#ecfeff", color: "#0e7490", border: "#a5f3fc" },
     PARSED: { label: "Parsed", bg: "#eff6ff", color: "#1d4ed8", border: "#bfdbfe" },
     PARSING: { label: "Parsing", bg: "#eff6ff", color: "#1d4ed8", border: "#bfdbfe" },
-    PENDING: { label: "Queued", bg: "rgb(247,248,248)", color: "rgb(90,109,119)", border: "rgb(229,230,230)" },
+    PENDING: { label: "Queued", bg: "var(--surface-secondary)", color: "var(--text-secondary)", border: "var(--border-subtle)" },
   };
-  const s = map[status] || { label: status, bg: "rgb(247,248,248)", color: "rgb(90,109,119)", border: "rgb(229,230,230)" };
+  const s = map[status] || { label: status, bg: "var(--surface-secondary)", color: "var(--text-secondary)", border: "var(--border-subtle)" };
   return (
     <span style={{ display: "inline-flex", alignItems: "center", padding: "3px 10px", borderRadius: 100, fontSize: 11, fontWeight: 500, background: s.bg, color: s.color, border: `1px solid ${s.border}`, whiteSpace: "nowrap" }}>
       {s.label}
@@ -164,20 +164,20 @@ export default function DashboardPage() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20, width: "100%", fontFamily: "'Onest', system-ui, sans-serif" }}>
 
-      {/* ── Dark header ── */}
-      <div style={{ background: "#1f2223", borderRadius: 12, padding: "20px 28px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      {/* ── Header ── */}
+      <div style={{ padding: "12px 0 8px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 6 }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#e0ff82", display: "inline-block" }} />
             <span style={{ fontSize: 10, fontWeight: 600, color: "#e0ff82", textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>Live Grading Active</span>
           </div>
-          <h1 style={{ fontSize: 22, fontWeight: 600, color: "#fff", letterSpacing: "-0.02em", margin: 0 }}>Grading HUD</h1>
-          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", marginTop: 3 }}>Async multi-modal OCR · SymPy validation</p>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", margin: 0 }}>Welcome to Ozymor Lab</h1>
+          <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 4 }}>Empowering education through state-of-the-art AI-driven answer evaluation.</p>
         </div>
-        <Link href="/dashboard/exams" className="btn-lp-accent" style={{ fontSize: 12.5, padding: "8px 18px" }}>
-          <GraduationCap size={13} />
+        <Link href="/dashboard/exams" className="btn-lp-accent" style={{ fontSize: 12.5, padding: "10px 20px" }}>
+          <GraduationCap size={14} />
           Upload Answer Sheets
-          <ArrowRight size={12} />
+          <ArrowRight size={13} />
         </Link>
       </div>
 
@@ -185,12 +185,12 @@ export default function DashboardPage() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
         {[
           { label: "TOTAL PROCESSED", value: processedCount, sub: "Live", subColor: "#15803d", subBg: "#f0fdf4" },
-          { label: "IN GRADING QUEUE", value: queueCount, sub: queueCount > 0 ? "Active" : "Idle", subColor: queueCount > 0 ? "#b45309" : "rgb(90,109,119)", subBg: queueCount > 0 ? "#fffbeb" : "rgb(247,248,248)" },
+          { label: "IN GRADING QUEUE", value: queueCount, sub: queueCount > 0 ? "Active" : "Idle", subColor: queueCount > 0 ? "#b45309" : "var(--text-secondary)", subBg: queueCount > 0 ? "#fffbeb" : "var(--surface-secondary)" },
           { label: "AVG. LATENCY", value: avgLatency, sub: "Fast", subColor: "#1d4ed8", subBg: "#eff6ff" },
         ].map((s, i) => (
           <div key={i} className="card-lp" style={{ padding: "24px 28px" }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: "rgb(90,109,119)", textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: 8 }}>{s.label}</div>
-            <div style={{ fontSize: 44, fontWeight: 600, color: "rgb(31,34,35)", letterSpacing: "-0.03em", lineHeight: 1, marginBottom: 12 }}>{s.value}</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: 8 }}>{s.label}</div>
+            <div style={{ fontSize: 44, fontWeight: 600, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1, marginBottom: 12 }}>{s.value}</div>
             <span style={{ display: "inline-flex", alignItems: "center", fontSize: 11, fontWeight: 500, padding: "3px 10px", borderRadius: 100, background: s.subBg, color: s.subColor }}>{s.sub}</span>
           </div>
         ))}
@@ -198,19 +198,19 @@ export default function DashboardPage() {
 
       {/* ── Submissions table ── */}
       <div className="card-lp" style={{ overflow: "hidden" }}>
-        <div style={{ padding: "16px 20px", borderBottom: "1px solid rgb(229,230,230)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: "rgb(31,34,35)", display: "flex", alignItems: "center", gap: 8 }}>
-            <FileText size={14} style={{ color: "rgb(90,109,119)" }} />
+        <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border-subtle)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: 8 }}>
+            <FileText size={14} style={{ color: "var(--text-secondary)" }} />
             Recent Submissions
           </span>
-          <span style={{ fontSize: 11, color: "rgb(90,109,119)" }}>{todayCount} today · {submissions.length} total</span>
+          <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>{todayCount} today · {submissions.length} total</span>
         </div>
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ background: "rgb(247,248,248)", borderBottom: "1px solid rgb(229,230,230)" }}>
+              <tr style={{ background: "var(--surface-secondary)", borderBottom: "1px solid var(--border-subtle)" }}>
                 {["STUDENT ID", "FILENAME", "SCORE", "STATUS", "UPLOADED"].map(h => (
-                  <th key={h} style={{ padding: "10px 20px", textAlign: "left", fontSize: 10, fontWeight: 600, color: "rgb(90,109,119)", textTransform: "uppercase" as const, letterSpacing: "0.06em", whiteSpace: "nowrap" }}>{h}</th>
+                  <th key={h} style={{ padding: "10px 20px", textAlign: "left", fontSize: 10, fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase" as const, letterSpacing: "0.06em", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -221,22 +221,22 @@ export default function DashboardPage() {
                   <tr
                     key={sub.id}
                     onClick={() => sub.status === "GRADED" ? router.push(`/analysis?task_id=${sub.task_id || ""}&submission_id=${sub.id}`) : setSelectedSub(sub)}
-                    style={{ borderBottom: "1px solid rgb(247,248,248)", cursor: "pointer", transition: "background 0.1s" }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "rgb(247,248,248)"}
+                    style={{ borderBottom: "1px solid var(--border-subtle)", cursor: "pointer", transition: "background 0.1s" }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--surface-secondary)"}
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
                   >
-                    <td style={{ padding: "12px 20px", fontSize: 12, fontWeight: 600, color: "rgb(31,34,35)", fontFamily: "monospace" }}>
-                      {sub.student_id || <span style={{ color: "rgb(179,189,189)", fontStyle: "italic", fontWeight: 400 }}>Extracting…</span>}
+                    <td style={{ padding: "12px 20px", fontSize: 12, fontWeight: 600, color: "var(--text-primary)", fontFamily: "monospace" }}>
+                      {sub.student_id || <span style={{ color: "var(--text-tertiary)", fontStyle: "italic", fontWeight: 400 }}>Extracting…</span>}
                     </td>
                     <td style={{ padding: "12px 20px", maxWidth: 220 }}>
-                      <div style={{ fontSize: 12.5, fontWeight: 500, color: "rgb(31,34,35)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sub.file_name}</div>
-                      <div style={{ fontSize: 10.5, color: "rgb(90,109,119)", marginTop: 2 }}>{new Date(sub.created_at).toLocaleDateString()}</div>
+                      <div style={{ fontSize: 12.5, fontWeight: 500, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sub.file_name}</div>
+                      <div style={{ fontSize: 10.5, color: "var(--text-secondary)", marginTop: 2 }}>{new Date(sub.created_at).toLocaleDateString()}</div>
                     </td>
                     <td style={{ padding: "12px 20px" }}>
-                      {g ? <ScoreBar score={g.grade} max={g.max_grade} /> : <span style={{ fontSize: 11, color: "rgb(179,189,189)" }}>—</span>}
+                      {g ? <ScoreBar score={g.grade} max={g.max_grade} /> : <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>—</span>}
                     </td>
                     <td style={{ padding: "12px 20px" }}><StatusBadge status={sub.status} /></td>
-                    <td style={{ padding: "12px 20px", fontSize: 11, color: "rgb(90,109,119)", whiteSpace: "nowrap" }}>{timeAgo(sub.created_at)}</td>
+                    <td style={{ padding: "12px 20px", fontSize: 11, color: "var(--text-secondary)", whiteSpace: "nowrap" }}>{timeAgo(sub.created_at)}</td>
                   </tr>
                 );
               })}
@@ -244,8 +244,8 @@ export default function DashboardPage() {
                 <tr>
                   <td colSpan={5} style={{ padding: "48px 20px", textAlign: "center" }}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-                      <FileText size={32} strokeWidth={1.5} style={{ color: "rgb(179,189,189)" }} />
-                      <span style={{ fontSize: 13, color: "rgb(90,109,119)" }}>No submissions yet.</span>
+                      <FileText size={32} strokeWidth={1.5} style={{ color: "var(--text-tertiary)" }} />
+                      <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>No submissions yet.</span>
                       <Link href="/dashboard/exams" className="btn-lp-outline" style={{ fontSize: 12, padding: "6px 14px" }}>Go to Exam Setup →</Link>
                     </div>
                   </td>
