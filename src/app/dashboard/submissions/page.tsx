@@ -87,10 +87,12 @@ export default function SubmissionsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [visibleCount, setVisibleCount] = useState(10);
 
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = async (limitVal?: number) => {
     setIsLoading(true);
     try {
-      const res = await fetchWithAuth(`${API_BASE}/submissions`);
+      const currentLimit = limitVal ?? visibleCount;
+      const statusParam = statusFilter !== "ALL" ? `&status=${statusFilter}` : "";
+      const res = await fetchWithAuth(`${API_BASE}/submissions?limit=${currentLimit}${statusParam}`);
       const json = await res.json();
       if (json.data) {
         setSubmissions(json.data);
@@ -104,10 +106,10 @@ export default function SubmissionsPage() {
   };
 
   useEffect(() => {
-    fetchSubmissions();
-    const interval = setInterval(fetchSubmissions, 10000);
+    fetchSubmissions(visibleCount);
+    const interval = setInterval(() => fetchSubmissions(visibleCount), 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [visibleCount, statusFilter]);
 
   const applyFilters = (subsList: Submission[], search: string, status: string) => {
     let result = [...subsList];
@@ -284,7 +286,7 @@ export default function SubmissionsPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredSubmissions.slice(0, visibleCount).map((sub) => (
+              {filteredSubmissions.map((sub) => (
                 <tr 
                   key={sub.id} 
                   onClick={() => {
@@ -350,7 +352,7 @@ export default function SubmissionsPage() {
             </tbody>
           </table>
         </div>
-        {filteredSubmissions.length > 10 && (
+        { (filteredSubmissions.length === visibleCount || visibleCount > 10) && (
           <div style={{
             display: 'flex',
             justifyContent: 'center',
@@ -360,7 +362,7 @@ export default function SubmissionsPage() {
             background: 'var(--surface-secondary)',
             opacity: 0.85
           }}>
-            {visibleCount < filteredSubmissions.length && (
+            {filteredSubmissions.length === visibleCount && (
               <button
                 onClick={(e) => { e.stopPropagation(); setVisibleCount(prev => prev + 5); }}
                 style={{
