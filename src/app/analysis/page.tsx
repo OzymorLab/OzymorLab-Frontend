@@ -927,7 +927,7 @@ function AnalysisHUDPageContent() {
 
 
                 {/* Marks Box (Points adjustments very close to selectors) */}
-                <div className="h-10 flex items-center overflow-hidden flex-shrink-0">
+                <div className="h-10 flex items-center overflow-hidden flex-shrink-0 border border-[var(--border-subtle)] rounded-xl">
                   <div className="px-4 text-center">
                     <span className="text-[13px] font-mono font-bold text-[var(--text-primary)]">
                       {activeStudent.score?.toFixed(1) || "0.0"} pts
@@ -1416,32 +1416,33 @@ function AnalysisHUDPageContent() {
                       </button>
                     </div>
                   )}
-                  <textarea
-                    value={chatInput}
-                    onChange={(e) => {
-                      setChatInput(e.target.value);
-                      e.target.style.height = 'auto';
-                      e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendChat(chatInput);
-                      }
-                    }}
-                    placeholder="Write a message..."
-                    className="w-full bg-transparent border-none outline-none text-[13px] text-[var(--text-primary)] placeholder-gray-500 px-5 pt-3 pb-1 resize-none"
-                    disabled={!selectedStudentId}
-                    rows={2}
-                    style={{ minHeight: '52px', maxHeight: '120px' }}
-                  />
-                  <div className="flex items-center justify-between px-4 pb-2">
+                  {/* Horizontal container for +, textarea, and logo to keep them vertically centered */}
+                  <div className="flex items-center gap-2 px-4 py-2">
                     <button 
-                      className="p-1 rounded-lg hover:bg-[rgba(255,255,255,0.06)] text-[var(--text-secondary)] transition-all cursor-pointer flex-shrink-0"
+                      className="p-1.5 rounded-lg hover:bg-[rgba(255,255,255,0.06)] text-[var(--text-secondary)] transition-all cursor-pointer flex-shrink-0"
                       title="Add attachment"
                     >
                       <Plus size={16} />
                     </button>
+                    <textarea
+                      value={chatInput}
+                      onChange={(e) => {
+                        setChatInput(e.target.value);
+                        e.target.style.height = 'auto';
+                        e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSendChat(chatInput);
+                        }
+                      }}
+                      placeholder="Ask you doubt please"
+                      className="flex-1 bg-transparent border-none outline-none text-[13px] text-[var(--text-primary)] placeholder-gray-500 px-2 py-2.5 resize-none"
+                      disabled={!selectedStudentId}
+                      rows={2}
+                      style={{ minHeight: '52px', maxHeight: '120px' }}
+                    />
                     <button 
                       onClick={() => handleSendChat(chatInput)}
                       className="p-1 rounded-lg hover:bg-[rgba(255,255,255,0.06)] transition-all cursor-pointer flex-shrink-0"
