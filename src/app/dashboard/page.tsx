@@ -76,14 +76,42 @@ function buildThroughput(subs: Submission[]): DayCount[] {
 /* ── Bar chart ── */
 function BarChart({ data }: { data: DayCount[] }) {
   const max = Math.max(...data.map(d => d.count), 1);
+  const yTicks = [max, Math.round(max / 2), 0];
+
   return (
-    <div style={{ display: "flex", alignItems: "flex-end", gap: 8, height: 80, width: "100%" }}>
-      {data.map((d, i) => (
-        <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
-          <div style={{ width: "100%", height: `${Math.max((d.count / max) * 68, 4)}px`, background: "#1f2223", borderRadius: "4px 4px 0 0", transition: "height 0.4s ease" }} />
-          <span style={{ fontSize: 10, color: "rgb(90,109,119)" }}>{d.day}</span>
+    <div style={{ display: "flex", gap: 10, alignItems: "stretch", width: "100%", height: 110 }}>
+      {/* Y-Axis */}
+      <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "86px", paddingRight: 4, fontSize: 10, color: "var(--text-secondary)", minWidth: 16, textAlign: "right" }}>
+        {yTicks.map((tick, i) => (
+          <span key={i}>{tick}</span>
+        ))}
+      </div>
+
+      {/* Bars area container */}
+      <div style={{ flex: 1, display: "flex", alignItems: "flex-end", gap: 8, position: "relative", height: "100%" }}>
+        
+        {/* Horizontal background gridlines */}
+        <div style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 20, display: "flex", flexDirection: "column", justifyContent: "space-between", pointerEvents: "none" }}>
+          <div style={{ borderBottom: "1px dashed var(--border-subtle)", width: "100%", height: 0 }} />
+          <div style={{ borderBottom: "1px dashed var(--border-subtle)", width: "100%", height: 0 }} />
+          <div style={{ borderBottom: "1px dashed var(--border-subtle)", width: "100%", height: 0 }} />
         </div>
-      ))}
+
+        {data.map((d, i) => (
+          <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, zIndex: 1 }}>
+            <div 
+              style={{ 
+                width: "100%", 
+                height: `${Math.max((d.count / max) * 66, 4)}px`, 
+                background: "var(--brand-600)", 
+                borderRadius: "4px 4px 0 0", 
+                transition: "height 0.4s ease" 
+              }} 
+            />
+            <span style={{ fontSize: 10, color: "var(--text-secondary)" }}>{d.day}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -330,12 +358,14 @@ export default function DashboardPage() {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
 
         {/* Throughput chart */}
-        <div className="card-lp" style={{ padding: "20px 24px" }}>
+        <div className="card-lp" style={{ padding: "20px 24px", display: "flex", flexDirection: "column", minHeight: "180px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
             <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>Throughput — Last 7 Days</span>
             <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>Avg {throughputData.length ? (throughputData.reduce((a, b) => a + b.count, 0) / 7).toFixed(1) : 0}/day</span>
           </div>
-          <BarChart data={throughputData} />
+          <div style={{ flex: 1, display: "flex", alignItems: "flex-end", marginTop: "auto", width: "100%" }}>
+            <BarChart data={throughputData} />
+          </div>
         </div>
 
         {/* Live activity */}
