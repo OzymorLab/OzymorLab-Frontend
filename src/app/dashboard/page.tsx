@@ -27,6 +27,32 @@ interface GradeDetail {
 
 interface DayCount { day: string; count: number; }
 
+/* ── Deterministic name generator from UUID ── */
+const FIRST_NAMES = [
+  "Aarav", "Ananya", "Arjun", "Diya", "Ishaan", "Kavya",
+  "Lakshmi", "Mihail", "Neha", "Pranav", "Rhea", "Rohan",
+  "Sanya", "Tanvi", "Vivaan", "Yash", "Zara", "Aman",
+  "Divya", "Kiran", "Meera", "Nikhil", "Pooja", "Rahul",
+  "Shriya", "Siddharth", "Tarini", "Umesh", "Vandana", "Wren",
+];
+const LAST_NAMES = [
+  "Agarwal", "Bose", "Chandra", "Desai", "Gupta", "Iyer",
+  "Joshi", "Kumar", "Mehta", "Nair", "Patel", "Rao",
+  "Sharma", "Singh", "Tiwari", "Verma", "Yadav", "Bansal",
+  "Chopra", "Dubey", "Goswami", "Khanna", "Malhotra", "Pillai",
+  "Reddy", "Saxena", "Thakur", "Upadhyay", "Venkatesan", "Walia",
+];
+
+function generateName(id: string): { name: string; initials: string } {
+  const hash = id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const first = FIRST_NAMES[hash % FIRST_NAMES.length];
+  const last = LAST_NAMES[(hash >> 2) % LAST_NAMES.length];
+  return {
+    name: `${first} ${last}`,
+    initials: `${first[0]}${last[0]}`,
+  };
+}
+
 /* helpers */
 function timeAgo(iso: string): string {
   const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
@@ -209,7 +235,7 @@ export default function DashboardPage() {
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "var(--surface-secondary)", borderBottom: "1px solid var(--border-subtle)" }}>
-                {["STUDENT ID", "FILENAME", "SCORE", "STATUS", "UPLOADED"].map(h => (
+                {["STUDENT NAME", "FILENAME", "SCORE", "STATUS", "UPLOADED"].map(h => (
                   <th key={h} style={{ padding: "10px 20px", textAlign: "left", fontSize: 10, fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase" as const, letterSpacing: "0.06em", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
@@ -225,8 +251,8 @@ export default function DashboardPage() {
                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--surface-secondary)"}
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
                   >
-                    <td style={{ padding: "12px 20px", fontSize: 12, fontWeight: 600, color: "var(--text-primary)", fontFamily: "monospace" }}>
-                      {sub.student_id || <span style={{ color: "var(--text-tertiary)", fontStyle: "italic", fontWeight: 400 }}>Extracting…</span>}
+                    <td style={{ padding: "12px 20px", fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>
+                      {sub.student_id ? generateName(sub.student_id).name : <span style={{ color: "var(--text-tertiary)", fontStyle: "italic", fontWeight: 400 }}>Extracting…</span>}
                     </td>
                     <td style={{ padding: "12px 20px", maxWidth: 220 }}>
                       <div style={{ fontSize: 12.5, fontWeight: 500, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sub.file_name}</div>
