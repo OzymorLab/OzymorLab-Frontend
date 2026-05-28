@@ -161,9 +161,10 @@ export default function DashboardPage() {
   const [submissionsLimit, setSubmissionsLimit] = useState(5);
   const [liveEventsLimit, setLiveEventsLimit] = useState(5);
 
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = async (customLimit?: number) => {
     try {
-      const res = await fetchWithAuth(`${API_BASE}/submissions`);
+      const currentLimit = customLimit ?? submissionsLimit;
+      const res = await fetchWithAuth(`${API_BASE}/submissions?limit=${currentLimit}`);
       const json = await res.json();
       if (!json.data) return;
       setSubmissions(json.data);
@@ -180,10 +181,10 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    fetchSubmissions();
-    const iv = setInterval(fetchSubmissions, 5000);
+    fetchSubmissions(submissionsLimit);
+    const iv = setInterval(() => fetchSubmissions(submissionsLimit), 5000);
     return () => clearInterval(iv);
-  }, []);
+  }, [submissionsLimit]);
 
   useEffect(() => {
     if (!selectedSub) { setSubDetail(null); setGradeDetail(null); setActiveTab("evaluation"); return; }
@@ -308,15 +309,15 @@ export default function DashboardPage() {
             </tbody>
           </table>
         </div>
-        { (submissions.length > submissionsLimit || submissionsLimit > 5) && (
-          <div style={{ padding: "12px", borderTop: "1px solid rgb(229,230,230)", display: "flex", justifyContent: "center", gap: 16 }}>
-            {submissions.length > submissionsLimit && (
+        { (submissions.length === submissionsLimit || submissionsLimit > 5) && (
+          <div style={{ padding: "12px", borderTop: "1px solid var(--border-subtle)", display: "flex", justifyContent: "center", gap: 16 }}>
+            {submissions.length === submissionsLimit && (
               <button
                 onClick={() => setSubmissionsLimit(prev => prev + 5)}
                 style={{
                   background: "none",
                   border: "none",
-                  color: "#1f2223",
+                  color: "var(--text-primary)",
                   fontWeight: 600,
                   fontSize: 12.5,
                   cursor: "pointer",
