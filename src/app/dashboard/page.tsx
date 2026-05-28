@@ -150,7 +150,7 @@ function StatusBadge({ status }: { status: string }) {
 
 /* ══════════════════════════════════════════════════════ */
 export default function DashboardPage() {
-  const { fetchWithAuth } = useAuth();
+  const { user, fetchWithAuth } = useAuth();
   const router = useRouter();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [selectedSub, setSelectedSub] = useState<Submission | null>(null);
@@ -194,27 +194,43 @@ export default function DashboardPage() {
     } else { setGradeDetail(null); }
   }, [selectedSub]);
 
-  const processedCount = submissions.filter(s => s.status === "GRADED").length;
-  const queueCount = submissions.filter(s => !["GRADED", "FAILED"].includes(s.status)).length;
+  // Role-based computations
+  const mySubmissions = submissions.filter(s => s.student_id && generateName(s.student_id).name.toLowerCase() === user?.full_name.toLowerCase());
+  const myGraded = mySubmissions.filter(s => s.status === "GRADED");
+  const myPending = mySubmissions.filter(s => !["GRADED", "FAILED"].includes(s.status));
+  
+  let myAvgScore = "—";
+  if (myGraded.length > 0) {
+    const scores = myGraded.map(s => {
+      const g = gradeMap[s.id];
+      return g ? g.grade : null;
+    }).filter((s): s is number => s !== null);
+    if (scores.length > 0) {
+      myAvgScore = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) + " pts";
+    }
+  }
+
+  const processedCount = user?.role === "student" ? myGraded.length : submissions.filter(s => s.status === "GRADED").length;
+  const queueCount = user?.role === "student" ? myPending.length : submissions.filter(s => !["GRADED", "FAILED"].includes(s.status)).length;
   const latencies = Object.values(gradeMap).map(g => g.latency_ms).filter(Boolean);
   const avgLatency = latencies.length ? (latencies.reduce((a, b) => a + b, 0) / latencies.length / 1000).toFixed(1) + "s" : "—";
-  const throughputData = buildThroughput(submissions);
-  const displayedSubmissions = submissions.slice(0, submissionsLimit);
+  const throughputData = buildThroughput(user?.role === "student" ? mySubmissions : submissions);
+  const displayedSubmissions = user?.role === "student" ? mySubmissions.slice(0, submissionsLimit) : submissions.slice(0, submissionsLimit);
 
   /* live activity */
-  const allLiveEvents = submissions.flatMap(s => {
+  const allLiveEvents = (user?.role === "student" ? mySubmissions : submissions).flatMap(s => {
     const g = gradeMap[s.id];
     const sid = (s.student_id || s.id).slice(-8).toUpperCase();
     const ago = timeAgo(s.created_at);
-    if (s.status === "GRADED" && g) return [`${sid} graded — ${g.grade}/${g.max_grade}${g.confidence < 0.7 ? ", low OCR confidence" : ", no drift"} · ${ago}`];
-    if (s.status === "FAILED") return [`${sid} flagged — OCR error · ${ago}`];
-    if (s.status === "GRADING") return [`${sid} grading in progress · ${ago}`];
+    if (s.status === "GRADED" && g) return [`${user?.role === "student" ? "Your paper" : sid} graded — ${g.grade}/${g.max_grade}${g.confidence < 0.7 ? ", low OCR confidence" : ", no drift"} · ${ago}`];
+    if (s.status === "FAILED") return [`${user?.role === "student" ? "Your paper" : sid} flagged — OCR error · ${ago}`];
+    if (s.status === "GRADING") return [`${user?.role === "student" ? "Your paper" : sid} grading in progress · ${ago}`];
     return [];
   });
 
   const displayedLiveEvents = allLiveEvents.slice(0, liveEventsLimit);
 
-  const todayCount = submissions.filter(s => new Date(s.created_at).toDateString() === new Date().toDateString()).length;
+  const todayCount = (user?.role === "student" ? mySubmissions : submissions).filter(s => new Date(s.created_at).toDateString() === new Date().toDateString()).length;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20, width: "100%", fontFamily: "'Onest', system-ui, sans-serif" }}>
@@ -226,22 +242,54 @@ export default function DashboardPage() {
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#16a34a", display: "inline-block" }} />
             <span style={{ fontSize: 10, fontWeight: 800, color: "#16a34a", textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>Live Grading Active</span>
           </div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", margin: 0 }}>Welcome to Ozymor Lab</h1>
-          <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 4 }}>Empowering education through state-of-the-art AI-driven answer evaluation.</p>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", margin: 0 }}>
+            {user?.role === "student" ? `Welcome, ${user.full_name}` : "Welcome to Ozymor Lab"}
+          </h1>
+          <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 4 }}>
+            {user?.role === "student" 
+              ? "Track your exam submissions, step-by-step grading traces, and AI-driven insights."
+              : "Empowering education through state-of-the-art AI-driven answer evaluation."}
+          </p>
         </div>
-        <Link href="/dashboard/exams" className="btn-lp-accent" style={{ fontSize: 12.5, padding: "10px 20px" }}>
-          <GraduationCap size={14} />
-          Upload Answer Sheets
-          <ArrowRight size={13} />
-        </Link>
+        {user?.role === "student" ? (
+          <Link href="/dashboard/submissions" className="btn-lp-accent" style={{ fontSize: 12.5, padding: "10px 20px" }}>
+            <FileText size={14} />
+            View My Submissions
+            <ArrowRight size={13} />
+          </Link>
+        ) : (
+          <Link href="/dashboard/exams" className="btn-lp-accent" style={{ fontSize: 12.5, padding: "10px 20px" }}>
+            <GraduationCap size={14} />
+            Upload Answer Sheets
+            <ArrowRight size={13} />
+          </Link>
+        )}
       </div>
 
       {/* ── Stat cards ── */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
         {[
-          { label: "TOTAL PROCESSED", value: processedCount, sub: "Live", subColor: "#15803d", subBg: "#f0fdf4" },
-          { label: "IN GRADING QUEUE", value: queueCount, sub: queueCount > 0 ? "Active" : "Idle", subColor: queueCount > 0 ? "#b45309" : "var(--text-secondary)", subBg: queueCount > 0 ? "#fffbeb" : "var(--surface-secondary)" },
-          { label: "AVG. LATENCY", value: avgLatency, sub: "Fast", subColor: "#1d4ed8", subBg: "#eff6ff" },
+          { 
+            label: user?.role === "student" ? "MY SUBMISSIONS" : "TOTAL PROCESSED", 
+            value: user?.role === "student" ? mySubmissions.length : processedCount, 
+            sub: "Live", 
+            subColor: "#15803d", 
+            subBg: "#f0fdf4" 
+          },
+          { 
+            label: user?.role === "student" ? "MY AVERAGE SCORE" : "IN GRADING QUEUE", 
+            value: user?.role === "student" ? myAvgScore : queueCount, 
+            sub: user?.role === "student" ? "Academic" : (queueCount > 0 ? "Active" : "Idle"), 
+            subColor: user?.role === "student" ? "#1d4ed8" : (queueCount > 0 ? "#b45309" : "var(--text-secondary)"), 
+            subBg: user?.role === "student" ? "#eff6ff" : (queueCount > 0 ? "#fffbeb" : "var(--surface-secondary)") 
+          },
+          { 
+            label: user?.role === "student" ? "PENDING EVALUATION" : "AVG. LATENCY", 
+            value: user?.role === "student" ? myPending.length : avgLatency, 
+            sub: user?.role === "student" ? "Queue" : "Fast", 
+            subColor: user?.role === "student" ? "#b45309" : "#1d4ed8", 
+            subBg: user?.role === "student" ? "#fffbeb" : "#eff6ff" 
+          },
         ].map((s, i) => (
           <div key={i} className="card-lp" style={{ padding: "24px 28px" }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: 8 }}>{s.label}</div>
@@ -258,7 +306,7 @@ export default function DashboardPage() {
             <FileText size={14} style={{ color: "var(--text-secondary)" }} />
             Recent Submissions
           </span>
-          <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>{todayCount} today · {submissions.length} total</span>
+          <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>{todayCount} today · {user?.role === "student" ? mySubmissions.length : submissions.length} total</span>
         </div>
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -295,13 +343,15 @@ export default function DashboardPage() {
                   </tr>
                 );
               })}
-              {submissions.length === 0 && (
+              {(user?.role === "student" ? mySubmissions.length : submissions.length) === 0 && (
                 <tr>
                   <td colSpan={5} style={{ padding: "48px 20px", textAlign: "center" }}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
                       <FileText size={32} strokeWidth={1.5} style={{ color: "var(--text-tertiary)" }} />
                       <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>No submissions yet.</span>
-                      <Link href="/dashboard/exams" className="btn-lp-outline" style={{ fontSize: 12, padding: "6px 14px" }}>Go to Exam Setup →</Link>
+                      <Link href={user?.role === "student" ? "/dashboard/submissions" : "/dashboard/exams"} className="btn-lp-outline" style={{ fontSize: 12, padding: "6px 14px" }}>
+                        {user?.role === "student" ? "View My Submissions →" : "Go to Exam Setup →"}
+                      </Link>
                     </div>
                   </td>
                 </tr>
@@ -309,9 +359,9 @@ export default function DashboardPage() {
             </tbody>
           </table>
         </div>
-        { (submissions.length === submissionsLimit || submissionsLimit > 5) && (
+        { ((user?.role === "student" ? mySubmissions.length : submissions.length) === submissionsLimit || submissionsLimit > 5) && (
           <div style={{ padding: "12px", borderTop: "1px solid var(--border-subtle)", display: "flex", justifyContent: "center", gap: 16 }}>
-            {submissions.length === submissionsLimit && (
+            {(user?.role === "student" ? mySubmissions.length : submissions.length) === submissionsLimit && (
               <button
                 onClick={() => setSubmissionsLimit(prev => prev + 5)}
                 style={{
