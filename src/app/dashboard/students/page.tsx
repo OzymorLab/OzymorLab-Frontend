@@ -887,6 +887,34 @@ export default function StudentsPage() {
           </div>
         )}
 
+        {/* Student Invite Accept/Decline Banner */}
+        {isStudent && selectedClassroom.status === "PENDING" && (
+          <div className="bg-[var(--surface-primary)] border border-amber-500/30 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mt-2" style={{ padding: "20px 24px" }}>
+            <div>
+              <h3 className="text-[13.5px] font-bold text-amber-500 flex items-center gap-2">
+                <Sparkles size={14} className="text-amber-500" /> Classroom Invitation Pending
+              </h3>
+              <p className="text-[12px] text-[var(--text-secondary)] mt-1">
+                You have been invited to join this classroom cohort standard. Please accept to access classwork, tasks, and text editors.
+              </p>
+            </div>
+            <div className="flex gap-2.5">
+              <button
+                onClick={() => handleRejectInvite(selectedClassroom.id)}
+                className="btn-lp-outline px-4 py-2 rounded-xl text-[12px] font-bold cursor-pointer bg-transparent"
+              >
+                Decline
+              </button>
+              <button
+                onClick={() => handleAcceptInvite(selectedClassroom.id)}
+                className="btn-lp-accent border-0 px-5 py-2.5 rounded-xl text-[12px] font-bold cursor-pointer hover:scale-[1.02]"
+              >
+                Accept &amp; Join Class
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Dynamic Assignment submission Workspace */}
         {isStudent && activeAssignment ? (
           <div className="bg-[var(--surface-primary)] border border-[#e0ff82]/30 rounded-2xl shadow-lg flex flex-col gap-6" style={{ padding: "26px 28px" }}>
