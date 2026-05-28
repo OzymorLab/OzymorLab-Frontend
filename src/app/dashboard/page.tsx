@@ -222,8 +222,8 @@ export default function DashboardPage() {
       <div style={{ padding: "12px 0 8px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 6 }}>
-            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#e0ff82", display: "inline-block" }} />
-            <span style={{ fontSize: 10, fontWeight: 600, color: "#e0ff82", textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>Live Grading Active</span>
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#16a34a", display: "inline-block" }} />
+            <span style={{ fontSize: 10, fontWeight: 800, color: "#16a34a", textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>Live Grading Active</span>
           </div>
           <h1 style={{ fontSize: 24, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", margin: 0 }}>Welcome to Ozymor Lab</h1>
           <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 4 }}>Empowering education through state-of-the-art AI-driven answer evaluation.</p>
