@@ -1417,9 +1417,9 @@ function AnalysisHUDPageContent() {
                     </div>
                   )}
                   {/* Horizontal container for +, textarea, and logo to keep them vertically centered */}
-                  <div className="flex items-center gap-2 px-4 py-2">
+                  <div className="flex items-center gap-3 px-4 py-2 min-h-[52px]">
                     <button 
-                      className="p-1.5 rounded-lg hover:bg-[rgba(255,255,255,0.06)] text-[var(--text-secondary)] transition-all cursor-pointer flex-shrink-0"
+                      className="w-7 h-7 rounded-full border border-[var(--border-subtle)] hover:bg-[rgba(255,255,255,0.06)] text-[var(--text-secondary)] transition-all cursor-pointer flex items-center justify-center flex-shrink-0"
                       title="Add attachment"
                     >
                       <Plus size={16} />
@@ -1438,10 +1438,10 @@ function AnalysisHUDPageContent() {
                         }
                       }}
                       placeholder="Ask you doubt please"
-                      className="flex-1 bg-transparent border-none outline-none text-[13px] text-[var(--text-primary)] placeholder-gray-500 px-2 py-2.5 resize-none"
+                      className="flex-1 bg-transparent border-none outline-none text-[13px] text-[var(--text-primary)] placeholder-gray-500 px-2 py-1.5 resize-none self-center"
                       disabled={!selectedStudentId}
-                      rows={2}
-                      style={{ minHeight: '52px', maxHeight: '120px' }}
+                      rows={1}
+                      style={{ minHeight: '26px', maxHeight: '120px' }}
                     />
                     <button 
                       onClick={() => handleSendChat(chatInput)}
