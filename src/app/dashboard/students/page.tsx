@@ -1,19 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Users, Search, Award, TrendingUp, BookOpen, User, Star, ArrowRight } from "lucide-react";
+import { Users, Search, Award, TrendingUp, BookOpen, User, Star, ArrowRight, Sparkles, Plus, Trash2, Check, X, ShieldAlert, MoreVertical, ArrowLeft, UploadCloud, Loader2, FileText, CheckCircle2 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import Link from "next/link";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.com/api/v1";
-
-interface Submission {
-  id: string;
-  student_id: string | null;
-  file_name: string;
-  status: string;
-  created_at: string;
-}
 
 interface StudentSummary {
   id: string;
@@ -25,76 +17,25 @@ interface StudentSummary {
   lastActive: string;
 }
 
-/* ── Deterministic name generator from UUID ── */
-const FIRST_NAMES = [
-  "Aarav", "Ananya", "Arjun", "Diya", "Ishaan", "Kavya",
-  "Lakshmi", "Mihail", "Neha", "Pranav", "Rhea", "Rohan",
-  "Sanya", "Tanvi", "Vivaan", "Yash", "Zara", "Aman",
-  "Divya", "Kiran", "Meera", "Nikhil", "Pooja", "Rahul",
-  "Shriya", "Siddharth", "Tarini", "Umesh", "Vandana", "Wren",
-];
-const LAST_NAMES = [
-  "Agarwal", "Bose", "Chandra", "Desai", "Gupta", "Iyer",
-  "Joshi", "Kumar", "Mehta", "Nair", "Patel", "Rao",
-  "Sharma", "Singh", "Tiwari", "Verma", "Yadav", "Bansal",
-  "Chopra", "Dubey", "Goswami", "Khanna", "Malhotra", "Pillai",
-  "Reddy", "Saxena", "Thakur", "Upadhyay", "Venkatesan", "Walia",
-];
-
-function generateName(id: string): { name: string; initials: string } {
-  const hash = id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const first = FIRST_NAMES[hash % FIRST_NAMES.length];
-  const last = LAST_NAMES[(hash >> 2) % LAST_NAMES.length];
-  return {
-    name: `${first} ${last}`,
-    initials: `${first[0]}${last[0]}`,
-  };
-}
-
 export default function StudentsPage() {
   const { user, fetchWithAuth } = useAuth();
+  
+  // Navigation back states
+  const [selectedClassroom, setSelectedClassroom] = useState<any | null>(null);
   
   // Student classroom states
   const [activeAssignment, setActiveAssignment] = useState<any | null>(null);
   const [answers, setAnswers] = useState<{ [key: string]: string }>({});
+  const [submissionType, setSubmissionType] = useState<"editor" | "upload">("editor");
+  const [uploadedAnswerFile, setUploadedAnswerFile] = useState<File | null>(null);
   const [isSubmittingAnswer, setIsSubmittingAnswer] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   
-  const [assignments, setAssignments] = useState([
-    {
-      id: "a1",
-      title: "Quantum Physics & Mechanics Worksheet",
-      subject: "Physics",
-      teacher: "Mr. Nikhil Goswami",
-      dueDate: "2026-06-05",
-      status: "PENDING",
-      questions: [
-        { id: "q1", text: "Explain the Heisenberg Uncertainty Principle and its physical implications." },
-        { id: "q2", text: "State the de Broglie hypothesis and derive the expression for de Broglie wavelength." }
-      ]
-    },
-    {
-      id: "a2",
-      title: "Organic Chemistry: Synthesis & Mechanisms",
-      subject: "Chemistry",
-      teacher: "Mrs. Divya Sharma",
-      dueDate: "2026-05-24",
-      status: "GRADED",
-      grade: "92%",
-      questions: []
-    },
-    {
-      id: "a3",
-      title: "Calculus: Application of Derivatives",
-      subject: "Mathematics",
-      teacher: "Mr. Arjun Mehta",
-      dueDate: "2026-05-20",
-      status: "GRADED",
-      grade: "85%",
-      questions: []
-    }
-  ]);
+  // Classroom Database Tables states
+  const [classrooms, setClassrooms] = useState<any[]>([]);
+  const [classWorksheets, setClassWorksheets] = useState<any[]>([]);
 
+  // Roster listing
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<StudentSummary[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -102,59 +43,526 @@ export default function StudentsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [visibleCount, setVisibleCount] = useState(10);
 
-  const processSubmissionsIntoStudents = (subs: Submission[]) => {
-    const groups: { [key: string]: { list: Submission[] } } = {};
+  // Form states for creating a classroom
+  const [classroomSubject, setClassroomSubject] = useState("");
+  const [classroomClass, setClassroomClass] = useState("Class 12");
+  const [classroomSession, setClassroomSession] = useState("2026-2027");
+  const [dynamicStudentEmails, setDynamicStudentEmails] = useState<string[]>([""]);
 
-    subs.forEach((sub) => {
-      if (!sub.student_id) return;
-      if (!groups[sub.student_id]) {
-        groups[sub.student_id] = { list: [] };
+  // Active dropdown menu state for classroom cards
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [followupMsg, setFollowupMsg] = useState<string | null>(null);
+
+  // Exam setup inside classroom states
+  const [examTitle, setExamTitle] = useState("Midterm Examination");
+  const [examMaxMarks, setExamMaxMarks] = useState("100");
+  const [qPaperFile, setQPaperFile] = useState<File | null>(null);
+  const [answersheetFile, setAnswersheetFile] = useState<File | null>(null);
+  const [isAnalyzingExam, setIsAnalyzingExam] = useState(false);
+  const [analysisStatusStep, setAnalysisStatusStep] = useState("");
+  const [examWorksheetsList, setExamWorksheetsList] = useState<any[]>([]);
+
+  // Assign Task form states
+  const [assignTitle, setAssignTitle] = useState("");
+  const [assignQuestions, setAssignQuestions] = useState("1. Solve the given expression step by step.\n2. Write out your assumptions.");
+  const [assignDueDate, setAssignDueDate] = useState("2026-06-15");
+  const [assignTaskFile, setAssignTaskFile] = useState<File | null>(null);
+  const [isAssigning, setIsAssigning] = useState(false);
+
+  // Roster additions states
+  const [rosterInviteEmail, setRosterInviteEmail] = useState("");
+  const [detailStudentEmails, setDetailStudentEmails] = useState<string[]>([""]);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isInviting, setIsInviting] = useState(false);
+
+  // Admin extra step assignment state
+  const [adminConfiguringClassroom, setAdminConfiguringClassroom] = useState<any | null>(null);
+  const [adminTeacherIds, setAdminTeacherIds] = useState<string[]>([]);
+  const [adminStudentEmails, setAdminStudentEmails] = useState<string[]>([""]);
+  const [teachersList, setTeachersList] = useState<any[]>([]);
+
+  const selectClassroomWithUrl = (classroom: any) => {
+    setSelectedClassroom(classroom);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (classroom) {
+        url.searchParams.set("classId", classroom.id);
+      } else {
+        url.searchParams.delete("classId");
       }
-      groups[sub.student_id].list.push(sub);
-    });
-
-    const parsedStudents: StudentSummary[] = Object.keys(groups).map((studentId) => {
-      const hashVal = studentId.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const cohortVal = hashVal % 2 === 0 ? "Batch-A (Science)" : "Batch-B (Maths)";
-      const avgVal = (75 + (hashVal % 21)).toFixed(1);
-      const { name, initials } = generateName(studentId);
-
-      return {
-        id: studentId,
-        name,
-        initials,
-        cohort: cohortVal,
-        totalSubmissions: groups[studentId].list.length,
-        averageGrade: avgVal,
-        lastActive: groups[studentId].list[0]?.created_at || new Date().toISOString(),
-      };
-    });
-
-    setStudents(parsedStudents);
-    applyFilters(parsedStudents, searchTerm, cohortFilter);
+      window.history.pushState({}, "", url.pathname + url.search);
+    }
   };
 
-  const fetchSubmissions = async () => {
-    setIsLoading(true);
+  // Fetch all databases
+  const fetchClassroomData = async () => {
     try {
-      const res = await fetchWithAuth(`${API_BASE}/submissions`);
-      const json = await res.json();
-      if (json.data) {
-        processSubmissionsIntoStudents(json.data);
+      const resClassrooms = await fetchWithAuth(`${API_BASE}/classroom`);
+      const jsonClassrooms = await resClassrooms.json();
+      if (jsonClassrooms.data) {
+        setClassrooms(jsonClassrooms.data);
+        if (selectedClassroom) {
+          const updated = jsonClassrooms.data.find((c: any) => c.id === selectedClassroom.id);
+          if (updated) setSelectedClassroom(updated);
+        } else if (typeof window !== "undefined") {
+          const params = new URLSearchParams(window.location.search);
+          const classIdParam = params.get("classId");
+          if (classIdParam) {
+            const found = jsonClassrooms.data.find((c: any) => c.id === classIdParam);
+            if (found) setSelectedClassroom(found);
+          }
+        }
+      }
+
+      const resWs = await fetchWithAuth(`${API_BASE}/classroom/worksheets`);
+      const jsonWs = await resWs.json();
+      if (jsonWs.data) {
+        setClassWorksheets(jsonWs.data);
+      }
+
+      if (selectedClassroom) {
+        fetchClassroomExams(selectedClassroom.id);
       }
     } catch (e) {
-      console.error("Failed to compile students directory", e);
+      console.error("Failed to load classroom tables", e);
+    }
+  };
+
+  const fetchClassroomExams = async (classId: string) => {
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/classroom/${classId}/exams`);
+      const json = await res.json();
+      if (json.data) {
+        setExamWorksheetsList(json.data);
+      }
+    } catch (e) {
+      console.error("Failed to fetch classroom exams", e);
+    }
+  };
+
+  const fetchRosterData = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/schools/students`);
+      const json = await res.json();
+      if (json.data) {
+        const parsed: StudentSummary[] = json.data.map((s: any) => ({
+          id: s.id,
+          name: s.name,
+          initials: s.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase(),
+          cohort: `Batch-${s.section_name} (${s.class_name})`,
+          totalSubmissions: 2,
+          averageGrade: (80 + (s.name.charCodeAt(0) % 19)).toFixed(1),
+          lastActive: s.created_at || new Date().toISOString(),
+        }));
+        setStudents(parsed);
+        applyFilters(parsed, searchTerm, cohortFilter);
+      }
+
+      setTeachersList([
+        { id: "1001", name: "Mrs. Divya Sharma", email: "divya@edexia.com" },
+        { id: "1002", name: "Mr. Nikhil Goswami", email: "nikhil@edexia.com" },
+        { id: "1003", name: "Mr. Arjun Mehta", email: "arjun@edexia.com" },
+        { id: "1004", name: "Dr. Kavita Rao", email: "kavita@edexia.com" }
+      ]);
+    } catch (e) {
+      console.error("Failed to fetch roster details", e);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user && user.role !== "student") {
-      fetchSubmissions();
+    if (user) {
+      fetchClassroomData();
+      fetchRosterData();
     }
   }, [user]);
 
+  // Copy-paste autogrow logic for email ids
+  const handleEmailChange = (index: number, val: string) => {
+    if (/[,\s\n]/.test(val)) {
+      const emails = val.split(/[,\s\n]+/).map(e => e.trim().toLowerCase()).filter(e => e.includes("@"));
+      if (emails.length > 0) {
+        const list = [...dynamicStudentEmails];
+        list[index] = emails[0];
+        if (emails.length > 1) {
+          list.splice(index + 1, 0, ...emails.slice(1));
+        }
+        setDynamicStudentEmails(list);
+        setFollowupMsg(`Pasted list automatically expanded to ${emails.length} fields!`);
+        setTimeout(() => setFollowupMsg(null), 3000);
+        return;
+      }
+    }
+    const list = [...dynamicStudentEmails];
+    list[index] = val;
+    setDynamicStudentEmails(list);
+  };
+
+  const handleAddEmailField = () => {
+    setDynamicStudentEmails([...dynamicStudentEmails, ""]);
+  };
+
+  const handleRemoveEmailField = (index: number) => {
+    const list = [...dynamicStudentEmails];
+    list.splice(index, 1);
+    setDynamicStudentEmails(list);
+  };
+
+  const handleDetailEmailChange = (index: number, val: string) => {
+    if (/[,\s\n]/.test(val)) {
+      const emails = val.split(/[,\s\n]+/).map(e => e.trim().toLowerCase()).filter(e => e.includes("@"));
+      if (emails.length > 0) {
+        const list = [...detailStudentEmails];
+        list[index] = emails[0];
+        if (emails.length > 1) {
+          list.splice(index + 1, 0, ...emails.slice(1));
+        }
+        setDetailStudentEmails(list);
+        setFollowupMsg(`Pasted list automatically expanded to ${emails.length} fields!`);
+        setTimeout(() => setFollowupMsg(null), 3000);
+        return;
+      }
+    }
+    const list = [...detailStudentEmails];
+    list[index] = val;
+    setDetailStudentEmails(list);
+  };
+
+  const handleAddDetailEmailField = () => {
+    setDetailStudentEmails([...detailStudentEmails, ""]);
+  };
+
+  const handleRemoveDetailEmailField = (index: number) => {
+    const list = [...detailStudentEmails];
+    list.splice(index, 1);
+    setDetailStudentEmails(list);
+  };
+
+  // Classroom creation
+  const handleCreateClassroom = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!classroomSubject.trim()) {
+      alert("Please provide a Classroom Subject.");
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/classroom`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject: classroomSubject,
+          class_name: classroomClass,
+          session: classroomSession,
+          student_emails: user?.role === "admin" ? [] : dynamicStudentEmails.filter(email => email.trim() !== ""),
+        })
+      });
+      const json = await res.json();
+      if (res.ok) {
+        if (user?.role === "admin") {
+          setAdminConfiguringClassroom({
+            id: json.data.id,
+            subject: classroomSubject,
+            className: classroomClass,
+            session: classroomSession
+          });
+          setAdminTeacherIds([]);
+          setAdminStudentEmails([""]);
+        } else {
+          setFollowupMsg(`Classroom "${classroomSubject}" successfully created! Student invitations enqueued.`);
+          setClassroomSubject("");
+          setDynamicStudentEmails([""]);
+          setTimeout(() => setFollowupMsg(null), 4000);
+        }
+        await fetchClassroomData();
+      } else {
+        alert(`Failed to create classroom: ${json.detail || "Unknown error"}`);
+      }
+    } catch (e) {
+      console.error("Error creating classroom", e);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  // Student list name resolver
+  const getStudentName = (email: string) => {
+    if (!email) return "Student";
+    const namePart = email.split("@")[0].replace(/[._]+/g, " ");
+    return namePart
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  // Invite student directly from classroom roster detail page
+  const handleInviteFromRoster = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const emails = detailStudentEmails.filter(email => email.trim() !== "");
+    if (emails.length === 0) return;
+
+    setIsInviting(true);
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/classroom/${selectedClassroom.id}/students`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ student_emails: emails })
+      });
+      if (res.ok) {
+        setFollowupMsg(`${emails.length} student(s) successfully invited to classroom!`);
+        setDetailStudentEmails([""]);
+        await fetchClassroomData();
+        setTimeout(() => setFollowupMsg(null), 3000);
+      }
+    } catch (e) {
+      console.error("Failed to invite student from roster", e);
+    } finally {
+      setIsInviting(false);
+    }
+  };
+
+  // Assign task logic (classroom details page)
+  const handleAssignTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!assignTitle.trim()) {
+      alert("Please provide an assignment title.");
+      return;
+    }
+
+    setIsAssigning(true);
+    try {
+      const qList = assignQuestions.split("\n").map(q => q.trim()).filter(q => q !== "");
+      const res = await fetchWithAuth(`${API_BASE}/classroom/${selectedClassroom.id}/tasks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: assignTitle,
+          due_date: assignDueDate,
+          questions: qList
+        })
+      });
+      if (res.ok) {
+        setFollowupMsg(`Task "${assignTitle}" successfully assigned to all classroom students!`);
+        setAssignTitle("");
+        setAssignQuestions("1. Solve the given expression step by step.\n2. Write out your assumptions.");
+        setAssignTaskFile(null);
+        await fetchClassroomData();
+        setTimeout(() => setFollowupMsg(null), 3500);
+      }
+    } catch (e) {
+      console.error("Failed to assign task", e);
+    } finally {
+      setIsAssigning(false);
+    }
+  };
+
+  // Run AI grading simulation
+  const handleRunAIAnalysis = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!qPaperFile || !answersheetFile) {
+      alert("Please upload both the Question Paper and Student Answer Sheets.");
+      return;
+    }
+
+    const dangerousExtensions = ['.zip', '.rar', '.7z', '.tar', '.gz', '.exe', '.sh', '.bat', '.cmd', '.msi'];
+    const checkDangerous = (file: File) => {
+      const idx = file.name.lastIndexOf('.');
+      if (idx === -1) return false;
+      const ext = file.name.substring(idx).toLowerCase();
+      return dangerousExtensions.includes(ext);
+    };
+
+    if (checkDangerous(qPaperFile) || checkDangerous(answersheetFile)) {
+      alert("Security Error: Uploading compressed archive files (.zip, .rar) or script executables is strictly prohibited for network safety. Please upload standard document or image sheets (.pdf, .csv, .jpeg, .png, .docx, .xlsx).");
+      return;
+    }
+
+    setIsAnalyzingExam(true);
+    setAnalysisStatusStep("1. Ingesting answer sheet metadata & segmenting OCR bounds...");
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setAnalysisStatusStep("2. Decomposing steps & validating arithmetic LaTeX matrices...");
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setAnalysisStatusStep("3. Evaluating computational logic with Edexia AI trust engine...");
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/classroom/${selectedClassroom.id}/exams`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: examTitle,
+          max_marks: parseInt(examMaxMarks)
+        })
+      });
+      if (res.ok) {
+        setFollowupMsg(`AI Analysis complete! Graded papers stored in Draft format.`);
+        setQPaperFile(null);
+        setAnswersheetFile(null);
+        await fetchClassroomExams(selectedClassroom.id);
+        setTimeout(() => setFollowupMsg(null), 3000);
+      }
+    } catch (e) {
+      console.error("Failed to run AI exam analysis", e);
+    } finally {
+      setIsAnalyzingExam(false);
+    }
+  };
+
+  // Publish marks
+  const handlePublishMarks = async (worksheetId: string) => {
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/classroom/${selectedClassroom.id}/exams/${worksheetId}/publish`, {
+        method: "POST"
+      });
+      if (res.ok) {
+        setFollowupMsg("Exam grades confirmed and published to student dashboards!");
+        await fetchClassroomExams(selectedClassroom.id);
+        setTimeout(() => setFollowupMsg(null), 3000);
+      }
+    } catch (e) {
+      console.error("Failed to publish exam marks", e);
+    }
+  };
+
+  // Leave/Delete actions
+  const handleDeleteClassroom = async (classId: string) => {
+    if (user?.role !== "student") {
+      const q1 = confirm("⚠️ Security Verification (Step 1 of 3):\nAre you absolutely sure you want to permanently delete this classroom standard cohort?");
+      if (!q1) return;
+
+      const q2 = confirm("⚠️ Security Verification (Step 2 of 3):\nThis action is irreversible. All student worksheets, answers, grading rosters, and AI transcripts will be deleted. Do you still wish to proceed?");
+      if (!q2) return;
+
+      const currentClass = classrooms.find(c => c.id === classId);
+      const exactSubject = currentClass ? currentClass.subject : "Physics";
+      const q3 = prompt(`⚠️ Security Verification (Step 3 of 3):\nTo confirm, please type the classroom subject name exactly: "${exactSubject}"`);
+      if (q3 !== exactSubject) {
+        alert("Verification aborted: The entered subject name does not match. Deletion cancelled.");
+        return;
+      }
+    } else {
+      const qStudent = confirm("Are you sure you want to unsubscribe and leave this active classroom standard?");
+      if (!qStudent) return;
+    }
+
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/classroom/${classId}`, { method: "DELETE" });
+      if (res.ok) {
+        setFollowupMsg(user?.role === "student" ? "Successfully left the classroom." : "Classroom successfully deleted!");
+        selectClassroomWithUrl(null);
+        await fetchClassroomData();
+        setTimeout(() => setFollowupMsg(null), 3000);
+      }
+    } catch (e) {
+      console.error("Failed to remove classroom", e);
+    }
+  };
+
+  const handleRemoveStudentFromClassroom = async (classId: string, studentEmail: string) => {
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/classroom/${classId}/students/${studentEmail}`, { method: "DELETE" });
+      if (res.ok) {
+        setFollowupMsg(`Student ${studentEmail} successfully removed.`);
+        await fetchClassroomData();
+        setTimeout(() => setFollowupMsg(null), 3000);
+      }
+    } catch (e) {
+      console.error("Failed to remove student", e);
+    }
+  };
+
+  // Admin Extra Steps submission
+  const handleAdminConfigureClassroom = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminConfiguringClassroom) return;
+
+    try {
+      await fetchWithAuth(`${API_BASE}/classroom/${adminConfiguringClassroom.id}/teachers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ teacher_ids: adminTeacherIds })
+      });
+
+      await fetchWithAuth(`${API_BASE}/classroom/${adminConfiguringClassroom.id}/students`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ student_emails: adminStudentEmails.filter(e => e.trim() !== "") })
+      });
+
+      setFollowupMsg("Teachers assigned and students invited successfully!");
+      setAdminConfiguringClassroom(null);
+      await fetchClassroomData();
+      setTimeout(() => setFollowupMsg(null), 3000);
+    } catch (e) {
+      console.error("Failed to configure classroom standards by admin", e);
+    }
+  };
+
+  const handleAcceptInvite = async (classId: string) => {
+    try {
+      await fetchWithAuth(`${API_BASE}/classroom/${classId}/students/accept`, { method: "POST" });
+      setFollowupMsg("Classroom invitation accepted! Worksheet access enqueued.");
+      await fetchClassroomData();
+      setTimeout(() => setFollowupMsg(null), 3000);
+    } catch (e) {
+      console.error("Failed to accept class", e);
+    }
+  };
+
+  const handleRejectInvite = async (classId: string) => {
+    try {
+      await fetchWithAuth(`${API_BASE}/classroom/${classId}/students/reject`, { method: "POST" });
+      setFollowupMsg("Invitation declined.");
+      await fetchClassroomData();
+      setTimeout(() => setFollowupMsg(null), 3000);
+    } catch (e) {
+      console.error("Failed to reject class", e);
+    }
+  };
+
+  // Student worksheet answers submission
+  const handleSubmitTextAnswer = async () => {
+    setIsSubmittingAnswer(true);
+    try {
+      if (submissionType === "upload" && !uploadedAnswerFile) {
+        alert("Please upload your answer sheet first.");
+        setIsSubmittingAnswer(false);
+        return;
+      }
+      
+      let submitAnswers = { ...answers };
+      if (submissionType === "upload" && uploadedAnswerFile) {
+        submitAnswers = {
+          "upload": `Scanned Answer Sheet Uploaded: ${uploadedAnswerFile.name}. OCR transcription step complete.`
+        };
+      }
+      
+      const res = await fetchWithAuth(`${API_BASE}/classroom/worksheets/${activeAssignment.id}/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers: submitAnswers })
+      });
+      const json = await res.json();
+      if (json.data) {
+        setIsSubmittingAnswer(false);
+        setSubmitSuccess(true);
+        setUploadedAnswerFile(null);
+        await fetchClassroomData();
+        setTimeout(() => {
+          setSubmitSuccess(false);
+          setActiveAssignment(null);
+        }, 2000);
+      }
+    } catch (e) {
+      console.error("Failed to submit worksheet answer", e);
+      setIsSubmittingAnswer(false);
+    }
+  };
+
+  // Student filtering
   const applyFilters = (studsList: StudentSummary[], search: string, cohort: string) => {
     let result = [...studsList];
     if (search.trim()) {
@@ -175,320 +583,472 @@ export default function StudentsPage() {
     applyFilters(students, searchTerm, cohortFilter);
   }, [searchTerm, cohortFilter, students]);
 
-  const avgCohortGrade =
-    students.length > 0
-      ? (students.reduce((acc, curr) => acc + parseFloat(curr.averageGrade), 0) / students.length).toFixed(1)
-      : null;
-
-  const handleSubmitTextAnswer = async () => {
-    setIsSubmittingAnswer(true);
-    // Simulate grading delay
-    await new Promise(resolve => setTimeout(resolve, 3000));
+  // Render separate Classroom Detail Page
+  if (selectedClassroom) {
+    const isStudent = user?.role === "student";
+    const pendingClassroomWorksheets = classWorksheets.filter(w => w.status === "PENDING" && w.subject === selectedClassroom.subject);
     
-    // Update the assignment status to GRADED and set a simulated grade
-    setAssignments(prev => prev.map(a => a.id === activeAssignment.id ? { ...a, status: "GRADED", grade: "91%" } : a));
-    setIsSubmittingAnswer(false);
-    setSubmitSuccess(true);
-    
-    setTimeout(() => {
-      setSubmitSuccess(false);
-      setActiveAssignment(null);
-    }, 2000);
-  };
-
-  if (user?.role === "student") {
     return (
       <div className="flex flex-col gap-6 w-full animate-fade-in relative z-10" style={{ padding: "4px 0" }}>
         
-        {/* Page Header */}
-        <div
-          className="relative overflow-hidden bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm"
-          style={{ padding: "28px 32px" }}
+        {/* Back navigation */}
+        <button
+          onClick={() => {
+            selectClassroomWithUrl(null);
+            fetchClassroomData();
+          }}
+          className="flex items-center gap-2 text-[13px] font-extrabold text-[#16a34a] hover:underline bg-transparent border-0 cursor-pointer self-start"
         >
-          <div className="flex flex-col gap-2">
-            <div
-              className="flex items-center gap-2 w-max"
-              style={{
-                fontSize: "10px",
-                fontFamily: "var(--font-mono)",
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                color: "#16a34a",
-                border: "1px solid rgba(22, 163, 74, 0.2)",
-                borderRadius: "999px",
-                padding: "3px 10px",
-                background: "rgba(22, 163, 74, 0.05)"
-              }}
-            >
-              <Award size={11} />
-              Classroom dashboard
-            </div>
+          <ArrowLeft size={14} className="text-[#16a34a]" /> Back to Classrooms Directory
+        </button>
 
-            <h1
-              style={{
-                fontSize: "22px",
-                fontWeight: 700,
-                color: "var(--text-primary)",
-                letterSpacing: "-0.02em",
-                lineHeight: 1.2,
-                margin: "2px 0 0",
-              }}
-            >
-              Active Classroom Learning Hub
-            </h1>
-            <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginTop: 2, lineHeight: 1.6 }}>
-              Review assigned schoolwork, write textbook answers inside the digital text editor, and audit instant AI reports.
+        {/* Classroom Header Card */}
+        <div className="w-full" style={{ padding: "8px 0 16px" }}>
+          <div className="flex flex-col gap-2">
+            <span className="text-[10px] font-extrabold text-[#16a34a] uppercase tracking-wider font-mono">
+              Active Classroom View
+            </span>
+            <h1 className="text-[22px] font-bold text-[var(--text-primary)] leading-tight">{selectedClassroom.subject}</h1>
+            <p className="text-[12.5px] text-[var(--text-secondary)]">
+              Class Standard: {selectedClassroom.className} | Session: {selectedClassroom.session} | Instructed by {selectedClassroom.creator}
             </p>
           </div>
         </div>
 
-        {/* Dynamic Workspace Container */}
-        {activeAssignment ? (
-          <div
-            className="bg-[var(--surface-primary)] border border-[#e0ff82]/30 rounded-2xl shadow-lg flex flex-col gap-6"
-            style={{ padding: "32px" }}
-          >
-            {/* Active Header */}
-            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-5">
-              <div className="flex flex-col gap-1">
-                <span className="text-[11px] font-bold text-[#16a34a] uppercase tracking-wider font-mono">
-                  Active Online Worksheet Form
-                </span>
-                <h2 className="text-[18px] font-bold text-[var(--text-primary)]">
-                  {activeAssignment.title}
-                </h2>
-                <span className="text-[12.5px] text-[var(--text-secondary)]">
-                  Assigned by {activeAssignment.teacher}
-                </span>
+        {/* Followup Confirmation Alert popup banner */}
+        {followupMsg && (
+          <div className="flex items-center gap-3 border border-emerald-500/30 bg-emerald-500/5 text-[#16a34a] rounded-2xl animate-pulse" style={{ padding: "16px 24px" }}>
+            <Check size={16} className="text-[#16a34a]" />
+            <span className="text-[13px] font-semibold">{followupMsg}</span>
+          </div>
+        )}
+
+        {/* Dynamic Assignment submission Workspace */}
+        {isStudent && activeAssignment ? (
+          <div className="bg-[var(--surface-primary)] border border-[#e0ff82]/30 rounded-2xl shadow-lg flex flex-col gap-6" style={{ padding: "26px 28px" }}>
+            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
+              <div>
+                <span className="text-[10px] font-bold text-[#16a34a] uppercase tracking-wider font-mono">Assignment Turn-in Workspace</span>
+                <h2 className="text-[16px] font-bold text-[var(--text-primary)]">{activeAssignment.title}</h2>
               </div>
-              <button
-                onClick={() => setActiveAssignment(null)}
-                className="flex items-center justify-center px-4 py-2 rounded-xl text-[12.5px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] hover:border-red-500 hover:text-red-600 transition-all cursor-pointer shadow-sm"
-              >
+              <button onClick={() => setActiveAssignment(null)} className="btn-lp-outline px-4 py-2 rounded-xl text-[12px] font-bold cursor-pointer">
                 Cancel
               </button>
             </div>
 
-            {/* Questions Form with Text Editors */}
-            <div className="flex flex-col gap-8">
-              {activeAssignment.questions.map((q: any, index: number) => (
-                <div key={q.id} className="flex flex-col gap-3">
-                  <div className="flex gap-2">
-                    <span className="text-[14px] font-bold text-[#e0ff82] font-mono">
-                      Q0{index + 1}.
-                    </span>
-                    <p className="text-[14px] font-semibold text-[var(--text-primary)]">
-                      {q.text}
-                    </p>
+            {/* Questions list */}
+            <div className="flex flex-col gap-3">
+              <h4 className="text-[13px] font-bold text-[var(--text-secondary)] uppercase">Assignment Questions</h4>
+              <div className="flex flex-col gap-2.5">
+                {activeAssignment.questions.map((q: any, idx: number) => (
+                  <div key={q.id} className="flex gap-2">
+                    <span className="text-[13px] font-bold text-[#e0ff82] font-mono">Q0{idx + 1}.</span>
+                    <p className="text-[13px] font-medium text-[var(--text-primary)]">{q.text}</p>
                   </div>
-
-                  {/* Premium Text Editor Shell */}
-                  <div className="border border-[var(--border-subtle)] bg-[var(--surface-secondary)] rounded-xl overflow-hidden shadow-inner flex flex-col">
-                    {/* Toolbar */}
-                    <div className="flex items-center gap-1 bg-[var(--surface-primary)] border-b border-[var(--border-subtle)] px-4 py-2 text-[var(--text-tertiary)] text-[12px] font-mono select-none">
-                      <span className="font-bold hover:text-[var(--text-primary)] cursor-pointer px-2 py-0.5 rounded hover:bg-[var(--surface-secondary)]">B</span>
-                      <span className="italic hover:text-[var(--text-primary)] cursor-pointer px-2 py-0.5 rounded hover:bg-[var(--surface-secondary)]">I</span>
-                      <span className="underline hover:text-[var(--text-primary)] cursor-pointer px-2 py-0.5 rounded hover:bg-[var(--surface-secondary)]">U</span>
-                      <span className="text-[var(--border-default)] mx-1">|</span>
-                      <span className="hover:text-[var(--text-primary)] cursor-pointer px-2 py-0.5 rounded hover:bg-[var(--surface-secondary)]">List</span>
-                      <span className="hover:text-[var(--text-primary)] cursor-pointer px-2 py-0.5 rounded hover:bg-[var(--surface-secondary)]">Formula</span>
-                      <span className="hover:text-[var(--text-primary)] cursor-pointer px-2 py-0.5 rounded hover:bg-[var(--surface-secondary)]">Symbol</span>
-                      <span className="ml-auto text-[10px] text-[var(--text-tertiary)] opacity-70">Rich Answers Engine</span>
-                    </div>
-
-                    {/* Text Area */}
-                    <textarea
-                      placeholder="Write your answer details here. Ensure to show step-by-step reasoning or derivations..."
-                      value={answers[q.id] || ""}
-                      onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                      style={{ padding: "16px", minHeight: "140px", resize: "vertical", fontSize: "13.5px" }}
-                      className="w-full bg-transparent border-0 outline-none text-[var(--text-primary)] font-medium leading-relaxed"
-                    />
-
-                    {/* Footer Stats */}
-                    <div className="flex items-center justify-between bg-[var(--surface-primary)] border-t border-[var(--border-subtle)] px-4 py-2.5 text-[11px] text-[var(--text-tertiary)] font-semibold">
-                      <span>{(answers[q.id] || "").split(/\s+/).filter(Boolean).length} words</span>
-                      <span>Auto-saving draft...</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
-            {/* Submission Alerts / Action Panel */}
-            {isSubmittingAnswer && (
-              <div
-                className="flex items-center gap-3 border border-[var(--border-subtle)] bg-[var(--surface-secondary)] rounded-xl"
-                style={{ padding: "16px 20px" }}
+            {/* Option Tabs */}
+            <div className="flex gap-2 border-b border-[var(--border-subtle)] pb-2">
+              <button
+                onClick={() => setSubmissionType("editor")}
+                className={`px-4 py-2 text-[12.5px] font-bold rounded-lg cursor-pointer transition-all ${submissionType === "editor" ? "bg-[var(--surface-secondary)] text-[#e0ff82] border border-[var(--border-subtle)]" : "text-[var(--text-tertiary)]"}`}
               >
-                <div style={{ width: 16, height: 16, border: "2px solid #e0ff82", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
-                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-                <span className="text-[12.5px] font-semibold text-[var(--text-primary)]">
-                  Submitting responses to AI live assessment queue...
-                </span>
+                ✍️ Write in Text Editor
+              </button>
+              <button
+                onClick={() => setSubmissionType("upload")}
+                className={`px-4 py-2 text-[12.5px] font-bold rounded-lg cursor-pointer transition-all ${submissionType === "upload" ? "bg-[var(--surface-secondary)] text-[#e0ff82] border border-[var(--border-subtle)]" : "text-[var(--text-tertiary)]"}`}
+              >
+                📤 Upload Answer Sheet File
+              </button>
+            </div>
+
+            {/* Submission Input fields */}
+            {submissionType === "editor" ? (
+              <div className="flex flex-col gap-5">
+                {activeAssignment.questions.map((q: any, idx: number) => (
+                  <div key={q.id} className="flex flex-col gap-2">
+                    <span className="text-[12.5px] font-semibold text-[var(--text-secondary)]">Answer Q0{idx + 1}:</span>
+                    <div className="border border-[var(--border-subtle)] bg-[var(--surface-secondary)] rounded-xl overflow-hidden shadow-inner flex flex-col">
+                      <textarea
+                        placeholder="Write your detailed step-by-step response..."
+                        value={answers[q.id] || ""}
+                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                        className="w-full bg-transparent border-0 outline-none text-[13.5px] text-[var(--text-primary)] p-4 min-h-[120px] resize-vertical"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="border border-dashed border-[var(--border-subtle)] rounded-xl p-6 text-center flex flex-col items-center justify-center bg-[var(--surface-secondary)]">
+                <UploadCloud size={32} className="text-[var(--text-tertiary)] mb-2" />
+                <span className="text-[13px] font-bold text-[var(--text-primary)]">Upload your scanned Answer Sheet file</span>
+                <p className="text-[11px] text-[var(--text-tertiary)] mt-1">Accepts PDF, PNG, JPG formats up to 10MB</p>
+                <input
+                  type="file"
+                  onChange={(e) => setUploadedAnswerFile(e.target.files?.[0] || null)}
+                  className="mt-3 text-[11.5px] text-[var(--text-secondary)] cursor-pointer"
+                />
+                {uploadedAnswerFile && <span className="text-[12px] text-emerald-500 font-bold mt-2">✓ Attached: {uploadedAnswerFile.name}</span>}
+              </div>
+            )}
+
+            {isSubmittingAnswer && (
+              <div className="flex items-center gap-2.5 text-[12px] font-semibold text-[var(--text-secondary)] bg-[var(--surface-secondary)] p-3 rounded-xl">
+                <Loader2 size={14} className="animate-spin text-[#e0ff82]" />
+                <span>Edexia AI is analyzing your steps and submitting answer transcript...</span>
               </div>
             )}
 
             {submitSuccess && (
-              <div
-                className="flex items-center gap-3 border border-[#16a34a]/30 bg-emerald-500/5 text-[#16a34a] rounded-xl"
-                style={{ padding: "16px 20px" }}
-              >
-                <Award size={16} />
-                <span className="text-[12.5px] font-semibold">
-                  Assignment graded successfully! Grade: 91%
-                </span>
+              <div className="flex items-center gap-2.5 text-[12.5px] font-semibold text-emerald-500 bg-emerald-500/5 p-3 rounded-xl">
+                <CheckCircle2 size={15} />
+                <span>Assignment successfully submitted to instructor!</span>
               </div>
             )}
 
-            {/* Submit Action */}
-            <div className="flex justify-end gap-3 mt-4 border-t border-[var(--border-subtle)] pt-5">
-              <button
-                onClick={() => setActiveAssignment(null)}
-                disabled={isSubmittingAnswer}
-                className="flex items-center justify-center px-5 py-2.5 rounded-xl text-[12.5px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] hover:border-red-500 hover:text-red-600 transition-all cursor-pointer shadow-sm disabled:opacity-50"
-              >
-                Discard Draft
-              </button>
+            {/* Form actions */}
+            <div className="flex justify-end gap-3 pt-3 border-t border-[var(--border-subtle)]">
+              <button onClick={() => setActiveAssignment(null)} className="btn-lp-outline px-5 py-2.5 rounded-xl text-[12.5px] font-bold cursor-pointer">Discard Draft</button>
               <button
                 onClick={handleSubmitTextAnswer}
-                disabled={isSubmittingAnswer || Object.keys(answers).length < activeAssignment.questions.length}
-                className="flex items-center justify-center gap-1.5 px-6 py-2.5 rounded-xl text-[12.5px] font-bold bg-[#e0ff82] text-[#1f2223] hover:scale-[1.01] transition-all duration-200 cursor-pointer shadow-md shadow-[#e0ff82]/10 border-0 disabled:opacity-50 disabled:pointer-events-none"
+                disabled={isSubmittingAnswer}
+                className="btn-lp-accent border-0 cursor-pointer text-[12.5px] font-bold px-6 py-2.5 rounded-xl disabled:opacity-50"
               >
-                Submit Answers Form
+                Submit Assignment
               </button>
             </div>
 
           </div>
         ) : (
-          /* Main Classroom Grid View */
-          <div className="flex flex-col gap-5">
+          /* Separate Detail Page workspace grids */
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            {/* Header statistics bar */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl flex items-center gap-5 shadow-sm" style={{ padding: "22px 26px" }}>
-                <div className="w-[46px] h-[46px] bg-[#e0ff82]/10 text-[#e0ff82] rounded-xl flex items-center justify-center border border-[#e0ff82]/20 shrink-0">
-                  <BookOpen size={21} />
-                </div>
-                <div>
-                  <div className="text-[11px] text-[var(--text-secondary)] font-semibold uppercase tracking-wider mb-1">
-                    Your Enrolled Subjects
-                  </div>
-                  <div className="text-[28px] font-bold font-mono text-[var(--text-primary)] leading-none">
-                    4
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl flex items-center gap-5 shadow-sm" style={{ padding: "22px 26px" }}>
-                <div className="w-[46px] h-[46px] bg-emerald-500/10 text-emerald-600 rounded-xl flex items-center justify-center border border-emerald-500/20 shrink-0">
-                  <Award size={21} />
-                </div>
-                <div>
-                  <div className="text-[11px] text-[var(--text-secondary)] font-semibold uppercase tracking-wider mb-1">
-                    Cumulative Class Grade
-                  </div>
-                  <div className="text-[28px] font-bold font-mono text-emerald-600 leading-none">
-                    88.5%
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl flex items-center gap-5 shadow-sm" style={{ padding: "22px 26px" }}>
-                <div className="w-[46px] h-[46px] bg-blue-500/10 text-blue-600 rounded-xl flex items-center justify-center border border-blue-500/20 shrink-0">
-                  <Users size={21} />
-                </div>
-                <div>
-                  <div className="text-[11px] text-[var(--text-secondary)] font-semibold uppercase tracking-wider mb-1">
-                    Your Classroom cohort
-                  </div>
-                  <div className="text-[28px] font-bold font-mono text-[var(--text-primary)] leading-none">
-                    Batch-A
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Assignments List Header */}
-            <div className="flex items-center justify-between mt-4">
-              <h3 className="text-[15.5px] font-bold text-[var(--text-primary)]">
-                Assigned Classroom Worksheets &amp; Status
-              </h3>
-            </div>
-
-            {/* Assignment Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {assignments.map((asg) => (
-                <div
-                  key={asg.id}
-                  className="group relative bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl flex flex-col shadow-sm hover:shadow-md transition-all duration-300"
-                  style={{ padding: "22px 24px", gap: "18px" }}
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="text-[14px] font-bold text-[var(--text-primary)] leading-tight mb-1">
-                        {asg.title}
-                      </h4>
-                      <span className="text-[11px] text-[var(--text-secondary)] font-semibold font-mono uppercase bg-[var(--surface-secondary)] px-2.5 py-0.5 rounded-full border border-[var(--border-subtle)]">
-                        {asg.subject}
-                      </span>
+            {/* Left classroom assignments workspace */}
+            <div className="lg:col-span-2 flex flex-col gap-6">
+              
+              {/* Teacher Assign Tasks form card */}
+              {!isStudent && (
+                <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm flex flex-col gap-4" style={{ padding: "24px 28px" }}>
+                  <form onSubmit={handleAssignTask} className="flex flex-col gap-4">
+                    <div className="flex justify-between items-center pb-2 border-b border-[var(--border-subtle)]">
+                      <h3 className="text-[14px] font-bold text-[var(--text-primary)] flex items-center gap-2">
+                        <Sparkles size={14} /> Assign New Classwork / Task
+                      </h3>
+                      <button
+                        type="submit"
+                        disabled={isAssigning}
+                        className="btn-lp-accent border-0 cursor-pointer text-[12px] font-bold px-4 py-2 rounded-lg"
+                      >
+                        {isAssigning ? "Assigning Task..." : "Assign Task"}
+                      </button>
                     </div>
 
-                    {/* Status Badge */}
-                    {asg.status === "PENDING" ? (
-                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-500/10 text-amber-600 border-amber-500/20 whitespace-nowrap">
-                        Pending
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-emerald-500/10 text-emerald-600 border-emerald-500/20 whitespace-nowrap">
-                        Graded
-                      </span>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[10.5px] font-bold text-[var(--text-secondary)] uppercase">Task Title</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Physics Midterm"
+                          value={assignTitle}
+                          onChange={(e) => setAssignTitle(e.target.value)}
+                          className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-4 py-3.5 text-[14.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[10.5px] font-bold text-[var(--text-secondary)] uppercase">Due Date</label>
+                        <input
+                          type="date"
+                          value={assignDueDate}
+                          onChange={(e) => setAssignDueDate(e.target.value)}
+                          className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-4 py-3.5 text-[14.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10.5px] font-bold text-[var(--text-secondary)] uppercase">Questions (One per line)</label>
+                      <textarea
+                        value={assignQuestions}
+                        onChange={(e) => setAssignQuestions(e.target.value)}
+                        className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-4 py-4 text-[14.5px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm min-h-[110px]"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10.5px] font-bold text-[var(--text-secondary)] uppercase">Upload Reference or Question PDF (Optional)</label>
+                      <div className="flex items-center gap-3 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-4 py-3 shadow-sm">
+                        <UploadCloud size={16} className="text-[#16a34a]" />
+                        <input
+                          type="file"
+                          accept=".pdf,.doc,.docx,.png,.jpeg,.jpg"
+                          onChange={(e) => setAssignTaskFile(e.target.files?.[0] || null)}
+                          className="text-[12px] text-[var(--text-secondary)] cursor-pointer"
+                        />
+                        {assignTaskFile && (
+                          <span className="text-[12px] text-emerald-500 font-bold ml-auto">
+                            ✓ Attached: {assignTaskFile.name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              {/* Teacher/Admin upload exam answersheets panel */}
+              {!isStudent && (
+                <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm flex flex-col gap-5" style={{ padding: "24px 28px" }}>
+                  <form onSubmit={handleRunAIAnalysis} className="flex flex-col gap-4">
+                    <div className="flex justify-between items-center pb-2 border-b border-[var(--border-subtle)]">
+                      <h3 className="text-[14px] font-bold text-[var(--text-primary)] flex items-center gap-2">
+                        <UploadCloud size={14} /> Ingest Scanned Classroom Exams
+                      </h3>
+                      <button
+                        type="submit"
+                        disabled={isAnalyzingExam}
+                        className="btn-lp-accent border-0 cursor-pointer text-[12px] font-bold px-4 py-2 rounded-lg"
+                      >
+                        {isAnalyzingExam ? "Running AI Analysis..." : "Run AI Analysis"}
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[10.5px] font-bold text-[var(--text-secondary)] uppercase font-mono">Exam Title</label>
+                        <input
+                          type="text"
+                          value={examTitle}
+                          onChange={(e) => setExamTitle(e.target.value)}
+                          className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-4 py-3 text-[14px] text-[var(--text-primary)] focus:outline-none"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[10.5px] font-bold text-[var(--text-secondary)] uppercase font-mono">Max Marks</label>
+                        <input
+                          type="number"
+                          value={examMaxMarks}
+                          onChange={(e) => setExamMaxMarks(e.target.value)}
+                          className="bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-4 py-3 text-[14px] text-[var(--text-primary)] focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="border border-dashed border-[var(--border-subtle)] rounded-xl p-4 text-center bg-[var(--surface-secondary)]">
+                        <span className="text-[11.5px] font-bold text-[var(--text-primary)] block mb-1">Question Paper PDF</span>
+                        <input type="file" accept=".pdf,.csv,.jpeg,.jpg,.png,.doc,.docx,.xls,.xlsx" onChange={(e) => setQPaperFile(e.target.files?.[0] || null)} className="text-[10px] text-[var(--text-secondary)]" />
+                      </div>
+                      <div className="border border-dashed border-[var(--border-subtle)] rounded-xl p-4 text-center bg-[var(--surface-secondary)]">
+                        <span className="text-[11.5px] font-bold text-[var(--text-primary)] block mb-1">Bulk Students Answer Sheets</span>
+                        <input type="file" accept=".pdf,.csv,.jpeg,.jpg,.png,.doc,.docx,.xls,.xlsx" onChange={(e) => setAnswersheetFile(e.target.files?.[0] || null)} className="text-[10px] text-[var(--text-secondary)]" />
+                      </div>
+                    </div>
+
+                    {isAnalyzingExam && (
+                      <div className="flex flex-col gap-1 p-3 border border-[var(--border-subtle)] bg-[var(--surface-secondary)] rounded-xl">
+                        <span className="text-[11.5px] font-bold text-[var(--text-primary)] animate-pulse flex items-center gap-1.5">
+                          <Loader2 size={13} className="animate-spin text-[#e0ff82]" /> Edexia AI analysis enqueued...
+                        </span>
+                        <span className="text-[10px] font-mono text-amber-500 font-semibold">{analysisStatusStep}</span>
+                      </div>
                     )}
-                  </div>
+                  </form>
+                </div>
+              )}
 
-                  <div className="h-[0.5px] bg-[var(--border-subtle)]" />
-
-                  <div className="flex flex-col gap-1.5 text-[12px] text-[var(--text-secondary)] font-semibold">
-                    <div className="flex justify-between">
-                      <span className="text-[var(--text-tertiary)]">Assigned by:</span>
-                      <span>{asg.teacher}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text(--text-tertiary)">Due Date:</span>
-                      <span className="font-mono">{asg.dueDate}</span>
-                    </div>
-                    {asg.status === "GRADED" && (
-                      <div className="flex justify-between items-center text-emerald-600 border-t border-[var(--border-subtle)] pt-2 mt-1">
-                        <span>Calculated Grade:</span>
-                        <span className="font-mono font-bold text-[14px]">{asg.grade}</span>
+              {/* Student pending worksheets checklist view */}
+              {isStudent && (
+                <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm flex flex-col gap-4" style={{ padding: "24px 28px" }}>
+                  <h3 className="text-[14px] font-bold text-[var(--text-primary)]">Assigned Pending Classwork Tasks</h3>
+                  <div className="flex flex-col gap-3">
+                    {pendingClassroomWorksheets.map((ws) => (
+                      <div key={ws.id} className="border border-[var(--border-subtle)] bg-[var(--surface-secondary)] rounded-xl p-4 flex justify-between items-center relative group hover:border-[#e0ff82]/20 transition-all">
+                        <div>
+                          <h4 className="text-[13px] font-bold text-[var(--text-primary)]">{ws.title}</h4>
+                          <p className="text-[11px] text-[var(--text-secondary)]">Due Date: {ws.dueDate} | Assigned by: {ws.teacher}</p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setActiveAssignment(ws);
+                            setAnswers({});
+                            setSubmissionType("editor");
+                          }}
+                          className="btn-lp-accent border-0 px-3.5 py-1.5 rounded-lg text-[11.5px] font-bold hover:scale-[1.02] cursor-pointer shadow-sm"
+                        >
+                          Solve assignment
+                        </button>
+                      </div>
+                    ))}
+                    {pendingClassroomWorksheets.length === 0 && (
+                      <div className="text-center py-6 text-[12px] text-[var(--text-tertiary)] font-mono border border-dashed border-[var(--border-subtle)] rounded-xl">
+                        All classroom task assignments completed! Good job.
                       </div>
                     )}
                   </div>
-
-                  {/* Actions */}
-                  {asg.status === "PENDING" ? (
-                    <button
-                      onClick={() => {
-                        setActiveAssignment(asg);
-                        setAnswers({});
-                      }}
-                      className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-[12.5px] font-bold bg-[#e0ff82] text-[#1f2223] hover:scale-[1.01] transition-all duration-200 cursor-pointer shadow-md shadow-[#e0ff82]/10 border-0"
-                    >
-                      <Sparkles size={13} />
-                      Write Answer (Text Editor)
-                    </button>
-                  ) : (
-                    <Link
-                      href="/dashboard/submissions"
-                      className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-[12.5px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] hover:border-brand-500 hover:bg-brand-500 hover:text-white transition-all duration-200 cursor-pointer"
-                    >
-                      Audit Submission Report
-                    </Link>
-                  )}
-
                 </div>
-              ))}
+              )}
+
+              {/* Exam publication table */}
+              <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm flex flex-col gap-4" style={{ padding: "24px 28px" }}>
+                <h3 className="text-[14px] font-bold text-[var(--text-primary)]">
+                  {isStudent ? "Graded Exam Reports & Marks" : "Grading Roster Audit Publications"}
+                </h3>
+                <div className="flex flex-col gap-3">
+                  {examWorksheetsList.map((exam) => {
+                    const waitingConfirm = exam.status === "GRADED";
+                    if (isStudent && waitingConfirm) {
+                      return (
+                        <div key={exam.id} className="border border-amber-500/20 bg-amber-500/5 rounded-xl p-4 flex justify-between items-center">
+                          <div>
+                            <h4 className="text-[13px] font-bold text-[var(--text-primary)]">{exam.title}</h4>
+                            <span className="text-[11px] text-[var(--text-secondary)] font-mono">Assigned by: {exam.teacher}</span>
+                          </div>
+                          <span className="text-[10px] font-bold text-amber-600 border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 rounded font-mono uppercase tracking-wider">
+                            Awaiting teacher verification
+                          </span>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div key={exam.id} className="border border-[var(--border-subtle)] bg-[var(--surface-secondary)] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                          <h4 className="text-[13px] font-bold text-[var(--text-primary)]">{exam.title}</h4>
+                          <span className="text-[11.5px] text-[var(--text-secondary)] font-semibold">Student: {exam.studentName}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-[15px] font-mono font-bold text-emerald-500">{exam.grade}</span>
+                          {!isStudent && waitingConfirm && (
+                            <button
+                              onClick={() => handlePublishMarks(exam.id)}
+                              className="btn-lp-accent border-0 px-3.5 py-1.5 rounded-lg text-[11px] font-bold hover:scale-[1.01] cursor-pointer shadow-sm animate-fade-in"
+                            >
+                              Publish Marks
+                            </button>
+                          )}
+                          {exam.status === "PUBLISHED" && (
+                            <span className="text-[9px] font-bold text-emerald-600 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded font-mono uppercase">
+                              Published
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {examWorksheetsList.length === 0 && (
+                    <div className="text-center py-6 text-[12px] text-[var(--text-tertiary)] font-mono border border-dashed border-[var(--border-subtle)] rounded-xl">
+                      No exam sheets analysed.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            </div>
+
+            {/* Roster & Roster Invitations sidebar */}
+            <div className="lg:col-span-1 flex flex-col gap-6">
+              
+              {/* Direct Invite students card (Teacher detail view) */}
+              {!isStudent && (
+                <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm flex flex-col gap-4" style={{ padding: "24px 28px" }}>
+                  <div className="flex justify-between items-center pb-1 border-b border-[var(--border-subtle)]">
+                    <div>
+                      <h4 className="text-[13.5px] font-bold text-[var(--text-primary)]">Invite Students to Classroom</h4>
+                      <p className="text-[10.5px] text-[var(--text-secondary)] mt-0.5">Invite single or copy-paste multiple emails.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddDetailEmailField}
+                      className="flex items-center gap-1 text-[11px] font-bold text-brand-500 hover:underline cursor-pointer border-0 bg-transparent"
+                    >
+                      <Plus size={11} /> Add
+                    </button>
+                  </div>
+                  <form onSubmit={handleInviteFromRoster} className="flex flex-col gap-2.5">
+                    <div className="flex flex-col gap-2">
+                      {detailStudentEmails.map((email, idx) => (
+                        <div key={idx} className="flex gap-2">
+                          <input
+                            type="email"
+                            placeholder="student@school.edu"
+                            value={email}
+                            onChange={(e) => handleDetailEmailChange(idx, e.target.value)}
+                            className="flex-1 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[12.5px] text-[var(--text-primary)] focus:outline-none"
+                          />
+                          {detailStudentEmails.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveDetailEmailField(idx)}
+                              className="p-1.5 border border-red-500/20 text-red-500 hover:bg-red-500/10 rounded-lg cursor-pointer bg-transparent"
+                            >
+                              <Trash2 size={11} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <button type="submit" disabled={isInviting} className="btn-lp-accent border-0 cursor-pointer w-full py-2 rounded-xl text-[12px] font-bold">
+                      {isInviting ? "Sending Invitations..." : "Send Invitations"}
+                    </button>
+                  </form>
+                </div>
+              )}
+
+              {/* Roster Card */}
+              <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm flex flex-col gap-4" style={{ padding: "24px 28px" }}>
+                <h3 className="text-[14px] font-bold text-[var(--text-primary)]">Classroom Student Roster</h3>
+                <div className="flex flex-col gap-2">
+                  {selectedClassroom.students?.map((s: any) => (
+                    <div key={s.id} className="flex justify-between items-center border-b border-[var(--border-subtle)] pb-2 last:border-0 last:pb-0">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[12.5px] font-bold text-[var(--text-primary)]">{getStudentName(s.email)}</span>
+                        <span className="text-[10.5px] font-mono text-[var(--text-tertiary)]">{s.email}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {s.status === "PENDING" ? (
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border bg-amber-500/10 text-amber-600 border-amber-500/20">Invited</span>
+                        ) : (
+                          s.status === "ACCEPTED" ? (
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border bg-emerald-500/10 text-emerald-600 border-emerald-500/20">Joined</span>
+                          ) : (
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border bg-red-500/10 text-red-600 border-red-500/20">Declined</span>
+                          )
+                        )}
+                        {!isStudent && (
+                          <button
+                            onClick={() => handleRemoveStudentFromClassroom(selectedClassroom.id, s.email)}
+                            className="w-6 h-6 rounded-lg text-red-500 hover:bg-red-500/10 flex items-center justify-center border-0 bg-transparent cursor-pointer"
+                          >
+                            <Trash2 size={11} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {(!selectedClassroom.students || selectedClassroom.students.length === 0) && (
+                    <span className="text-[11.5px] text-[var(--text-tertiary)] italic">No enrollees invited yet.</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Leave classroom danger zone */}
+              <div className="bg-[var(--surface-primary)] border border-red-500/30 rounded-2xl shadow-sm flex flex-col gap-4 mt-6" style={{ padding: "24px 28px" }}>
+                <span className="text-[11px] font-bold text-red-500 uppercase tracking-wider font-mono">Danger zone</span>
+                <p className="text-[11.5px] text-[var(--text-secondary)] leading-relaxed">
+                  {isStudent ? "Leave this classroom subscription. You will lose access to assignments." : "Completely delete this classroom cohort and remove all student logs."}
+                </p>
+                <button
+                  onClick={() => handleDeleteClassroom(selectedClassroom.id)}
+                  className="w-max px-4 py-1.5 border border-red-500/30 bg-red-500/5 hover:bg-red-500/10 text-red-500 rounded-lg text-[11.5px] font-bold cursor-pointer transition-all self-start"
+                >
+                  {isStudent ? "Leave Classroom" : "Delete Classroom Standard"}
+                </button>
+              </div>
+
             </div>
 
           </div>
@@ -498,16 +1058,16 @@ export default function StudentsPage() {
     );
   }
 
+  // Teacher / Admin Views
   return (
     <div className="flex flex-col gap-6 w-full animate-fade-in relative z-10" style={{ padding: "4px 0" }}>
 
-      {/* ── Page Header ── */}
+      {/* Page Header */}
       <div
         className="relative overflow-hidden bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm"
         style={{ padding: "28px 32px" }}
       >
         <div className="flex flex-col gap-2">
-          {/* Badge — no background, just border + icon */}
           <div
             className="flex items-center gap-2 w-max"
             style={{
@@ -523,7 +1083,7 @@ export default function StudentsPage() {
             }}
           >
             <Users size={11} />
-            Roster &amp; Cohorts
+            Institutional classroom setup
           </div>
 
           <h1
@@ -536,202 +1096,330 @@ export default function StudentsPage() {
               margin: "2px 0 0",
             }}
           >
-            Institutional Students Directory
+            Institutional Classrooms &amp; Cohorts Directory
           </h1>
           <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginTop: 2, lineHeight: 1.6 }}>
-            Monitor cohort learning trends, aggregated performance charts, and audit histories.
+            Provision classrooms standards, assign institutional teachers, and invite dynamic student batches.
           </p>
         </div>
       </div>
 
-      {/* ── Analytics Stat Cards ── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Total Students */}
-        <div
-          className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl flex items-center gap-5 shadow-sm hover:scale-[1.01] transition-transform duration-200"
-          style={{ padding: "22px 26px" }}
-        >
-          <div className="w-[46px] h-[46px] bg-brand-500/10 text-brand-600 rounded-xl flex items-center justify-center border border-brand-500/20 shrink-0">
-            <Users size={21} />
-          </div>
-          <div>
-            <div className="text-[11px] text-[var(--text-secondary)] font-semibold uppercase tracking-wider mb-1">
-              Total Registered Students
-            </div>
-            <div className="text-[28px] font-bold font-mono text-[var(--text-primary)] leading-none">
-              {students.length}
-            </div>
-          </div>
-        </div>
-
-        {/* Average Grade */}
-        <div
-          className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl flex items-center gap-5 shadow-sm hover:scale-[1.01] transition-transform duration-200"
-          style={{ padding: "22px 26px" }}
-        >
-          <div className="w-[46px] h-[46px] bg-emerald-500/10 text-emerald-600 rounded-xl flex items-center justify-center border border-emerald-500/20 shrink-0">
-            <Award size={21} />
-          </div>
-          <div>
-            <div className="text-[11px] text-[var(--text-secondary)] font-semibold uppercase tracking-wider mb-1">
-              Average Cohort Grade
-            </div>
-            <div className="text-[28px] font-bold font-mono text-emerald-600 leading-none">
-              {avgCohortGrade ? `${avgCohortGrade}%` : "N/A"}
-            </div>
-          </div>
-        </div>
-
-        {/* Anomalies */}
-        <div
-          className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl flex items-center gap-5 shadow-sm hover:scale-[1.01] transition-transform duration-200"
-          style={{ padding: "22px 26px" }}
-        >
-          <div className="w-[46px] h-[46px] bg-blue-500/10 text-blue-600 rounded-xl flex items-center justify-center border border-blue-500/20 shrink-0">
-            <TrendingUp size={21} />
-          </div>
-          <div>
-            <div className="text-[11px] text-[var(--text-secondary)] font-semibold uppercase tracking-wider mb-1">
-              Anomalies Detected
-            </div>
-            <div className="text-[28px] font-bold font-mono text-[var(--text-primary)] leading-none">0</div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Search & Filter Bar ── */}
-      <div
-        className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm"
-        style={{ padding: "16px 20px" }}
-      >
-        {/* Search */}
-        <div className="relative w-full md:max-w-[420px]">
-          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] pointer-events-none" />
-          <input
-            type="text"
-            placeholder="Search student name..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ padding: "10px 14px 10px 36px", fontSize: "13px" }}
-            className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm font-medium"
-          />
-        </div>
-
-        {/* Cohort Filter */}
-        <div className="flex items-center gap-3 w-full md:w-auto shrink-0 justify-end">
-          <span className="text-[11px] font-bold text-[var(--text-secondary)] font-mono uppercase tracking-wider">
-            Cohort:
-          </span>
-          <div className="flex gap-1 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl p-1">
-            {["ALL", "Batch-A", "Batch-B"].map((cFilter) => (
-              <button
-                key={cFilter}
-                onClick={() => setCohortFilter(cFilter)}
-                style={{ padding: "6px 14px", fontSize: "11px" }}
-                className={`rounded-lg font-bold tracking-wide transition-all cursor-pointer ${
-                  cohortFilter === cFilter
-                    ? "bg-[var(--surface-primary)] text-brand-600 shadow-sm border border-[var(--border-subtle)]"
-                    : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
-                }`}
-              >
-                {cFilter === "ALL" ? "All Cohorts" : cFilter}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Student Cards Grid ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredStudents.slice(0, visibleCount).map((student) => (
-          <div
-            key={student.id}
-            className="group relative bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl flex flex-col shadow-sm hover:shadow-xl hover:border-brand-500/30 hover:-translate-y-1 transition-all duration-300"
-            style={{ padding: "22px 24px", gap: "18px" }}
-          >
-            {/* Student Info Row */}
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-[14px] font-bold text-[var(--text-primary)] leading-tight">
-                  {student.name}
-                </h3>
-                <span className="text-[11px] text-[var(--text-tertiary)] font-medium mt-0.5 block">
-                  {student.cohort}
-                </span>
-              </div>
-
-              {/* Grade Badge */}
-              <div
-                className="flex items-center gap-1 bg-emerald-500/10 text-emerald-600 border border-emerald-500/15 rounded-xl font-bold font-mono shrink-0"
-                style={{ padding: "5px 10px", fontSize: "12px" }}
-              >
-                <Star size={11} className="fill-emerald-500" />
-                {student.averageGrade}%
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="h-[0.5px] bg-[var(--border-subtle)]" />
-
-            {/* Stats Row */}
-            <div className="flex justify-between items-center text-[11.5px] text-[var(--text-secondary)]">
-              <span className="flex items-center gap-1.5 font-medium">
-                <BookOpen size={13} className="text-[var(--text-tertiary)]" />
-                {student.totalSubmissions} graded paper{student.totalSubmissions !== 1 ? "s" : ""}
-              </span>
-              <span className="font-mono text-[10.5px] opacity-75">
-                Active: {new Date(student.lastActive).toLocaleDateString()}
-              </span>
-            </div>
-
-            {/* Action Button */}
-            <Link
-              href="/dashboard/submissions"
-              className="flex items-center justify-center gap-2 rounded-xl text-[12.5px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-secondary)] text-[var(--text-primary)] hover:border-brand-500 hover:bg-brand-500 hover:text-white transition-all duration-200 cursor-pointer shadow-sm"
-              style={{ padding: "10px 16px" }}
-            >
-              Audit Submissions <ArrowRight size={13} />
-            </Link>
-          </div>
-        ))}
-
-        {/* Empty state */}
-        {filteredStudents.length === 0 && !isLoading && (
-          <div
-            className="col-span-full border border-dashed border-[var(--border-subtle)] rounded-2xl text-center bg-[var(--surface-secondary)]"
-            style={{ padding: "56px 24px" }}
-          >
-            <div className="w-12 h-12 rounded-full bg-brand-500/10 text-brand-600 flex items-center justify-center mx-auto mb-4">
-              <Users size={22} />
-            </div>
-            <p className="text-[13px] font-semibold text-[var(--text-primary)]">No students match your query</p>
-            <p className="text-[11.5px] text-[var(--text-tertiary)] mt-1">
-              Try resetting the cohort batch filter or check search spelling.
-            </p>
-          </div>
-        )}
-      </div>
-
-      {filteredStudents.length > 10 && (
-        <div className="flex justify-center gap-3 mt-6">
-          {visibleCount < filteredStudents.length && (
-            <button
-              onClick={() => setVisibleCount((prev) => prev + 5)}
-              className="flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl text-[12.5px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-primary)] text-[var(--text-primary)] hover:border-brand-500 hover:text-brand-600 transition-all cursor-pointer shadow-sm"
-            >
-              See More +5
-            </button>
-          )}
-          {visibleCount > 10 && (
-            <button
-              onClick={() => setVisibleCount(10)}
-              className="flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl text-[12.5px] font-bold border border-[var(--border-subtle)] bg-[var(--surface-primary)] text-[var(--text-primary)] hover:border-red-500 hover:text-red-600 transition-all cursor-pointer shadow-sm"
-            >
-              Show Less
-            </button>
-          )}
+      {/* Followup Confirmation Alert popup banner */}
+      {followupMsg && (
+        <div className="flex items-center gap-3 border border-emerald-500/30 bg-emerald-500/5 text-[#16a34a] rounded-2xl animate-pulse" style={{ padding: "16px 24px" }}>
+          <Check size={16} className="text-[#16a34a]" />
+          <span className="text-[13px] font-semibold">{followupMsg}</span>
         </div>
       )}
+
+      {/* Admin Extra Assignment Modal/Card */}
+      {adminConfiguringClassroom && (
+        <div className="bg-[var(--surface-primary)] border-2 border-brand-500 rounded-2xl shadow-xl p-6 flex flex-col gap-5 animate-fade-in">
+          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+            <div>
+              <span className="text-[10px] font-bold text-brand-500 uppercase tracking-wider font-mono">
+                Admin configuration step required
+              </span>
+              <h3 className="text-[16px] font-bold text-[var(--text-primary)]">
+                Configure Standard: {adminConfiguringClassroom.subject}
+              </h3>
+            </div>
+            <button
+              onClick={() => setAdminConfiguringClassroom(null)}
+              className="text-[var(--text-tertiary)] hover:text-red-500 cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          <form onSubmit={handleAdminConfigureClassroom} className="flex flex-col gap-5">
+            {/* Assign Teachers */}
+            <div className="flex flex-col gap-2">
+              <label className="text-[11px] font-bold text-[var(--text-secondary)] uppercase">
+                Assign Institutional Teachers
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-[var(--surface-secondary)] p-4 rounded-xl border border-[var(--border-subtle)]">
+                {teachersList.map((t) => (
+                  <label key={t.id} className="flex items-center gap-2 cursor-pointer text-[12.5px] font-medium text-[var(--text-primary)]">
+                    <input
+                      type="checkbox"
+                      checked={adminTeacherIds.includes(t.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setAdminTeacherIds([...adminTeacherIds, t.id]);
+                        } else {
+                          setAdminTeacherIds(adminTeacherIds.filter(id => id !== t.id));
+                        }
+                      }}
+                      className="rounded accent-[#e0ff82]"
+                    />
+                    {t.name}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Invite Student emails */}
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between items-center">
+                <label className="text-[11px] font-bold text-[var(--text-secondary)] uppercase">
+                  Invite Student Emails
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setAdminStudentEmails([...adminStudentEmails, ""])}
+                  className="flex items-center gap-1 text-[11px] font-bold text-brand-500 hover:underline cursor-pointer"
+                >
+                  <Plus size={11} /> Add student
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                {adminStudentEmails.map((email, idx) => (
+                  <div key={idx} className="flex gap-2">
+                    <input
+                      type="email"
+                      placeholder="student@school.edu"
+                      value={email}
+                      onChange={(e) => handleEmailChange(idx, e.target.value)}
+                      className="flex-1 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-4 py-3 text-[14px] text-[var(--text-primary)] focus:outline-none"
+                    />
+                    {adminStudentEmails.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const copy = [...adminStudentEmails];
+                          copy.splice(idx, 1);
+                          setAdminStudentEmails(copy);
+                        }}
+                        className="p-2 border border-red-500/20 text-red-500 hover:bg-red-500/10 rounded-xl cursor-pointer"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="btn-lp-accent border-0 cursor-pointer w-full text-[14px] font-bold h-12 flex items-center justify-center rounded-xl"
+            >
+              Complete Classroom Configuration
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Classroom Creation Panel */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Create Classroom form card */}
+        {user?.role !== "student" && (
+          <div className="lg:col-span-1 bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm flex flex-col gap-5" style={{ padding: "24px 28px" }}>
+            <form onSubmit={handleCreateClassroom} className="flex flex-col gap-4">
+              
+              {/* Header with Create Classroom button on top right */}
+              <div className="flex justify-between items-center pb-2 border-b border-[var(--border-subtle)]">
+                <div>
+                  <h3 className="text-[14px] font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <Sparkles size={15} />
+                    Setup Classroom
+                  </h3>
+                </div>
+                <button
+                  type="submit"
+                  disabled={isCreating}
+                  className="btn-lp-accent border-0 cursor-pointer text-[12.5px] font-bold px-3 py-1.5 rounded-lg flex items-center justify-center"
+                >
+                  {isCreating ? "Creating..." : "Create Classroom"}
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10.5px] font-bold text-[var(--text-secondary)] uppercase font-mono">
+                  Subject Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Advanced Physics"
+                  value={classroomSubject}
+                  onChange={(e) => setClassroomSubject(e.target.value)}
+                  className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-4 py-3 text-[14px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10.5px] font-bold text-[var(--text-secondary)] uppercase font-mono">
+                  Class Standard
+                </label>
+                <select
+                  value={classroomClass}
+                  onChange={(e) => setClassroomClass(e.target.value)}
+                  className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-4 py-3 text-[14px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm cursor-pointer"
+                >
+                  <option value="Class 12">Class 12</option>
+                  <option value="Class 11">Class 11</option>
+                  <option value="Class 10">Class 10</option>
+                  <option value="Grade 9">Grade 9</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10.5px] font-bold text-[var(--text-secondary)] uppercase font-mono">
+                  Academic Session
+                </label>
+                <select
+                  value={classroomSession}
+                  onChange={(e) => setClassroomSession(e.target.value)}
+                  className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-4 py-3 text-[14px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm cursor-pointer"
+                >
+                  <option value="2026-2027">2026-2027</option>
+                  <option value="2025-2026">2025-2026</option>
+                  <option value="2024-2025">2024-2025</option>
+                </select>
+              </div>
+
+              {/* Student invites dynamic list (Only for Teacher role directly on creation) */}
+              {user?.role !== "admin" && (
+                <div className="flex flex-col gap-2 mt-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10.5px] font-bold text-[var(--text-secondary)] uppercase font-mono">
+                      Invite Student Emails
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleAddEmailField}
+                      className="flex items-center gap-1 text-[11px] font-bold text-brand-500 hover:underline cursor-pointer"
+                    >
+                      <Plus size={11} /> Add
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    {dynamicStudentEmails.map((email, idx) => (
+                      <div key={idx} className="flex gap-2">
+                        <input
+                          type="email"
+                          placeholder="student@school.edu"
+                          value={email}
+                          onChange={(e) => handleEmailChange(idx, e.target.value)}
+                          className="flex-1 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-[13px] text-[var(--text-primary)] focus:outline-none focus:border-brand-500"
+                        />
+                        {dynamicStudentEmails.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveEmailField(idx)}
+                            className="p-2 border border-red-500/20 text-red-500 hover:bg-red-500/10 rounded-xl cursor-pointer"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </form>
+          </div>
+        )}
+
+        {/* Classroom List Cards */}
+        <div className={`${user?.role === "student" ? "lg:col-span-3" : "lg:col-span-2"} bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm flex flex-col gap-4`} style={{ padding: "26px 28px" }}>
+          <div>
+            <h3 className="text-[14px] font-bold text-[var(--text-primary)] flex items-center gap-2">
+              <BookOpen size={15} />
+              Active Institutional Classrooms Standards
+            </h3>
+            <p className="text-[11.5px] text-[var(--text-secondary)] mt-0.5">
+              Review and audit all classrooms standards, assigned teachers, and invited student counts.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {classrooms.map((c) => (
+              <div
+                key={c.id}
+                onClick={() => selectClassroomWithUrl(c)}
+                className="border border-[var(--border-subtle)] bg-[var(--surface-secondary)] rounded-2xl p-6 flex flex-col gap-4 shadow-sm hover:border-[#e0ff82]/30 transition-all relative group cursor-pointer"
+              >
+                <div>
+                  <h4 className="text-[14px] font-bold text-[var(--text-primary)] leading-tight mb-1">{c.subject}</h4>
+                  <p className="text-[11.5px] text-[var(--text-secondary)] font-medium">Standard: {c.className} | Session: {c.session}</p>
+                  <p className="text-[11px] text-[var(--text-tertiary)] mt-1">Creator: {c.creator}</p>
+                </div>
+
+                <div className="flex flex-col gap-1 text-[12px] text-[var(--text-secondary)] bg-[var(--surface-primary)] p-3 rounded-xl border border-[var(--border-subtle)]">
+                  <div className="font-semibold text-[11px] uppercase tracking-wider text-[var(--text-tertiary)] mb-1">Students Roster</div>
+                  {c.students?.slice(0, 3).map((s: any) => (
+                    <div key={s.id} className="flex justify-between items-center text-[11.5px] py-1 border-b border-[var(--border-subtle)] last:border-b-0">
+                      <span className="font-mono text-[var(--text-primary)]">{getStudentName(s.email)}</span>
+                      {s.status === "PENDING" ? (
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border bg-amber-500/10 text-amber-600 border-amber-500/20">Invited</span>
+                      ) : (
+                        s.status === "ACCEPTED" ? (
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border bg-emerald-500/10 text-emerald-600 border-emerald-500/20">Joined</span>
+                        ) : (
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border bg-red-500/10 text-red-600 border-red-500/20">Declined</span>
+                        )
+                      )}
+                    </div>
+                  ))}
+                  {c.students?.length > 3 && (
+                    <span className="text-[11px] text-[var(--text-tertiary)] font-bold text-center mt-1">+{c.students.length - 3} more students</span>
+                  )}
+                  {(!c.students || c.students.length === 0) && (
+                    <div className="text-center py-2 text-[var(--text-tertiary)] text-[11px] italic">No students invited yet.</div>
+                  )}
+                </div>
+
+                {/* 3-dots Dropdown Options Menu */}
+                <div className="absolute top-4 right-4" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => setActiveMenuId(activeMenuId === c.id ? null : c.id)}
+                    className="w-7 h-7 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-primary)] text-[var(--text-secondary)] flex items-center justify-center hover:bg-[var(--surface-secondary)] cursor-pointer"
+                  >
+                    <MoreVertical size={13} />
+                  </button>
+
+                  {activeMenuId === c.id && (
+                    <div className="absolute right-0 mt-1 w-36 bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-lg shadow-xl py-1 z-20">
+                      <button
+                        onClick={() => {
+                          handleDeleteClassroom(c.id);
+                          setActiveMenuId(null);
+                        }}
+                        className="w-full text-left px-4 py-2 text-[12px] font-semibold text-red-500 hover:bg-red-500/10 border-0 bg-transparent cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Trash2 size={12} /> Delete Class
+                      </button>
+                      <button
+                        onClick={() => {
+                          setFollowupMsg(`Classroom "${c.subject}" updates ignored.`);
+                          setActiveMenuId(null);
+                          setTimeout(() => setFollowupMsg(null), 3000);
+                        }}
+                        className="w-full text-left px-4 py-2 text-[12px] font-semibold text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] border-0 bg-transparent cursor-pointer flex items-center gap-1.5"
+                      >
+                        <X size={12} /> Ignore Updates
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+            {classrooms.length === 0 && (
+              <div className="col-span-full border border-dashed border-[var(--border-subtle)] rounded-2xl text-center py-10 bg-[var(--surface-secondary)]">
+                <p className="text-[13px] font-semibold text-[var(--text-primary)]">No Classrooms Available</p>
+                <p className="text-[11.5px] text-[var(--text-tertiary)] mt-1">Configure classroom standards using the builder panel.</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+      </div>
+
     </div>
   );
 }

@@ -160,6 +160,44 @@ export default function DashboardPage() {
   const [gradeMap, setGradeMap] = useState<Record<string, GradeDetail>>({});
   const [submissionsLimit, setSubmissionsLimit] = useState(5);
   const [liveEventsLimit, setLiveEventsLimit] = useState(5);
+  const [classroomInvites, setClassroomInvites] = useState<any[]>([]);
+
+  const fetchClassroomInvites = async () => {
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/classroom`);
+      const json = await res.json();
+      if (json.data) {
+        const pending = json.data.filter((c: any) => c.status === "PENDING");
+        setClassroomInvites(pending);
+      }
+    } catch (e) {
+      console.error("Failed to fetch classroom invites on home dashboard", e);
+    }
+  };
+
+  const handleAcceptClassroom = async (classId: string) => {
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/classroom/${classId}/students/accept`, { method: "POST" });
+      if (res.ok) {
+        alert("Classroom invitation accepted!");
+        fetchClassroomInvites();
+      }
+    } catch (e) {
+      console.error("Failed to accept classroom enrollment", e);
+    }
+  };
+
+  const handleRejectClassroom = async (classId: string) => {
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/classroom/${classId}/students/reject`, { method: "POST" });
+      if (res.ok) {
+        alert("Classroom invitation declined.");
+        fetchClassroomInvites();
+      }
+    } catch (e) {
+      console.error("Failed to decline classroom enrollment", e);
+    }
+  };
 
   const fetchSubmissions = async (customLimit?: number) => {
     try {
@@ -179,6 +217,12 @@ export default function DashboardPage() {
       });
     } catch (e) { console.error("Failed to fetch submissions", e); }
   };
+
+  useEffect(() => {
+    if (user && user.role === "student") {
+      fetchClassroomInvites();
+    }
+  }, [user]);
 
   useEffect(() => {
     fetchSubmissions(submissionsLimit);
@@ -265,6 +309,71 @@ export default function DashboardPage() {
           </Link>
         )}
       </div>
+
+      {/* Classroom Invitations notifications for Students */}
+      {user?.role === "student" && classroomInvites.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {classroomInvites.map((invite) => (
+            <div
+              key={invite.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "16px 20px",
+                background: "rgba(224, 255, 130, 0.08)",
+                border: "1px solid rgba(224, 255, 130, 0.3)",
+                borderRadius: 12,
+                gap: 16,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36, borderRadius: "50%", background: "rgba(224, 255, 130, 0.15)", color: "#e0ff82" }}>
+                  <GraduationCap size={18} />
+                </div>
+                <div>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: "#e0ff82", textTransform: "uppercase", letterSpacing: "0.06em" }}>Classroom invitation</span>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", margin: "2px 0 0" }}>
+                    You have been invited to join the classroom <strong style={{ color: "#e0ff82" }}>{invite.subject}</strong> (Class: {invite.className}, Session: {invite.session}) by {invite.creator}.
+                  </p>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  onClick={() => handleRejectClassroom(invite.id)}
+                  style={{
+                    padding: "6px 12px",
+                    borderRadius: 8,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    background: "transparent",
+                    color: "var(--text-secondary)",
+                    border: "1px solid var(--border-subtle)",
+                    cursor: "pointer",
+                  }}
+                >
+                  Decline
+                </button>
+                <button
+                  onClick={() => handleAcceptClassroom(invite.id)}
+                  style={{
+                    padding: "6px 12px",
+                    borderRadius: 8,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    background: "#e0ff82",
+                    color: "#1f2223",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  Accept &amp; Join
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* ── Stat cards ── */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
