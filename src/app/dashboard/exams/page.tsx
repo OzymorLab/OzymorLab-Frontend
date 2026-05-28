@@ -35,6 +35,161 @@ interface ExamCycle {
 export default function ExamsPage() {
   const { user, fetchWithAuth } = useAuth();
   
+  // Student view state
+  const [studentSubject, setStudentSubject] = useState("Physics");
+  const [studentQPaper, setStudentQPaper] = useState<File | null>(null);
+  const [studentAnswer, setStudentAnswer] = useState<File | null>(null);
+  const [isStudentSubmitting, setIsStudentSubmitting] = useState(false);
+  const [studentStatusMsg, setStudentStatusMsg] = useState("");
+
+  const handleStudentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!studentQPaper || !studentAnswer) {
+      alert("Please upload both the Question Paper and the Answer Sheet.");
+      return;
+    }
+
+    setIsStudentSubmitting(true);
+    try {
+      // 1. Upload Question Paper
+      setStudentStatusMsg("Decomposing question paper & drafting marking criteria...");
+      const paperFormData = new FormData();
+      paperFormData.append("file", studentQPaper);
+      paperFormData.append("subject", studentSubject);
+      paperFormData.append("board", "CBSE");
+      paperFormData.append("grade_level", "Class 12");
+      paperFormData.append("max_marks", "30");
+
+      const paperRes = await fetchWithAuth(`${API_BASE}/question-papers/upload`, {
+        method: "POST",
+        body: paperFormData,
+      });
+
+      if (!paperRes.ok) {
+        const err = await paperRes.json();
+        throw new Error(err.detail || "Failed to process question paper.");
+      }
+
+      const paperJson = await paperRes.json();
+      const paperData = paperJson.data;
+      const qKey = paperData.question_paper_key;
+      const rSteps = paperData.draft_rubric.steps || [];
+      const gNotes = paperData.draft_rubric.grading_notes || "";
+
+      // 2. Resolve/create default cycle
+      setStudentStatusMsg("Aligning submission with active academic cycle...");
+      let cycleId = selectedCycleId;
+      if (!cycleId) {
+        if (cycles.length > 0) {
+          cycleId = cycles[0].id;
+        } else {
+          // Create dummy cycle
+          const cycRes = await fetchWithAuth(`${API_BASE}/exam-cycles`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: "Self Submissions Cycle",
+              start_date: new Date().toISOString().split('T')[0],
+              end_date: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+            }),
+          });
+          const cycJson = await cycRes.json();
+          cycleId = cycJson.data.id;
+        }
+      }
+
+      // 3. Confirm Rubric & Create Task
+      setStudentStatusMsg("Creating active evaluation task...");
+      const taskPayload = {
+        title: `Self Submission: ${studentSubject}`,
+        subject: studentSubject,
+        board: "CBSE",
+        grade_level: "Class 12",
+        max_marks: 30,
+        description: "Student self-submitted work",
+        question_paper_key: qKey,
+        exam_cycle_id: cycleId,
+        paper_set: "A",
+        rubric: {
+          version: "1.0.0",
+          grading_notes: gNotes,
+          steps: rSteps,
+        }
+      };
+
+      const taskRes = await fetchWithAuth(`${API_BASE}/question-papers/confirm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(taskPayload),
+      });
+
+      if (!taskRes.ok) {
+        const err = await taskRes.json();
+        throw new Error(err.detail || "Failed to confirm grading task.");
+      }
+
+      const taskJson = await taskRes.json();
+      const tId = taskJson.data.id;
+
+      // 4. Auto-approve rubric (student flow auto-approval)
+      setStudentStatusMsg("Unlocking evaluation (auto-approving marking rubric)...");
+      const approveRes = await fetchWithAuth(`${API_BASE}/question-papers/${tId}/rubric/approve`, {
+        method: "POST",
+      });
+      if (!approveRes.ok) {
+        throw new Error("Failed to auto-approve grading rubric.");
+      }
+
+      // 5. Upload student's answer sheet
+      setStudentStatusMsg("Ingesting answer sheet images & text...");
+      const ansFormData = new FormData();
+      ansFormData.append("task_id", tId);
+      ansFormData.append("files", studentAnswer);
+      const uniqueStudentId = `STUDENT-${user?.full_name?.replace(/[^a-zA-Z0-9]/g, "-").toUpperCase() || "SELF"}`;
+      ansFormData.append("student_ids", JSON.stringify([uniqueStudentId]));
+
+      const ansRes = await fetchWithAuth(`${API_BASE}/submissions/bulk`, {
+        method: "POST",
+        body: ansFormData,
+      });
+
+      if (!ansRes.ok) {
+        const err = await ansRes.json();
+        throw new Error(err.detail || "Answer sheet ingestion failed.");
+      }
+
+      // 6. Start grading evaluation
+      setStudentStatusMsg("Enqueuing grading run in AI evaluation queue...");
+      const gradePayload = {
+        task_id: tId,
+        description: `Self submission run for ${studentSubject}`,
+        temperature: 0.0,
+      };
+
+      const gradeRes = await fetchWithAuth(`${API_BASE}/submissions/bulk-grade`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(gradePayload),
+      });
+
+      if (!gradeRes.ok) {
+        const err = await gradeRes.json();
+        throw new Error(err.detail || "Failed to initiate AI evaluation.");
+      }
+
+      setStudentStatusMsg("Done! Redirecting you to Submissions board...");
+      setTimeout(() => {
+        window.location.href = "/dashboard/submissions";
+      }, 1500);
+
+    } catch (err: any) {
+      alert(err.message || "An error occurred during submission.");
+      setStudentStatusMsg("");
+    } finally {
+      setIsStudentSubmitting(false);
+    }
+  };
+
   // Phase 4: Wizard steps (0: Cycle Selection, 1: Paper Upload, 2: Rubric Edit & State Machine, 3: Bulk Answer Upload, 4: Live Progress)
   const [step, setStep] = useState(0); 
 
@@ -438,6 +593,176 @@ export default function ExamsPage() {
       alert(e.message);
     }
   };
+
+  if (user?.role === "student") {
+    return (
+      <div className="flex flex-col gap-8 w-full animate-fade-in relative z-10" style={{ padding: "4px 0" }}>
+        
+        {/* Page Header */}
+        <div
+          className="relative overflow-hidden bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm"
+          style={{ padding: "28px 32px" }}
+        >
+          <div className="flex flex-col gap-2">
+            <div
+              className="flex items-center gap-2 w-max"
+              style={{
+                fontSize: "10px",
+                fontFamily: "var(--font-mono)",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                color: "#16a34a",
+                border: "1px solid rgba(22, 163, 74, 0.2)",
+                borderRadius: "999px",
+                padding: "3px 10px",
+                background: "rgba(22, 163, 74, 0.05)"
+              }}
+            >
+              <Sparkles size={11} />
+              Self-Directed Assessment
+            </div>
+
+            <h1
+              style={{
+                fontSize: "22px",
+                fontWeight: 700,
+                color: "var(--text-primary)",
+                letterSpacing: "-0.02em",
+                lineHeight: 1.2,
+                margin: "2px 0 0",
+              }}
+            >
+              New Submission setup
+            </h1>
+            <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginTop: 2, lineHeight: 1.6 }}>
+              Select subject, upload the exam question paper and your answer sheets to get evaluated by AI.
+            </p>
+          </div>
+        </div>
+
+        {/* Submission Form */}
+        <div
+          className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm flex flex-col"
+          style={{ padding: "32px", gap: "24px" }}
+        >
+          <form onSubmit={handleStudentSubmit} className="flex flex-col gap-6">
+            
+            {/* Subject Select */}
+            <div className="flex flex-col gap-2">
+              <label style={{ fontSize: "12.5px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                Subject
+              </label>
+              <select
+                value={studentSubject}
+                onChange={(e) => setStudentSubject(e.target.value)}
+                style={{ padding: "12px 16px", fontSize: "13.5px" }}
+                className="w-full bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-primary)] focus:outline-none focus:border-brand-500 shadow-sm font-semibold cursor-pointer"
+              >
+                {["Physics", "Chemistry", "Mathematics", "Biology", "English", "Computer Science"].map((subj) => (
+                  <option key={subj} value={subj}>{subj}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Two Column Upload */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              {/* Question Paper Upload */}
+              <div className="flex flex-col gap-2">
+                <label style={{ fontSize: "12.5px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  Question Paper (PDF / Image)
+                </label>
+                <div 
+                  className={`border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all duration-200 bg-[var(--surface-secondary)] ${
+                    studentQPaper ? "border-emerald-500/50 bg-emerald-500/5" : "border-[var(--border-subtle)] hover:border-brand-500/50"
+                  }`}
+                  style={{ padding: "36px 20px", gap: "12px", position: "relative" }}
+                >
+                  <input
+                    type="file"
+                    accept="application/pdf,image/*"
+                    onChange={(e) => setStudentQPaper(e.target.files?.[0] || null)}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                  />
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
+                    studentQPaper ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-[var(--surface-primary)] text-[var(--text-tertiary)] border-[var(--border-subtle)]"
+                  }`}>
+                    {studentQPaper ? <CheckCircle2 size={18} /> : <UploadCloud size={18} />}
+                  </div>
+                  <div className="text-center">
+                    <p style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)" }}>
+                      {studentQPaper ? studentQPaper.name : "Upload Question Paper"}
+                    </p>
+                    <p style={{ fontSize: "11px", color: "var(--text-tertiary)", marginTop: 2 }}>
+                      PDF, PNG, JPG up to 10MB
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Answer Sheet Upload */}
+              <div className="flex flex-col gap-2">
+                <label style={{ fontSize: "12.5px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  Answer Sheet (PDF / Image)
+                </label>
+                <div 
+                  className={`border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all duration-200 bg-[var(--surface-secondary)] ${
+                    studentAnswer ? "border-emerald-500/50 bg-emerald-500/5" : "border-[var(--border-subtle)] hover:border-brand-500/50"
+                  }`}
+                  style={{ padding: "36px 20px", gap: "12px", position: "relative" }}
+                >
+                  <input
+                    type="file"
+                    accept="application/pdf,image/*"
+                    onChange={(e) => setStudentAnswer(e.target.files?.[0] || null)}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                  />
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
+                    studentAnswer ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-[var(--surface-primary)] text-[var(--text-tertiary)] border-[var(--border-subtle)]"
+                  }`}>
+                    {studentAnswer ? <CheckCircle2 size={18} /> : <UploadCloud size={18} />}
+                  </div>
+                  <div className="text-center">
+                    <p style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)" }}>
+                      {studentAnswer ? studentAnswer.name : "Upload Answer Sheet"}
+                    </p>
+                    <p style={{ fontSize: "11px", color: "var(--text-tertiary)", marginTop: 2 }}>
+                      PDF, PNG, JPG up to 10MB
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Submission Status Message / Loader */}
+            {isStudentSubmitting && (
+              <div 
+                className="flex items-center gap-3 border border-[var(--border-subtle)] bg-[var(--surface-secondary)] rounded-xl"
+                style={{ padding: "16px 20px" }}
+              >
+                <Loader2 className="animate-spin text-brand-600 shrink-0" size={16} />
+                <span className="text-[12.5px] font-semibold text-[var(--text-primary)]">{studentStatusMsg}</span>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isStudentSubmitting}
+              className="flex items-center justify-center gap-2 rounded-xl text-[13.5px] font-bold bg-[#e0ff82] text-[#1f2223] hover:scale-[1.01] transition-all duration-200 cursor-pointer shadow-md shadow-[#e0ff82]/10 border-0 disabled:opacity-50 disabled:pointer-events-none self-end"
+              style={{ padding: "12px 24px" }}
+            >
+              Process &amp; Grade Submission <ArrowRight size={14} />
+            </button>
+
+          </form>
+        </div>
+
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8 w-full animate-fade-in relative z-10">

@@ -22,7 +22,6 @@ const LogoIcon = () => (
 const navItems = [
   { label: "Exams Setup", href: "/dashboard/exams", icon: GraduationCap },
   { label: "Submissions", href: "/dashboard/submissions", icon: BookOpen },
-  { label: "Students", href: "/dashboard/students", icon: Users },
   { label: "Reviews", href: "/dashboard/reviews", icon: Shield },
   { label: "Reports", href: "/dashboard/reports", icon: BarChart3 },
 ];
