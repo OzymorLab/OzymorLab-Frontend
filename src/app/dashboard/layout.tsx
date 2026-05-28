@@ -92,8 +92,11 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
 
   const activeNavItems = user?.role === "student"
     ? [
+        { label: "New Submission", href: "/dashboard/exams", icon: GraduationCap },
         { label: "Submissions", href: "/dashboard/submissions", icon: BookOpen },
         { label: "Classroom", href: "/dashboard/students", icon: Users },
+        { label: "Reviews", href: "/dashboard/reviews", icon: Shield },
+        { label: "Reports", href: "/dashboard/reports", icon: BarChart3 },
       ]
     : navItems;
 
