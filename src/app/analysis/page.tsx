@@ -214,6 +214,11 @@ function AnalysisHUDPageContent() {
       let filteredData = json.data || [];
       if (qExamTitle) {
         filteredData = filteredData.filter((w: any) => w.title === qExamTitle);
+      } else if (qSubId && filteredData.length > 0) {
+        const currentWorksheet = filteredData.find((w: any) => w.id === qSubId);
+        if (currentWorksheet && currentWorksheet.title) {
+          filteredData = filteredData.filter((w: any) => w.title === currentWorksheet.title);
+        }
       }
       
       if (filteredData && filteredData.length > 0) {

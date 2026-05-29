@@ -769,7 +769,7 @@ export default function StudentsPage() {
                           </button>
                         ) : (
                           <button
-                            onClick={() => router.push(`/analysis?task_id=${selectedClassroom.id}&submission_id=${ws.id}&exam_title=${encodeURIComponent(ws.title || "")}`)}
+                            onClick={() => router.push(`/analysis?task_id=${selectedClassroom.id}&submission_id=${ws.id}&exam_title=${encodeURIComponent(ws.title || selectedTaskTitle || "")}`)}
                             className="bg-transparent border border-[#16a34a]/30 text-[#16a34a] hover:bg-[#16a34a]/10 cursor-pointer text-[11px] font-bold px-4 py-2 rounded-lg transition-colors"
                           >
                             Review
