@@ -130,7 +130,9 @@ function AnalysisHUDPageContent() {
   const [isLoadingRoster, setIsLoadingRoster] = useState(false);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [isLoadingPractices, setIsLoadingPractices] = useState(false);
+  const [isLoadingGrade, setIsLoadingGrade] = useState(false);
   const [error, setError] = useState<string>("");
+  const [gradeDetail, setGradeDetail] = useState<any>(null);
 
   // Refs
   const rightPaneRef = useRef<HTMLDivElement>(null);
@@ -248,9 +250,23 @@ function AnalysisHUDPageContent() {
       if (activeWs) {
         setSubmissionDetail(activeWs);
         setChatMessages([]);
+        
+        // Fetch real grade details if graded
+        if (activeWs.status === "GRADED" || activeWs.status === "PUBLISHED") {
+          setIsLoadingGrade(true);
+          fetchWithAuth(`${API_BASE}/submissions/${activeWs.id}/grade`)
+            .then(res => res.json())
+            .then(json => {
+              if (json.data) setGradeDetail(json.data);
+            })
+            .catch(e => console.error("Grade fetch failed", e))
+            .finally(() => setIsLoadingGrade(false));
+        } else {
+          setGradeDetail(null);
+        }
       }
     }
-  }, [selectedStudentId, roster]);
+  }, [selectedStudentId, roster, fetchWithAuth]);
   const fetchPractices = useCallback(async () => {
     try {
       setIsLoadingPractices(true);
@@ -1286,7 +1302,7 @@ function AnalysisHUDPageContent() {
                   </h3>
                 </div>
 
-                {isLoadingDetail ? (
+                {isLoadingDetail || isLoadingGrade ? (
                   <div className="flex items-center justify-center flex-1">
                     <Loader2 className="animate-spin text-[var(--text-primary)]" size={24} />
                   </div>
@@ -1297,7 +1313,9 @@ function AnalysisHUDPageContent() {
                         Question Score
                       </span>
                       <span className="text-[13px] font-bold font-mono text-[var(--text-primary)] bg-brand-500/10 text-brand-600 px-3 py-1 rounded-lg">
-                        {activeQuestion.points ? `${(activeQuestion.points * 0.85).toFixed(1)} / ${activeQuestion.points} pts` : "Auto-Graded"}
+                        {gradeDetail && gradeDetail.step_grades && gradeDetail.step_grades[selectedQuestionIndex]
+                          ? `${gradeDetail.step_grades[selectedQuestionIndex].marks_awarded} / ${gradeDetail.step_grades[selectedQuestionIndex].max_marks} pts`
+                          : activeQuestion.points ? `${(activeQuestion.points * 0.85).toFixed(1)} / ${activeQuestion.points} pts` : "Auto-Graded"}
                       </span>
                     </div>
 
@@ -1309,9 +1327,11 @@ function AnalysisHUDPageContent() {
                     </div>
 
                     <p className="text-[12.5px] text-[var(--text-primary)] leading-relaxed font-medium">
-                      {activeStudent.answers && activeStudent.answers[activeQuestion.id] 
-                        ? `OzymorLab analysis shows the student's answer captures the essential components of the question. Conceptually, they are on the right track, but points were deducted slightly for minor verbosity or structural omissions. Overall grade assignment: ${activeStudent.grade || "Verified"}.`
-                        : "No answer provided for this question, so no step traces or analysis can be generated."}
+                      {gradeDetail && gradeDetail.step_grades && gradeDetail.step_grades[selectedQuestionIndex]
+                        ? gradeDetail.step_grades[selectedQuestionIndex].justification
+                        : activeStudent.answers && activeStudent.answers[activeQuestion.id] 
+                          ? `OzymorLab analysis has graded this submission. Overall grade assignment: ${activeStudent.grade || "Verified"}.`
+                          : "No answer provided for this question, so no step traces or analysis can be generated."}
                     </p>
                   </div>
                 )}
