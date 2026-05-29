@@ -197,76 +197,86 @@ function AnalysisHUDPageContent() {
       setError("");
       
       const params = new URLSearchParams(window.location.search);
-      const qClassId = params.get("task_id"); // The task_id parameter is actually the classroom id
-      const qSubId = params.get("submission_id"); // The submission_id is the worksheet id
-      const qExamTitle = params.get("exam_title"); // The title of the assignment to filter by
+      const qTaskId = params.get("task_id"); // The actual exam Task ID
+      const qSubId = params.get("submission_id"); // The actual Student Submission ID
       
-      if (qClassId) {
-        setClassId(qClassId);
+      if (qTaskId) {
+        setClassId(qTaskId);
       }
 
-      // Fetch exams/worksheets for this classroom
-      const url = qClassId 
-        ? `${API_BASE}/classroom/${qClassId}/exams` 
-        : `${API_BASE}/classroom/worksheets`; // fallback for student
+      if (qTaskId) {
+        // Fetch dynamic submissions roster for this exam task
+        const url = `${API_BASE}/analysis/submissions?task_id=${qTaskId}`;
+        const res = await fetchWithAuth(url);
+        const json = await res.json();
         
-      const res = await fetchWithAuth(url);
-      const json = await res.json();
-      
-      let filteredData = json.data || [];
-      if (qExamTitle) {
-        filteredData = filteredData.filter((w: any) => w.title === qExamTitle);
-      } else if (qSubId && filteredData.length > 0) {
-        const currentWorksheet = filteredData.find((w: any) => w.id === qSubId);
-        if (currentWorksheet && currentWorksheet.title) {
-          filteredData = filteredData.filter((w: any) => w.title === currentWorksheet.title);
-        }
-      }
-      
-      if (filteredData && filteredData.length > 0) {
-        setRoster(filteredData);
+        const rosterData = json.data || [];
         
-        const initialSubId = qSubId && filteredData.some((w: any) => w.id === qSubId)
-          ? qSubId
-          : filteredData[0].id;
+        if (rosterData && rosterData.length > 0) {
+          const mappedRoster = rosterData.map((item: any) => ({
+            id: item.id,
+            studentId: item.studentId,
+            studentName: item.name,
+            avatar: item.avatar,
+            score: item.score,
+            maxScore: item.maxScore,
+            flagColor: item.flagColor,
+            submissionTime: item.submissionTime,
+            status: "GRADED"
+          }));
           
-        setSelectedStudentId(initialSubId);
+          setRoster(mappedRoster);
+          
+          const initialSubId = qSubId && mappedRoster.some((w: any) => w.id === qSubId)
+            ? qSubId
+            : mappedRoster[0].id;
+            
+          setSelectedStudentId(initialSubId);
+        } else {
+          setRoster([]);
+          setError("No student submissions found for this exam task.");
+        }
       } else {
         setRoster([]);
-        setError("No submissions found for this classroom.");
+        setError("Missing task_id in URL parameters.");
       }
     } catch (e) {
-      console.error("Failed to load worksheets", e);
-      setError("Failed to load worksheets. Please try again.");
+      console.error("Failed to load dynamic submissions roster", e);
+      setError("Failed to load student submissions roster. Please try again.");
     } finally {
       setIsLoadingTasks(false);
     }
   }, [fetchWithAuth]);
 
-  // When a student's submission is selected, we just set it from the roster
+  // When a student's submission is selected, we fetch full analysis details
   useEffect(() => {
-    if (selectedStudentId && roster.length > 0) {
-      const activeWs = roster.find(w => w.id === selectedStudentId);
-      if (activeWs) {
-        setSubmissionDetail(activeWs);
-        setChatMessages([]);
-        
-        // Fetch real grade details if graded
-        if (activeWs.status === "GRADED" || activeWs.status === "PUBLISHED") {
-          setIsLoadingGrade(true);
-          fetchWithAuth(`${API_BASE}/submissions/${activeWs.id}/grade`)
-            .then(res => res.json())
-            .then(json => {
-              if (json.data) setGradeDetail(json.data);
-            })
-            .catch(e => console.error("Grade fetch failed", e))
-            .finally(() => setIsLoadingGrade(false));
-        } else {
-          setGradeDetail(null);
-        }
-      }
+    if (selectedStudentId) {
+      setIsLoadingDetail(true);
+      setChatMessages([]);
+      setGradeDetail(null);
+      
+      fetchWithAuth(`${API_BASE}/analysis/submissions/${selectedStudentId}`)
+        .then(res => res.json())
+        .then(json => {
+          if (json.data) {
+            setSubmissionDetail(json.data);
+            
+            // Fetch grade details to keep step_grades sync'd
+            setIsLoadingGrade(true);
+            fetchWithAuth(`${API_BASE}/submissions/${selectedStudentId}/grade`)
+              .then(gRes => gRes.json())
+              .then(gJson => {
+                if (gJson.data) setGradeDetail(gJson.data);
+              })
+              .catch(e => console.error("Grade details fetch failed", e))
+              .finally(() => setIsLoadingGrade(false));
+          }
+        })
+        .catch(e => console.error("Submission details fetch failed", e))
+        .finally(() => setIsLoadingDetail(false));
     }
-  }, [selectedStudentId, roster, fetchWithAuth]);
+  }, [selectedStudentId, fetchWithAuth]);
+
   const fetchPractices = useCallback(async () => {
     try {
       setIsLoadingPractices(true);
@@ -305,10 +315,6 @@ function AnalysisHUDPageContent() {
   // DERIVED DATA
   // ==========================================
   
-  // ==========================================
-  // DERIVED DATA
-  // ==========================================
-  
   const activePractice = practiceHistory.find(p => p.id === selectedPracticeId) || null;
   
   const activeStudent = viewMode === "self-eval" && activePractice
@@ -319,19 +325,33 @@ function AnalysisHUDPageContent() {
         score: activePractice.score,
         maxScore: activePractice.maxScore,
         flagColor: "white",
-        submissionTime: activePractice.date
-      }
-    : submissionDetail || {
-        id: "",
-        studentName: "Loading...",
-        avatar: "?",
-        score: 0,
-        maxScore: 0,
-        flagColor: "white",
-        submissionTime: "N/A",
-        questions: [],
+        submissionTime: activePractice.date,
+        questions: activePractice.steps.map(s => ({ id: s.stepNum.toString(), text: s.text })),
         answers: {}
-      };
+      }
+    : submissionDetail
+      ? {
+          id: submissionDetail.id,
+          studentName: submissionDetail.studentName,
+          avatar: submissionDetail.avatar,
+          score: submissionDetail.score,
+          maxScore: submissionDetail.maxScore,
+          flagColor: "green",
+          submissionTime: "N/A",
+          questions: (submissionDetail.steps || []).map((s: any) => ({ id: s.stepNum.toString(), text: s.text })),
+          answers: {}
+        }
+      : {
+          id: "",
+          studentName: "Loading...",
+          avatar: "?",
+          score: 0,
+          maxScore: 0,
+          flagColor: "white",
+          submissionTime: "N/A",
+          questions: [],
+          answers: {}
+        };
 
   const activeQuestion = viewMode === "self-eval" && activePractice
     ? {
@@ -343,19 +363,29 @@ function AnalysisHUDPageContent() {
         avgLatency: "0.8s",
         confidence: 100,
         maxMarks: activePractice.maxScore,
-        questionText: activePractice.ocrText || "Private Self Evaluation Workspace"
+        text: activePractice.ocrText || "Private Self Evaluation Workspace"
       }
-    : activeStudent.questions && activeStudent.questions.length > 0
-      ? activeStudent.questions[selectedQuestionIndex] || activeStudent.questions[0]
+    : submissionDetail?.steps && submissionDetail.steps.length > 0
+      ? {
+          id: submissionDetail.steps[selectedQuestionIndex]?.stepNum?.toString() || "",
+          title: `Step ${selectedQuestionIndex + 1}`,
+          text: submissionDetail.questionText || "Subject Question",
+          topic: submissionDetail.subject || "",
+          difficulty: submissionDetail.difficulty || "Medium",
+          confidence: submissionDetail.confidence || 0.95,
+          maxMarks: submissionDetail.steps[selectedQuestionIndex]?.maxMarks || 0,
+          points: submissionDetail.steps[selectedQuestionIndex]?.maxMarks || 0
+        }
       : {
-        id: "",
-        title: "Loading...",
-        text: "Loading...",
-        topic: "",
-        difficulty: "",
-        confidence: 0,
-        maxMarks: 0
-      };
+          id: "",
+          title: "Loading...",
+          text: "Loading...",
+          topic: "",
+          difficulty: "",
+          confidence: 0,
+          maxMarks: 0,
+          points: 0
+        };
 
   // We are removing `activeSteps` since we render the student's actual answers via HTML, not fixed steps array.
 
@@ -363,21 +393,35 @@ function AnalysisHUDPageContent() {
   // ACTIONS
   // ==========================================
 
-  // Adjust marks (teacher mode)
+  // Adjust marks for the specific active step
   const adjustTotalMarks = async (amt: number) => {
     if (!selectedStudentId || viewMode !== "teacher") return;
+    
+    // Find active step number (1-indexed based on selectedQuestionIndex)
+    const currentStep = submissionDetail?.steps?.[selectedQuestionIndex];
+    const stepNum = currentStep ? currentStep.stepNum : (selectedQuestionIndex + 1);
     
     try {
       await fetchWithAuth(`${API_BASE}/analysis/submissions/${selectedStudentId}/marks`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: amt })
+        body: JSON.stringify({ amount: amt, step_num: stepNum })
       });
       
-      // Refresh data
-      await fetchWorksheets();
+      // Re-fetch submission details silently to update score instantly
+      const res = await fetchWithAuth(`${API_BASE}/analysis/submissions/${selectedStudentId}`);
+      const json = await res.json();
+      if (json.data) {
+        setSubmissionDetail(json.data);
+      }
+      
+      const gRes = await fetchWithAuth(`${API_BASE}/submissions/${selectedStudentId}/grade`);
+      const gJson = await gRes.json();
+      if (gJson.data) {
+        setGradeDetail(gJson.data);
+      }
     } catch (e) {
-      console.error("Failed to override marks", e);
+      console.error("Failed to override step marks", e);
     }
   };
 
@@ -885,7 +929,7 @@ function AnalysisHUDPageContent() {
             ) : (
               <div className="flex-1 flex gap-2">
                 <div className="flex-1 h-10 px-4 text-[13.5px] font-bold text-[var(--text-primary)] flex items-center">
-                  {viewMode === "teacher" ? `${activeStudent.studentName} - Question ${selectedQuestionIndex + 1}` : `Question ${selectedQuestionIndex + 1}`}
+                  {viewMode === "teacher" ? `${activeStudent.studentName} - Step ${selectedQuestionIndex + 1}` : `Step ${selectedQuestionIndex + 1}`}
                 </div>
 
 
@@ -893,7 +937,11 @@ function AnalysisHUDPageContent() {
                 <div className="h-10 flex items-center overflow-hidden flex-shrink-0 border border-[var(--border-subtle)] rounded-xl">
                   <div className="px-4 text-center">
                     <span className="text-[13px] font-mono font-bold text-[var(--text-primary)]">
-                      {(gradeDetail?.grade ?? activeStudent.score ?? (activeQuestion.points * 0.85)).toFixed(1)} pts
+                      {gradeDetail?.step_grades?.[selectedQuestionIndex]
+                        ? `${gradeDetail.step_grades[selectedQuestionIndex].marks_awarded.toFixed(1)} / ${gradeDetail.step_grades[selectedQuestionIndex].max_marks.toFixed(1)} pts`
+                        : submissionDetail?.steps?.[selectedQuestionIndex]
+                          ? `${submissionDetail.steps[selectedQuestionIndex].marks.toFixed(1)} / ${submissionDetail.steps[selectedQuestionIndex].maxMarks.toFixed(1)} pts`
+                          : "— pts"}
                     </span>
                   </div>
                   
@@ -1256,12 +1304,76 @@ function AnalysisHUDPageContent() {
                         backgroundSize: "18px 18px"
                       }}>
 
-                      <div className="flex-1 p-6 relative overflow-y-auto">
-                        
+                      <div className="flex-1 p-6 relative overflow-y-auto flex flex-col gap-4">
                         {isLoadingDetail ? (
                           <div className="flex items-center justify-center h-full">
                             <Loader2 className="animate-spin text-[var(--text-primary)]" size={24} />
                           </div>
+                        ) : submissionDetail?.steps && submissionDetail.steps.length > 0 ? (
+                          submissionDetail.steps.map((step: any, index: number) => {
+                            const isSelected = selectedQuestionIndex === index;
+                            const hasError = step.marks < step.maxMarks || step.errorType;
+                            
+                            return (
+                              <div
+                                key={step.stepNum || index}
+                                onClick={() => setSelectedQuestionIndex(index)}
+                                className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer shadow-sm relative flex flex-col gap-3 ${
+                                  isSelected 
+                                    ? "ring-2 ring-brand-500 ring-offset-1 ring-offset-[var(--surface-secondary)] border-brand-500 bg-[var(--surface-primary)]" 
+                                    : "border-[var(--border-subtle)] bg-[var(--surface-primary)]/80 hover:bg-[var(--surface-primary)] hover:border-[var(--border-default)]"
+                                } ${
+                                  hasError && isSelected 
+                                    ? "shadow-md shadow-red-500/5 bg-gradient-to-br from-[var(--surface-primary)] to-red-500/5" 
+                                    : ""
+                                }`}
+                              >
+                                {/* Step Header */}
+                                <div className="flex justify-between items-center">
+                                  <span className="text-[12px] font-bold font-mono uppercase tracking-wider text-brand-600 flex items-center gap-1.5">
+                                    <Sparkles size={13} />
+                                    Step {step.stepNum}
+                                  </span>
+                                  
+                                  <div className="flex items-center gap-2">
+                                    {/* Error Warning Badge */}
+                                    {hasError && (
+                                      <span className="text-[9.5px] font-bold uppercase tracking-wider bg-red-500/10 border border-red-500/20 text-red-500 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                                        <AlertTriangle size={10} />
+                                        {step.errorType || "Deduction"}
+                                      </span>
+                                    )}
+                                    
+                                    <span className="text-[12px] font-bold font-mono text-[var(--text-secondary)]">
+                                      {step.marks.toFixed(1)} / {step.maxMarks.toFixed(1)} pts
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Step Content (Text & Equation) */}
+                                <div className="flex flex-col gap-2">
+                                  {step.text && (
+                                    <p className="text-[13.5px] leading-relaxed text-[var(--text-primary)] font-medium">
+                                      {step.text}
+                                    </p>
+                                  )}
+                                  {step.latex && (
+                                    <div className="bg-[var(--surface-secondary)] px-3 py-2 rounded-lg border border-[var(--border-subtle)] font-mono text-[12px] text-[var(--text-secondary)] w-max max-w-full overflow-x-auto">
+                                      {step.latex}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Bounding Box Indicator - WRONG PART HIGHLIGHT capsules */}
+                                {hasError && step.justification && (
+                                  <div className="mt-2 text-[11.5px] flex items-center gap-1.5 bg-red-500/5 border border-red-500/10 rounded-xl p-3 text-red-600 font-medium">
+                                    <ShieldAlert size={13} className="shrink-0" />
+                                    <span><strong>Feedback:</strong> {step.justification}</span>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })
                         ) : activeStudent.answers && activeStudent.answers[activeQuestion.id] ? (
                           <div 
                             className="bg-[var(--surface-primary)] p-6 rounded-lg border border-[var(--border-subtle)] shadow-sm text-[14px] text-[var(--text-primary)] min-h-[300px]"

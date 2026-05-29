@@ -74,7 +74,7 @@ interface GradeDetail {
 }
 
 export default function SubmissionsPage() {
-  const { fetchWithAuth } = useAuth();
+  const { fetchWithAuth, user } = useAuth();
   const router = useRouter();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [filteredSubmissions, setFilteredSubmissions] = useState<Submission[]>([]);
@@ -113,6 +113,17 @@ export default function SubmissionsPage() {
 
   const applyFilters = (subsList: Submission[], search: string, status: string) => {
     let result = [...subsList];
+    if (user?.role === "student") {
+      result = result.filter(s => {
+        if (!s.student_id) return false;
+        if (s.student_id === user?.id) return true;
+        const uName = (user?.full_name || "").toLowerCase();
+        if (generateStudentName(s.student_id).name.toLowerCase() === uName) return true;
+        const idLower = s.student_id.toLowerCase();
+        if (uName && (idLower.includes(uName.split(' ')[0]) || idLower.includes(uName.replace(' ', '-')))) return true;
+        return false;
+      });
+    }
     if (search.trim()) {
       result = result.filter(
         (s) =>
