@@ -893,7 +893,7 @@ function AnalysisHUDPageContent() {
                 <div className="h-10 flex items-center overflow-hidden flex-shrink-0 border border-[var(--border-subtle)] rounded-xl">
                   <div className="px-4 text-center">
                     <span className="text-[13px] font-mono font-bold text-[var(--text-primary)]">
-                      {(gradeDetail?.grade ?? activeStudent.score ?? (activeQuestion.points * 0.85) ?? 0).toFixed(1)} pts
+                      {(gradeDetail?.grade ?? activeStudent.score ?? (activeQuestion.points * 0.85)).toFixed(1)} pts
                     </span>
                   </div>
                   
