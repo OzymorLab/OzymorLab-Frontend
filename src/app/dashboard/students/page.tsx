@@ -36,6 +36,10 @@ interface StudentSummary {
   lastActive: string;
 }
 
+// Client-side cache for high-performance instant loading
+const classroomExamsCache: Record<string, any> = {};
+let globalWorksheetsCache: any = null;
+
 export default function StudentsPage() {
   const { user, fetchWithAuth } = useAuth();
   const router = useRouter();
@@ -118,6 +122,9 @@ export default function StudentsPage() {
 
   // Fetch all databases
   const fetchClassroomData = async () => {
+    if (globalWorksheetsCache) {
+      setClassWorksheets(globalWorksheetsCache);
+    }
     try {
       const resClassrooms = await fetchWithAuth(`${API_BASE}/classroom`);
       const jsonClassrooms = await resClassrooms.json();
@@ -139,6 +146,7 @@ export default function StudentsPage() {
       const resWs = await fetchWithAuth(`${API_BASE}/classroom/worksheets`);
       const jsonWs = await resWs.json();
       if (jsonWs.data) {
+        globalWorksheetsCache = jsonWs.data;
         setClassWorksheets(jsonWs.data);
       }
 
@@ -151,10 +159,14 @@ export default function StudentsPage() {
   };
 
   const fetchClassroomExams = async (classId: string) => {
+    if (classroomExamsCache[classId]) {
+      setExamWorksheetsList(classroomExamsCache[classId]);
+    }
     try {
       const res = await fetchWithAuth(`${API_BASE}/classroom/${classId}/exams`);
       const json = await res.json();
       if (json.data) {
+        classroomExamsCache[classId] = json.data;
         setExamWorksheetsList(json.data);
       }
     } catch (e) {
