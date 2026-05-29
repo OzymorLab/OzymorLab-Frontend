@@ -3544,3 +3544,34 @@ select.input-field {
   }
 }
 
+/* React Quill Dark Mode Overrides */
+.ql-toolbar.ql-snow {
+  border-color: var(--border-subtle) !important;
+  background-color: var(--surface-secondary);
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+}
+.ql-container.ql-snow {
+  border-color: var(--border-subtle) !important;
+  border-bottom-left-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
+  font-family: inherit !important;
+  font-size: 14px !important;
+}
+.ql-snow .ql-stroke {
+  stroke: var(--text-secondary) !important;
+}
+.ql-snow .ql-fill, .ql-snow .ql-stroke.ql-fill {
+  fill: var(--text-secondary) !important;
+}
+.ql-snow .ql-picker {
+  color: var(--text-secondary) !important;
+}
+.ql-snow .ql-picker-options {
+  background-color: var(--surface-primary) !important;
+  border-color: var(--border-subtle) !important;
+}
+.ql-editor.ql-blank::before {
+  color: var(--text-tertiary) !important;
+  font-style: normal !important;
+}

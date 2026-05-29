@@ -4,8 +4,27 @@ import { useState, useEffect } from "react";
 import { Users, Search, Award, TrendingUp, BookOpen, User, Star, ArrowRight, Sparkles, Plus, Trash2, Check, X, ShieldAlert, MoreVertical, ArrowLeft, UploadCloud, Loader2, FileText, CheckCircle2 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
+import "react-quill-new/dist/quill.snow.css";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.com/api/v1";
+
+const quillModules = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, false] }],
+    [{ 'font': [] }, { 'size': [] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ 'color': [] }, { 'background': [] }],
+    [{ 'script': 'sub'}, { 'script': 'super' }],
+    ['blockquote', 'code-block'],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    [{ 'indent': '-1'}, { 'indent': '+1' }, { 'align': [] }],
+    ['link', 'image', 'video'],
+    ['clean']
+  ],
+};
 
 interface StudentSummary {
   id: string;
@@ -19,6 +38,7 @@ interface StudentSummary {
 
 export default function StudentsPage() {
   const { user, fetchWithAuth } = useAuth();
+  const router = useRouter();
   
   // Navigation back states
   const [selectedClassroom, setSelectedClassroom] = useState<any | null>(null);
@@ -389,7 +409,7 @@ export default function StudentsPage() {
     await new Promise(resolve => setTimeout(resolve, 2000));
     setAnalysisStatusStep("2. Decomposing steps & validating arithmetic LaTeX matrices...");
     await new Promise(resolve => setTimeout(resolve, 2000));
-    setAnalysisStatusStep("3. Evaluating computational logic with Edexia AI trust engine...");
+    setAnalysisStatusStep("3. Evaluating computational logic with OzymorLab trust engine...");
     await new Promise(resolve => setTimeout(resolve, 2000));
 
     try {
@@ -444,7 +464,7 @@ export default function StudentsPage() {
     await new Promise(resolve => setTimeout(resolve, 1500));
     setAnalysisStatusStep("2. Running computational step verification & OCR bounds check...");
     await new Promise(resolve => setTimeout(resolve, 1500));
-    setAnalysisStatusStep("3. Evaluating final accuracy scores with Edexia AI trust engine...");
+    setAnalysisStatusStep("3. Evaluating final accuracy scores with OzymorLab trust engine...");
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     try {
@@ -699,155 +719,86 @@ export default function StudentsPage() {
               </div>
             </div>
           </div>
-
-          {/* Main Grid: Submissions list and active details */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Roster Submissions Table */}
+          <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 shadow-sm">
+            <h3 className="text-[14px] font-bold text-[var(--text-primary)] mb-4 flex items-center justify-between">
+              Student Roster Submissions
+            </h3>
             
-            {/* Submissions List */}
-            <div className="lg:col-span-1 flex flex-col gap-4">
-              <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-5 shadow-sm">
-                <h3 className="text-[13px] font-bold text-[var(--text-primary)] mb-3">Student Roster Submissions</h3>
-                <div className="flex flex-col gap-2.5">
-                  {relatedWorksheets.map((ws) => {
-                    const isSelected = selectedStudentWorksheet?.id === ws.id;
-                    return (
-                      <div
-                        key={ws.id}
-                        onClick={() => setSelectedStudentWorksheet(ws)}
-                        className={`border p-3.5 rounded-xl flex justify-between items-center cursor-pointer transition-all ${isSelected ? "border-[#e0ff82] bg-[var(--surface-secondary)] shadow-sm" : "border-[var(--border-subtle)] hover:border-[#e0ff82]/20"}`}
-                      >
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[12.5px] font-bold text-[var(--text-primary)]">{ws.studentName}</span>
-                          <span className="text-[10px] font-mono text-[var(--text-tertiary)]">Grade: {ws.grade || "N/A"}</span>
-                        </div>
-                        <div>
-                          {ws.status === "PENDING" ? (
-                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border bg-amber-500/10 text-amber-600 border-amber-500/20">Pending</span>
-                          ) : ws.status === "GRADED" ? (
-                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border bg-blue-500/10 text-blue-600 border-blue-500/20">Awaiting Verify</span>
-                          ) : (
-                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border bg-emerald-500/10 text-emerald-600 border-emerald-500/20">Published</span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Active submission workspace and editor */}
-            <div className="lg:col-span-2">
-              {selectedStudentWorksheet ? (
-                <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 shadow-sm flex flex-col gap-6">
-                  
-                  {/* Header */}
-                  <div className="flex justify-between items-center border-b border-[var(--border-subtle)] pb-4">
-                    <div>
-                      <span className="text-[10px] font-bold text-[#16a34a] uppercase tracking-wider font-mono">Evaluation Workspace</span>
-                      <h3 className="text-[16px] font-bold text-[var(--text-primary)]">{selectedStudentWorksheet.studentName}</h3>
-                    </div>
-                    
-                    {/* Start Evaluation Button & Publish Marks */}
-                    <div className="flex items-center gap-2">
-                      {selectedStudentWorksheet.status === "PENDING" && (
-                        <button
-                          onClick={() => handleStartEvaluation(selectedStudentWorksheet.id)}
-                          disabled={isAnalyzingExam}
-                          className="btn-lp-accent border-0 cursor-pointer text-[12px] font-bold px-4 py-2 rounded-lg flex items-center gap-1.5"
-                        >
-                          {isAnalyzingExam ? (
-                            <>
-                              <Loader2 size={13} className="animate-spin text-black" />
-                              Evaluating...
-                            </>
-                          ) : "Start Evaluation"}
-                        </button>
-                      )}
-
-                      {selectedStudentWorksheet.status === "GRADED" && (
-                        <button
-                          onClick={() => handlePublishMarks(selectedStudentWorksheet.id)}
-                          className="btn-lp-accent border-0 cursor-pointer text-[12px] font-bold px-4 py-2 rounded-lg"
-                        >
-                          Publish Marks
-                        </button>
-                      )}
-
-                      {selectedStudentWorksheet.status === "PUBLISHED" && (
-                        <span className="text-[10px] font-bold text-emerald-600 border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 rounded font-mono uppercase tracking-wider">
-                          Published ✓
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* AI progress tracker */}
-                  {isAnalyzingExam && selectedStudentWorksheet.status === "PENDING" && (
-                    <div className="flex flex-col gap-1 p-4 border border-amber-500/20 bg-amber-500/5 rounded-xl">
-                      <span className="text-[12px] font-bold text-[var(--text-primary)] animate-pulse flex items-center gap-1.5">
-                        <Loader2 size={13} className="animate-spin text-[#e0ff82]" /> Edexia AI analyzing steps...
-                      </span>
-                      <span className="text-[10.5px] font-mono text-amber-500 font-semibold">{analysisStatusStep}</span>
-                    </div>
-                  )}
-
-                  {/* Assignment Questions and Answers */}
-                  <div className="flex flex-col gap-4">
-                    <h4 className="text-[12px] font-bold text-[var(--text-secondary)] uppercase font-mono">Submission Details</h4>
-                    
-                    {selectedStudentWorksheet.status === "PENDING" ? (
-                      <div className="text-center py-8 border border-dashed border-[var(--border-subtle)] rounded-xl bg-[var(--surface-secondary)] text-[12.5px] text-[var(--text-secondary)]">
-                        Student has not submitted the worksheet answers yet. Click <strong>Start Evaluation</strong> to trigger an AI grading mock run on this profile.
-                      </div>
-                    ) : (
-                      <div className="flex flex-col gap-4">
-                        {/* Questions and student's answers */}
-                        {selectedStudentWorksheet.questions?.map((q: any, idx: number) => (
-                          <div key={q.id} className="border border-[var(--border-subtle)] bg-[var(--surface-secondary)] rounded-xl p-4 flex flex-col gap-2">
-                            <span className="text-[12px] font-bold text-[#e0ff82] font-mono">Question 0{idx + 1}: {q.text}</span>
-                            <div className="border-t border-[var(--border-subtle)] pt-2 mt-1">
-                              <span className="text-[11px] font-bold text-[var(--text-secondary)] block uppercase mb-1">Student Answer:</span>
-                              <p className="text-[13px] text-[var(--text-primary)] whitespace-pre-wrap leading-relaxed">
-                                {selectedStudentWorksheet.answers?.[q.id] || "No answer submitted."}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-
-                        {/* Display attachment if exists */}
-                        {selectedStudentWorksheet.answers?.["upload"] && (
-                          <div className="border border-[var(--border-subtle)] bg-[var(--surface-secondary)] rounded-xl p-4 flex items-center gap-3">
-                            <FileText size={20} className="text-[#16a34a]" />
-                            <div>
-                              <span className="text-[12px] font-bold text-[var(--text-primary)] block">Scanned Answer Sheet Uploaded</span>
-                              <span className="text-[10.5px] text-[var(--text-secondary)]">{selectedStudentWorksheet.answers["upload"]}</span>
-                            </div>
-                          </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    <th className="py-3 px-4 text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Student Name</th>
+                    <th className="py-3 px-4 text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Status</th>
+                    <th className="py-3 px-4 text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Grade</th>
+                    <th className="py-3 px-4 text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {relatedWorksheets.map((ws) => (
+                    <tr key={ws.id} className="border-b border-[var(--border-subtle)] hover:bg-[var(--surface-secondary)] transition-colors">
+                      <td className="py-4 px-4">
+                        <span className="text-[13px] font-bold text-[var(--text-primary)]">{ws.studentName}</span>
+                      </td>
+                      <td className="py-4 px-4">
+                        {ws.status === "PENDING" ? (
+                          <span className="text-[10px] font-bold px-2 py-1 rounded-md border bg-amber-500/10 text-amber-600 border-amber-500/20">Pending Evaluation</span>
+                        ) : ws.status === "GRADED" ? (
+                          <span className="text-[10px] font-bold px-2 py-1 rounded-md border bg-blue-500/10 text-blue-600 border-blue-500/20">Awaiting Verify</span>
+                        ) : (
+                          <span className="text-[10px] font-bold px-2 py-1 rounded-md border bg-emerald-500/10 text-emerald-600 border-emerald-500/20">Published</span>
                         )}
-
-                        {/* Graded Details */}
-                        <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4 flex justify-between items-center mt-2">
-                          <div>
-                            <span className="text-[11px] font-bold text-emerald-500 uppercase tracking-wider block">AI Evaluated Score</span>
-                            <span className="text-[13px] font-medium text-[var(--text-secondary)]">Steps validated successfully via OCR and trust engine.</span>
-                          </div>
-                          <span className="text-[22px] font-mono font-bold text-emerald-500">{selectedStudentWorksheet.grade}</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                </div>
-              ) : (
-                <div className="bg-[var(--surface-primary)] border border-dashed border-[var(--border-subtle)] rounded-2xl p-12 text-center text-[13px] text-[var(--text-secondary)]">
-                  Select a student submission from the roster panel to inspect their turning-in worksheet answers and trigger evaluation.
-                </div>
-              )}
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="text-[12px] font-mono text-[var(--text-tertiary)] font-bold">{ws.grade || "N/A"}</span>
+                      </td>
+                      <td className="py-4 px-4 flex justify-end items-center gap-3">
+                        {ws.status === "PENDING" ? (
+                          <button
+                            onClick={() => handleStartEvaluation(ws.id)}
+                            disabled={isAnalyzingExam}
+                            className="btn-lp-accent border-0 cursor-pointer text-[11px] font-bold px-4 py-2 rounded-lg flex items-center gap-1.5"
+                          >
+                            {isAnalyzingExam ? (
+                              <>
+                                <Loader2 size={13} className="animate-spin text-black" />
+                                OzymorLab Analysing...
+                              </>
+                            ) : "Analyse"}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => router.push(`/analysis?task_id=${selectedClassroom.id}&submission_id=${ws.id}&exam_title=${encodeURIComponent(ws.title || "")}`)}
+                            className="bg-transparent border border-[#16a34a]/30 text-[#16a34a] hover:bg-[#16a34a]/10 cursor-pointer text-[11px] font-bold px-4 py-2 rounded-lg transition-colors"
+                          >
+                            Review
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                  {relatedWorksheets.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="py-8 text-center text-[13px] text-[var(--text-secondary)]">
+                        No submissions found for this task.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
 
+            {/* AI progress tracker (global for the table) */}
+            {isAnalyzingExam && (
+              <div className="mt-4 flex flex-col gap-1 p-4 border border-amber-500/20 bg-amber-500/5 rounded-xl animate-fade-in">
+                <span className="text-[12px] font-bold text-[var(--text-primary)] flex items-center gap-1.5">
+                  <Loader2 size={13} className="animate-spin text-[#e0ff82]" /> OzymorLab trust engine analyzing...
+                </span>
+                <span className="text-[10.5px] font-mono text-amber-500 font-semibold">{analysisStatusStep}</span>
+              </div>
+            )}
           </div>
-
         </div>
       );
     }
@@ -964,11 +915,13 @@ export default function StudentsPage() {
                   <div key={q.id} className="flex flex-col gap-2">
                     <span className="text-[12.5px] font-semibold text-[var(--text-secondary)]">Answer Q0{idx + 1}:</span>
                     <div className="border border-[var(--border-subtle)] bg-[var(--surface-secondary)] rounded-xl overflow-hidden shadow-inner flex flex-col">
-                      <textarea
+                      <ReactQuill
+                        theme="snow"
                         placeholder="Write your detailed step-by-step response..."
                         value={answers[q.id] || ""}
-                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                        className="w-full bg-transparent border-0 outline-none text-[13.5px] text-[var(--text-primary)] p-4 min-h-[120px] resize-vertical"
+                        onChange={(content) => setAnswers({ ...answers, [q.id]: content })}
+                        modules={quillModules}
+                        className="w-full bg-transparent text-[var(--text-primary)] min-h-[250px]"
                       />
                     </div>
                   </div>
@@ -991,7 +944,7 @@ export default function StudentsPage() {
             {isSubmittingAnswer && (
               <div className="flex items-center gap-2.5 text-[12px] font-semibold text-[var(--text-secondary)] bg-[var(--surface-secondary)] p-3 rounded-xl">
                 <Loader2 size={14} className="animate-spin text-[#e0ff82]" />
-                <span>Edexia AI is analyzing your steps and submitting answer transcript...</span>
+                <span>OzymorLab is analyzing your steps and submitting answer transcript...</span>
               </div>
             )}
 
@@ -1143,7 +1096,7 @@ export default function StudentsPage() {
                     {isAnalyzingExam && (
                       <div className="flex flex-col gap-1 p-3 border border-[var(--border-subtle)] bg-[var(--surface-secondary)] rounded-xl">
                         <span className="text-[11.5px] font-bold text-[var(--text-primary)] animate-pulse flex items-center gap-1.5">
-                          <Loader2 size={13} className="animate-spin text-[#e0ff82]" /> Edexia AI analysis enqueued...
+                          <Loader2 size={13} className="animate-spin text-[#e0ff82]" /> OzymorLab analysis enqueued...
                         </span>
                         <span className="text-[10px] font-mono text-amber-500 font-semibold">{analysisStatusStep}</span>
                       </div>

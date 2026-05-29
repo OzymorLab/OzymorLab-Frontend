@@ -167,7 +167,7 @@ export default function SubmissionsPage() {
           <p className="text-[13px] text-text-tertiary mt-1">Audit complete grading streams, logs, and evidence-backed results.</p>
         </div>
         <button 
-          onClick={fetchSubmissions} 
+          onClick={() => fetchSubmissions(visibleCount)} 
           disabled={isLoading}
           style={{
             display: 'inline-flex',
