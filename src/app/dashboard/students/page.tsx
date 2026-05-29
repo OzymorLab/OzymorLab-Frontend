@@ -163,6 +163,7 @@ export default function StudentsPage() {
   };
 
   const fetchRosterData = async () => {
+    if (user?.role === "student") return;
     setIsLoading(true);
     try {
       const res = await fetchWithAuth(`${API_BASE}/schools/students`);

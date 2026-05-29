@@ -176,7 +176,12 @@ function AnalysisHUDPageContent() {
     if (user) {
       if (user.role === "student") {
         setViewMode("student");
-      } else if (user.role === "admin" || user.role === "teacher") {
+      } else if (
+        user.role === "admin" ||
+        user.role === "teacher" ||
+        user.role === "hod" ||
+        user.role === "principal"
+      ) {
         setViewMode("teacher");
       }
     }
@@ -229,12 +234,16 @@ function AnalysisHUDPageContent() {
           
           const initialSubId = qSubId && mappedRoster.some((w: any) => w.id === qSubId)
             ? qSubId
-            : mappedRoster[0].id;
+            : (mappedRoster[0]?.id || "");
             
           setSelectedStudentId(initialSubId);
         } else {
           setRoster([]);
-          setError("No student submissions found for this exam task.");
+          if (qSubId) {
+            setSelectedStudentId(qSubId);
+          } else {
+            setError("No student submissions found for this exam task.");
+          }
         }
       } else {
         setRoster([]);
@@ -315,6 +324,16 @@ function AnalysisHUDPageContent() {
   // DERIVED DATA
   // ==========================================
   
+  const getFlagColor = (score: number, maxScore: number) => {
+    const ratio = maxScore > 0 ? score / maxScore : 0;
+    if (ratio >= 1.0) return "green-d";
+    if (ratio >= 0.9) return "green";
+    if (ratio >= 0.8) return "green-l";
+    if (ratio >= 0.6) return "red-l";
+    if (ratio >= 0.4) return "red";
+    return "red-d";
+  };
+
   const activePractice = practiceHistory.find(p => p.id === selectedPracticeId) || null;
   
   const activeStudent = viewMode === "self-eval" && activePractice
@@ -336,10 +355,12 @@ function AnalysisHUDPageContent() {
           avatar: submissionDetail.avatar,
           score: submissionDetail.score,
           maxScore: submissionDetail.maxScore,
-          flagColor: "green",
+          flagColor: getFlagColor(submissionDetail.score, submissionDetail.maxScore),
           submissionTime: "N/A",
-          questions: (submissionDetail.steps || []).map((s: any) => ({ id: s.stepNum.toString(), text: s.text })),
-          answers: {}
+          questions: submissionDetail.questions && submissionDetail.questions.length > 0
+            ? submissionDetail.questions.map((q: any) => ({ id: q.id || q.stepNum?.toString(), text: q.text }))
+            : (submissionDetail.steps || []).map((s: any) => ({ id: s.stepNum.toString(), text: s.text })),
+          answers: submissionDetail.answers || {}
         }
       : {
           id: "",
@@ -365,27 +386,38 @@ function AnalysisHUDPageContent() {
         maxMarks: activePractice.maxScore,
         text: activePractice.ocrText || "Private Self Evaluation Workspace"
       }
-    : submissionDetail?.steps && submissionDetail.steps.length > 0
+    : submissionDetail?.questions && submissionDetail.questions.length > 0
       ? {
-          id: submissionDetail.steps[selectedQuestionIndex]?.stepNum?.toString() || "",
-          title: `Step ${selectedQuestionIndex + 1}`,
-          text: submissionDetail.questionText || "Subject Question",
+          id: submissionDetail.questions[selectedQuestionIndex]?.id || (selectedQuestionIndex + 1).toString(),
+          title: `Question ${selectedQuestionIndex + 1}`,
+          text: submissionDetail.questions[selectedQuestionIndex]?.text || "Subject Question",
           topic: submissionDetail.subject || "",
           difficulty: submissionDetail.difficulty || "Medium",
           confidence: submissionDetail.confidence || 0.95,
-          maxMarks: submissionDetail.steps[selectedQuestionIndex]?.maxMarks || 0,
-          points: submissionDetail.steps[selectedQuestionIndex]?.maxMarks || 0
+          maxMarks: 100.0 / submissionDetail.questions.length,
+          points: 100.0 / submissionDetail.questions.length
         }
-      : {
-          id: "",
-          title: "Loading...",
-          text: "Loading...",
-          topic: "",
-          difficulty: "",
-          confidence: 0,
-          maxMarks: 0,
-          points: 0
-        };
+      : submissionDetail?.steps && submissionDetail.steps.length > 0
+        ? {
+            id: submissionDetail.steps[selectedQuestionIndex]?.stepNum?.toString() || "",
+            title: `Step ${selectedQuestionIndex + 1}`,
+            text: submissionDetail.questionText || "Subject Question",
+            topic: submissionDetail.subject || "",
+            difficulty: submissionDetail.difficulty || "Medium",
+            confidence: submissionDetail.confidence || 0.95,
+            maxMarks: submissionDetail.steps[selectedQuestionIndex]?.maxMarks || 0,
+            points: submissionDetail.steps[selectedQuestionIndex]?.maxMarks || 0
+          }
+        : {
+            id: "",
+            title: "Loading...",
+            text: "Loading...",
+            topic: "",
+            difficulty: "",
+            confidence: 0,
+            maxMarks: 0,
+            points: 0
+          };
 
   // We are removing `activeSteps` since we render the student's actual answers via HTML, not fixed steps array.
 
