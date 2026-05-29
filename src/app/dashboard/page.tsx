@@ -239,7 +239,15 @@ export default function DashboardPage() {
   }, [selectedSub]);
 
   // Role-based computations
-  const mySubmissions = submissions.filter(s => s.student_id && generateName(s.student_id).name.toLowerCase() === user?.full_name.toLowerCase());
+  const mySubmissions = submissions.filter(s => {
+    if (!s.student_id) return false;
+    if (s.student_id === user?.id) return true;
+    const uName = (user?.full_name || "").toLowerCase();
+    if (generateName(s.student_id).name.toLowerCase() === uName) return true;
+    const idLower = s.student_id.toLowerCase();
+    if (uName && (idLower.includes(uName.split(' ')[0]) || idLower.includes(uName.replace(' ', '-')))) return true;
+    return false;
+  });
   const myGraded = mySubmissions.filter(s => s.status === "GRADED");
   const myPending = mySubmissions.filter(s => !["GRADED", "FAILED"].includes(s.status));
   
