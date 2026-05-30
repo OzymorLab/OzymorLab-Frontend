@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /product_admin
+Disallow: /product_admin/
+Disallow: /dashboard
+Disallow: /dashboard/
+Disallow: /dashboard/admin
+Disallow: /dashboard/admin/
+
+Sitemap: https://ozymorlab.com/sitemap.xml
