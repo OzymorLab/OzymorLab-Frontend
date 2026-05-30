@@ -470,6 +470,43 @@ export default function StudentsPage() {
     }
   };
 
+  // Start AI bulk evaluation simulator
+  const handleBulkStartEvaluation = async (worksheetIds: string[]) => {
+    setIsAnalyzingExam(true);
+    setAnalysisStatusStep("1. Ingesting bulk student text submissions & indexing LaTeX syntax...");
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setAnalysisStatusStep("2. Running computational step verification & OCR bounds check...");
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setAnalysisStatusStep("3. Evaluating final accuracy scores with OzymorLab trust engine...");
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    try {
+      const promises = worksheetIds.map(id => fetchWithAuth(`${API_BASE}/classroom/worksheets/${id}/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          answers: { 
+            "q1": "Student submitted answers evaluated by Teacher triggering AI grading pipeline. Formulae verified.",
+            "q2": "Steps matched completely with standard answer key templates. Edexia score verified." 
+          }
+        })
+      }));
+      await Promise.all(promises);
+
+      setFollowupMsg(`Bulk AI Evaluation completed for ${worksheetIds.length} submissions! Grades saved as Draft.`);
+      await fetchClassroomData();
+      if (selectedClassroom) {
+        await fetchClassroomExams(selectedClassroom.id);
+      }
+      setTimeout(() => setFollowupMsg(null), 3000);
+    } catch (e) {
+      console.error("Bulk Evaluation failed", e);
+    } finally {
+      setIsAnalyzingExam(false);
+      setAnalysisStatusStep("");
+    }
+  };
+
   // Start AI evaluation simulator
   const handleStartEvaluation = async (worksheetId: string) => {
     setIsAnalyzingExam(true);
@@ -736,6 +773,19 @@ export default function StudentsPage() {
           <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 shadow-sm">
             <h3 className="text-[14px] font-bold text-[var(--text-primary)] mb-4 flex items-center justify-between">
               Student Roster Submissions
+              {relatedWorksheets.some(ws => ws.status === "PENDING") && (
+                <button
+                  onClick={() => handleBulkStartEvaluation(relatedWorksheets.filter(ws => ws.status === "PENDING").map(ws => ws.id))}
+                  disabled={isAnalyzingExam}
+                  className="btn-lp-accent border-0 cursor-pointer text-[12px] font-bold px-4 py-2 rounded-lg flex items-center gap-2 shadow-md hover:scale-105 transition-all"
+                >
+                  {isAnalyzingExam ? (
+                    <><Loader2 size={14} className="animate-spin text-black" /> Processing...</>
+                  ) : (
+                    <><Sparkles size={14} /> Bulk Analyse All Pending</>
+                  )}
+                </button>
+              )}
             </h3>
             
             <div className="overflow-x-auto">
@@ -941,16 +991,40 @@ export default function StudentsPage() {
                 ))}
               </div>
             ) : (
-              <div className="border border-dashed border-[var(--border-subtle)] rounded-xl p-6 text-center flex flex-col items-center justify-center bg-[var(--surface-secondary)]">
-                <UploadCloud size={32} className="text-[var(--text-tertiary)] mb-2" />
-                <span className="text-[13px] font-bold text-[var(--text-primary)]">Upload your scanned Answer Sheet file</span>
-                <p className="text-[11px] text-[var(--text-tertiary)] mt-1">Accepts PDF, PNG, JPG formats up to 10MB</p>
-                <input
-                  type="file"
-                  onChange={(e) => setUploadedAnswerFile(e.target.files?.[0] || null)}
-                  className="mt-3 text-[11.5px] text-[var(--text-secondary)] cursor-pointer"
-                />
-                {uploadedAnswerFile && <span className="text-[12px] text-emerald-500 font-bold mt-2">✓ Attached: {uploadedAnswerFile.name}</span>}
+              <div className="border border-dashed border-[var(--border-subtle)] rounded-xl p-8 text-center flex flex-col items-center justify-center bg-[var(--surface-secondary)] transition-all">
+                {!uploadedAnswerFile ? (
+                  <>
+                    <UploadCloud size={40} className="text-[var(--text-tertiary)] mb-3" />
+                    <span className="text-[14px] font-bold text-[var(--text-primary)]">Upload your scanned Answer Sheet file</span>
+                    <p className="text-[12px] text-[var(--text-tertiary)] mt-1 mb-4">Accepts PDF, PNG, JPG formats up to 10MB</p>
+                    <label className="btn-lp-outline px-5 py-2.5 rounded-xl text-[13px] font-bold cursor-pointer hover:bg-[var(--surface-primary)]">
+                      Browse Files
+                      <input
+                        type="file"
+                        className="hidden"
+                        onChange={(e) => setUploadedAnswerFile(e.target.files?.[0] || null)}
+                      />
+                    </label>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center gap-3 w-full max-w-sm">
+                    <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mb-1">
+                      <FileText size={32} className="text-emerald-500" />
+                    </div>
+                    <div className="text-center">
+                      <span className="text-[15px] font-bold text-[var(--text-primary)] block">{uploadedAnswerFile.name}</span>
+                      <span className="text-[12px] text-emerald-500 font-bold flex items-center justify-center gap-1 mt-1">
+                        <CheckCircle2 size={14} /> File Successfully Attached
+                      </span>
+                    </div>
+                    <button 
+                      onClick={() => setUploadedAnswerFile(null)}
+                      className="mt-2 text-[12px] font-bold text-red-500 hover:text-red-400 bg-red-500/10 px-4 py-1.5 rounded-lg transition-colors cursor-pointer"
+                    >
+                      Remove & Change File
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 

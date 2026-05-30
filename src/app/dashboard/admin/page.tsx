@@ -205,31 +205,30 @@ export default function SchoolAdminPage() {
   const [selectedStudentClassroom, setSelectedStudentClassroom] = useState("");
   const [selectedStudent, setSelectedStudent] = useState("");
 
+  const loadResource = async <T,>(url: string, fallback: T) => {
+    const res = await fetchWithAuth(url);
+    if (!res.ok) return fallback;
+    const json = await res.json();
+    return (json.data ?? fallback) as T;
+  };
+
   const loadAdminData = async () => {
     setLoading(true);
     try {
-      const [overviewRes, classesRes, studentsRes, teachersRes, classroomsRes, assignmentsRes] = await Promise.all([
-        fetchWithAuth(`${API_BASE}/schools/overview`),
-        fetchWithAuth(`${API_BASE}/schools/classes`),
-        fetchWithAuth(`${API_BASE}/schools/students?limit=200`),
-        fetchWithAuth(`${API_BASE}/schools/teachers`),
-        fetchWithAuth(`${API_BASE}/schools/classrooms`),
-        fetchWithAuth(`${API_BASE}/schools/assignments`),
+      const [overviewData, classesData, studentsData, teachersData, classroomsData, assignmentsData] = await Promise.all([
+        loadResource<Overview | null>(`${API_BASE}/schools/overview`, null),
+        loadResource<ClassInfo[]>(`${API_BASE}/schools/classes`, []),
+        loadResource<StudentRow[]>(`${API_BASE}/schools/students?limit=200`, []),
+        loadResource<TeacherRow[]>(`${API_BASE}/schools/teachers`, []),
+        loadResource<ClassroomRow[]>(`${API_BASE}/schools/classrooms`, []),
+        loadResource<AssignmentRow[]>(`${API_BASE}/schools/assignments`, []),
       ]);
-      const [overviewJson, classesJson, studentsJson, teachersJson, classroomsJson, assignmentsJson] = await Promise.all([
-        overviewRes.json(),
-        classesRes.json(),
-        studentsRes.json(),
-        teachersRes.json(),
-        classroomsRes.json(),
-        assignmentsRes.json(),
-      ]);
-      if (overviewJson.data) setOverview(overviewJson.data);
-      if (classesJson.data) setClasses(classesJson.data);
-      if (studentsJson.data) setStudents(studentsJson.data);
-      if (teachersJson.data) setTeachers(teachersJson.data);
-      if (classroomsJson.data) setClassrooms(classroomsJson.data);
-      if (assignmentsJson.data) setAssignments(assignmentsJson.data);
+      setOverview(overviewData);
+      setClasses(classesData);
+      setStudents(studentsData);
+      setTeachers(teachersData);
+      setClassrooms(classroomsData);
+      setAssignments(assignmentsData);
     } catch (error) {
       console.error("Failed to load school admin data", error);
     } finally {
