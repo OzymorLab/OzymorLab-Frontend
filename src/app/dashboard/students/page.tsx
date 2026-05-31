@@ -38,7 +38,9 @@ interface StudentSummary {
 
 // Client-side cache for high-performance instant loading
 const classroomExamsCache: Record<string, any> = {};
-let globalWorksheetsCache: any = null;
+const globalWorksheetsCache = {
+  data: null as any
+};
 
 export default function StudentsPage() {
   const { user, fetchWithAuth } = useAuth();
@@ -122,8 +124,8 @@ export default function StudentsPage() {
 
   // Fetch all databases
   const fetchClassroomData = async () => {
-    if (globalWorksheetsCache) {
-      setClassWorksheets(globalWorksheetsCache);
+    if (globalWorksheetsCache.data) {
+      setClassWorksheets(globalWorksheetsCache.data);
     }
     try {
       const resClassrooms = await fetchWithAuth(`${API_BASE}/classroom`);
@@ -146,7 +148,7 @@ export default function StudentsPage() {
       const resWs = await fetchWithAuth(`${API_BASE}/classroom/worksheets`);
       const jsonWs = await resWs.json();
       if (jsonWs.data) {
-        globalWorksheetsCache = jsonWs.data;
+        globalWorksheetsCache.data = jsonWs.data;
         setClassWorksheets(jsonWs.data);
       }
 
