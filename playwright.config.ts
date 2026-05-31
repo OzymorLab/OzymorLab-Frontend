@@ -20,9 +20,12 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev -- -p 3000',
+    command: 'npm run dev',
     port: 3000,
     timeout: 120000,
-    reuseExistingServer: true,
+    reuseExistingServer: false,
+    env: {
+      NEXT_PUBLIC_SUPABASE_URL: '',
+    },
   },
 });

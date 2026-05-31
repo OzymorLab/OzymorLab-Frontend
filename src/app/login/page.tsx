@@ -1,19 +1,23 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, ArrowRight, AlertCircle, CheckCircle2, Sparkles } from "lucide-react";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 
 function LoginPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { login, signup, loginWithGoogle, user, isLoading } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<"login" | "signup">(
-    searchParams.get("tab") === "signup" ? "signup" : "login"
-  );
+  const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("tab") === "signup") {
+      setActiveTab("signup");
+    }
+  }, []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -75,7 +79,7 @@ function LoginPageContent() {
   };
 
   return (
-    <div className="auth-page" suppressHydrationWarning>
+    <div className="auth-page">
       {isLoading ? (
         <div className="auth-loading">
           <div className="auth-spinner" />
@@ -361,9 +365,7 @@ function LoginPageContent() {
 export default function LoginPage() {
   return (
     <AuthProvider>
-      <Suspense fallback={<div className="auth-page" suppressHydrationWarning><div className="auth-loading"><div className="auth-spinner" /></div></div>}>
-        <LoginPageContent />
-      </Suspense>
+      <LoginPageContent />
     </AuthProvider>
   );
 }
