@@ -22,6 +22,20 @@
   --lp-max-w: 1200px;
 }
 
+:root.dark, :root[data-theme="dark"] {
+  --lp-bg: #111111;
+  --lp-fg: #e8e8e6;
+  --lp-fg-alt: #ffffff;
+  --lp-muted: #9ca3af;
+  --lp-muted2: #9ca3af;
+  --lp-border: rgba(255, 255, 255, 0.12);
+  --lp-border-light: rgba(255, 255, 255, 0.06);
+  --lp-surface: rgb(24, 26, 27);
+  --lp-accent: rgb(224, 255, 130);
+  --lp-accent-soft: rgb(231, 255, 161);
+}
+
+
 /* ── Reset ── */
 .lp-root {
   font-family: var(--lp-font);
@@ -118,6 +132,10 @@
   backdrop-filter: blur(16px);
   border-bottom: 1px solid transparent;
   transition: all 0.3s ease;
+}
+
+:root.dark .lp-nav, :root[data-theme="dark"] .lp-nav {
+  background: rgba(17, 17, 17, 0.85);
 }
 
 .lp-nav--scrolled {
@@ -398,11 +416,35 @@
   height: 32px;
   border-radius: 8px;
   background: var(--lp-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--lp-muted);
+  font-weight: 700;
+  font-size: 11px;
+  font-family: inherit;
+  transition: all 0.2s ease;
 }
 
 .lp-hero-ui__sidebar-item--active {
   background: var(--lp-accent);
+  color: var(--lp-fg);
 }
+
+/* Stacking Cards horizontal stretch and scroll bypass overrides */
+.sp-stack-card {
+  width: calc(100% - 48px) !important;
+}
+
+.sp-stack-card .sp-panel {
+  max-width: 100% !important;
+  margin: 0 !important;
+  transform: none !important;
+  opacity: 1 !important;
+  transition: box-shadow 0.3s ease !important; /* Only animate box shadow, bypass custom slide transformations */
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--sp-border) !important;
+}
+
 
 .lp-hero-ui__main {
   flex: 1;
@@ -1008,6 +1050,10 @@
 .lp-footer__bottom p {
   font-size: 13px;
   color: rgba(3, 32, 43, 0.7);
+}
+
+:root.dark .lp-footer__bottom p, :root[data-theme="dark"] .lp-footer__bottom p {
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .lp-footer__socials {
@@ -1692,5 +1738,206 @@
 
   .lp-blog-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ═══════════════ FAQ SECTION ═══════════════ */
+.lp-faqs {
+  padding: 100px 24px;
+  background: var(--lp-bg);
+  border-top: 1px solid var(--lp-border-light);
+}
+
+.lp-faqs__tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  max-width: 680px;
+  margin: 0 auto 32px;
+  padding: 6px;
+  background: var(--lp-surface);
+  border-radius: 100px;
+  border: 1px solid var(--lp-border);
+}
+
+.lp-faqs__tab-btn {
+  padding: 10px 24px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--lp-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--lp-font);
+}
+
+.lp-faqs__tab-btn:hover {
+  color: var(--lp-fg);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+:root.dark .lp-faqs__tab-btn:hover, :root[data-theme="dark"] .lp-faqs__tab-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.lp-faqs__tab-btn--active {
+  background: var(--lp-bg) !important;
+  color: var(--lp-fg) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 0 0 1px var(--lp-border);
+}
+
+:root.dark .lp-faqs__tab-btn--active, :root[data-theme="dark"] .lp-faqs__tab-btn--active {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), 0 0 0 1px var(--lp-border);
+}
+
+.lp-faqs__accordion {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lp-faqs__item {
+  background: var(--lp-bg);
+  border: 1px solid var(--lp-border);
+  border-radius: var(--lp-radius);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.lp-faqs__item:hover {
+  border-color: var(--lp-muted);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+}
+
+:root.dark .lp-faqs__item:hover, :root[data-theme="dark"] .lp-faqs__item:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.lp-faqs__item-header {
+  width: 100%;
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--lp-font);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--lp-fg);
+  gap: 16px;
+}
+
+.lp-faqs__item-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--lp-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--lp-muted);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s;
+}
+
+.lp-faqs__item-header:hover .lp-faqs__item-icon {
+  background: var(--lp-border);
+  color: var(--lp-fg);
+}
+
+.lp-faqs__item-icon--expanded {
+  transform: rotate(180deg);
+  background: var(--lp-accent) !important;
+  color: var(--lp-fg) !important;
+}
+
+.lp-faqs__item-body {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  padding: 0 24px;
+  transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, padding 0.3s ease;
+  text-align: left;
+  line-height: 1.6;
+  font-size: 14px;
+  color: var(--lp-muted);
+}
+
+.lp-faqs__item-body--expanded {
+  max-height: 600px;
+  opacity: 1;
+  padding: 0 24px 24px;
+}
+
+.lp-faqs__item-body p {
+  margin: 0;
+}
+
+.lp-faqs__cta-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, var(--lp-fg-alt) 0%, #1f2223 100%);
+  color: #ffffff;
+  border-radius: 16px;
+  padding: 32px 48px;
+  max-width: 800px;
+  margin: 56px auto 0;
+  text-align: left;
+  gap: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+}
+
+.lp-faqs__cta-banner-content {
+  flex: 1;
+}
+
+.lp-faqs__cta-banner h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.lp-faqs__cta-banner p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.lp-faqs__cta-banner .lp-btn {
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .lp-faqs {
+    padding: 64px 20px;
+  }
+
+  .lp-faqs__tabs {
+    border-radius: 20px;
+    padding: 8px;
+  }
+
+  .lp-faqs__tab-btn {
+    width: 100%;
+    text-align: center;
+    padding: 10px;
+  }
+
+  .lp-faqs__cta-banner {
+    flex-direction: column;
+    text-align: center;
+    padding: 32px 24px;
+    gap: 24px;
   }
 }

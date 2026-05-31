@@ -62,11 +62,11 @@ const navLinks = [
 const teamMembers = [
   { name: "Rajesh Sharma", role: "Founder & Director", initials: "RS", color: "#4f46e5" },
   { name: "Priya Patel", role: "Co-founder & Provost", initials: "PP", color: "#0891b2" },
-  { name: "Arun Kumar", role: "Head of Evaluation Systems", initials: "AK", color: "#059669" },
+  { name: "Asif Khan", role: "Head of Evaluation Systems", initials: "AK", color: "#059669" },
   { name: "Meera Desai", role: "Head of Multimodal AI", initials: "MD", color: "#d97706" },
   { name: "Vikram Singh", role: "Cursive OCR Architect", initials: "VS", color: "#dc2626" },
-  { name: "Sneha Verma", role: "UI/UX Research Lead", initials: "SV", color: "#7c3aed" },
-  { name: "Anita Nair", role: "Learning Analytics Lead", initials: "AN", color: "#0d9488" },
+  { name: "Sarah Varghese", role: "UI/UX Research Lead", initials: "SV", color: "#7c3aed" },
+  { name: "Adnan Naqvi", role: "Learning Analytics Lead", initials: "AN", color: "#0d9488" },
 ];
 
 const featureCards = [
@@ -107,10 +107,43 @@ const featureDetailRoles = [
   { role: "Academic Controller", items: ["Grading Integrity Program", "Multimodal AI Optimization"] },
 ];
 
+const faqData = {
+  student: [
+    { q: "Can OzymorLab evaluate complete answer sheets?", a: "Yes. OzymorLab can evaluate full answer sheets, including multiple questions across different subjects, not just individual answers." },
+    { q: "Does OzymorLab support CBSE answer sheets?", a: "Yes. OzymorLab is designed to evaluate answers according to board-style marking schemes and can provide detailed feedback aligned with CBSE-style expectations." },
+    { q: "Can OzymorLab check Mathematics step-by-step?", a: "Yes. OzymorLab analyzes intermediate steps, identifies where mistakes occur, and can award feedback on the solution process instead of only checking the final answer." },
+    { q: "Can it evaluate Physics derivations?", a: "Yes. OzymorLab evaluates derivations, formulas, substitutions, and logical progression used to arrive at the final answer." },
+    { q: "Can it check Chemistry equations and reactions?", a: "Yes. OzymorLab can validate chemical equations, reaction balancing, formulas, and explanatory answers." },
+    { q: "Does it support Biology diagrams?", a: "Yes. OzymorLab can analyze labelled diagrams and provide feedback on completeness and correctness." },
+    { q: "Can OzymorLab evaluate Hindi answers?", a: "Yes. OzymorLab supports Hindi answer evaluation and provides feedback on content, structure, and expression." },
+    { q: "Does it support Sanskrit?", a: "OzymorLab supports Sanskrit answer analysis and continues to improve script understanding and evaluation quality." },
+    { q: "Will my marks be exactly the same as my school teacher's?", a: "Not always. Different teachers may award marks differently. OzymorLab aims to provide consistent and explainable evaluation while highlighting areas for improvement." },
+    { q: "Can I improve my answer and submit again?", a: "Yes. Students can revise answers and track improvement over multiple submissions." }
+  ],
+  parent: [
+    { q: "How accurate is OzymorLab?", a: "OzymorLab uses AI-powered evaluation models trained to analyze answer quality, reasoning, structure, and completeness." },
+    { q: "Is my child's data safe?", a: "Yes. Student submissions are securely stored and processed using industry-standard security practices." },
+    { q: "Does OzymorLab replace teachers?", a: "No. OzymorLab is designed to assist learning and assessment, not replace educators." },
+    { q: "Can OzymorLab help improve board exam scores?", a: "OzymorLab helps students identify mistakes, improve answer-writing techniques, and practice exam-oriented responses." }
+  ],
+  teacher: [
+    { q: "Can OzymorLab grade an entire class at once?", a: "Yes. Teachers can upload multiple answer sheets and receive structured evaluations and analytics." },
+    { q: "Does OzymorLab support CBSE marking schemes?", a: "Yes. Teachers can configure marking rubrics and evaluation criteria aligned with board requirements." },
+    { q: "Can teachers customize rubrics?", a: "Yes. Schools and teachers can define custom rubrics, marking patterns, and evaluation standards." },
+    { q: "Does OzymorLab provide partial marking?", a: "Yes. The platform is designed to recognize intermediate reasoning and provide partial-credit evaluation where applicable." },
+    { q: "Can OzymorLab detect weak concepts across a class?", a: "Yes. Teachers receive topic-wise performance analytics and concept-level insights." },
+    { q: "Can it generate feedback automatically?", a: "Yes. Personalized feedback can be generated for each student." },
+    { q: "Can OzymorLab evaluate handwritten answer sheets?", a: "Yes. Handwritten answer sheets can be uploaded as images or PDFs for evaluation." }
+  ],
+  school: [
+    { q: "Can OzymorLab be used across multiple classes?", a: "Yes. Schools can manage multiple grades, sections, teachers, and subjects from one platform." }
+  ]
+};
+
 const testimonials = [
-  { name: "Dr. Danielle Rodrigues", role: "Vice Chancellor @Crown Board", quote: "OzymorLab transformed our grading pipeline — explainable traces changed everything." },
-  { name: "Prof. Dennis Howell", role: "Dean of Evaluation @Crown Board", quote: "The rubric grounding feature ensures consistent, bias-free evaluation at scale." },
-  { name: "Dr. Camilla Queiroz", role: "LMS Integration Lead @Crown Board", quote: "Seamless Canvas & Blackboard integration saved us months of manual work." },
+  { name: "Dr. Divya Ramachandran", role: "Vice Chancellor @Crown Board", quote: "OzymorLab transformed our grading pipeline — explainable traces changed everything." },
+  { name: "Prof. Danish Habib", role: "Dean of Evaluation @Crown Board", quote: "The rubric grounding feature ensures consistent, bias-free evaluation at scale." },
+  { name: "Dr. Cyril Quadros", role: "LMS Integration Lead @Crown Board", quote: "Seamless Canvas & Blackboard integration saved us months of manual work." },
 ];
 
 const pricingPlans = [
@@ -154,7 +187,155 @@ export default function LandingPage() {
     }
   }, [pathname]);
 
-  const r1 = useReveal(), r2 = useReveal(), r3 = useReveal(), r4 = useReveal(), r5 = useReveal(), r6 = useReveal(), r7 = useReveal(), r8 = useReveal(), r9 = useReveal(), r10 = useReveal(), r11 = useReveal();
+  const r1 = useReveal(), r2 = useReveal(), r3 = useReveal(), r4 = useReveal(), r5 = useReveal(), r6 = useReveal(), r7 = useReveal(), r8 = useReveal(), r9 = useReveal(), r10 = useReveal(), r11 = useReveal(), rFaq = useReveal();
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [smoothProgress, setSmoothProgress] = useState(0);
+  const lastScrollTime = useRef(0);
+
+  const [faqTab, setFaqTab] = useState<'student' | 'parent' | 'teacher' | 'school'>('student');
+  const [expandedFaqIndex, setExpandedFaqIndex] = useState<number | null>(null);
+
+  const scrollProgress = activeCardIndex === 0 ? 0 : activeCardIndex === 1 ? 0.5 : 1.0;
+
+  useEffect(() => {
+    let rId: number;
+    let currentProgress = smoothProgress;
+
+    const updateSmoothProgress = () => {
+      currentProgress += (scrollProgress - currentProgress) * 0.05; // Cinematic smooth slow LERP
+      setSmoothProgress(currentProgress);
+      rId = requestAnimationFrame(updateSmoothProgress);
+    };
+
+    rId = requestAnimationFrame(updateSmoothProgress);
+    return () => cancelAnimationFrame(rId);
+  }, [scrollProgress]);
+
+  // Capture wheel events on the container to step index by index discretely
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      const now = Date.now();
+      const delta = e.deltaY;
+
+      // Lock scroll while inside transition range
+      if ((delta > 0 && activeCardIndex < 2) || (delta < 0 && activeCardIndex > 0)) {
+        e.preventDefault();
+      }
+
+      // Check cooldown to avoid skipping steps on rapid scrolling
+      if (now - lastScrollTime.current < 800) {
+        return;
+      }
+
+      if (delta > 20 && activeCardIndex < 2) {
+        setActiveCardIndex(prev => prev + 1);
+        lastScrollTime.current = now;
+      } else if (delta < -20 && activeCardIndex > 0) {
+        setActiveCardIndex(prev => prev - 1);
+        lastScrollTime.current = now;
+      }
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, [activeCardIndex]);
+
+  // Capture mobile touch swipe to step index by index discretely
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    let touchStartY = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const now = Date.now();
+      const touchCurrentY = e.touches[0].clientY;
+      const deltaY = touchStartY - touchCurrentY; // Positive = swipe up / scroll down
+      
+      if (Math.abs(deltaY) > 40) {
+        // Lock scroll while inside transition range
+        if ((deltaY > 0 && activeCardIndex < 2) || (deltaY < 0 && activeCardIndex > 0)) {
+          e.preventDefault();
+        }
+
+        // Check cooldown
+        if (now - lastScrollTime.current < 800) {
+          return;
+        }
+
+        if (deltaY > 40 && activeCardIndex < 2) {
+          setActiveCardIndex(prev => prev + 1);
+          lastScrollTime.current = now;
+          touchStartY = touchCurrentY;
+        } else if (deltaY < -40 && activeCardIndex > 0) {
+          setActiveCardIndex(prev => prev - 1);
+          lastScrollTime.current = now;
+          touchStartY = touchCurrentY;
+        }
+      }
+    };
+
+    el.addEventListener("touchstart", handleTouchStart, { passive: true });
+    el.addEventListener("touchmove", handleTouchMove, { passive: false });
+    return () => {
+      el.removeEventListener("touchstart", handleTouchStart);
+      el.removeEventListener("touchmove", handleTouchMove);
+    };
+  }, [activeCardIndex]);
+
+  const activeIndex = activeCardIndex;
+
+  const handleSidebarClick = (idx: number) => {
+    setActiveCardIndex(idx);
+  };
+
+  const getCardStyles = (index: number) => {
+    if (index === 0) {
+      const scale = 1 - smoothProgress * 0.08;
+      const translateY = -35 * smoothProgress;
+      const opacity = 1 - smoothProgress * 0.35;
+      return {
+        transform: `translate3d(0, ${translateY}px, 0) scale(${scale})`,
+        opacity,
+        zIndex: 1,
+        pointerEvents: activeIndex === 0 ? ("auto" as const) : ("none" as const),
+      };
+    } else if (index === 1) {
+      const p1 = Math.min(Math.max((smoothProgress - 0.1) / 0.4, 0), 1);
+      const p1_dim = Math.min(Math.max((smoothProgress - 0.5) / 0.4, 0), 1);
+
+      const translateY = (1 - p1) * 600 - p1_dim * 15;
+      const scale = 0.95 + p1 * 0.05 - p1_dim * 0.05;
+      
+      return {
+        transform: `translate3d(0, ${translateY}px, 0) scale(${scale})`,
+        opacity: p1 === 0 ? 0 : 1,
+        zIndex: 2,
+        pointerEvents: activeIndex === 1 ? ("auto" as const) : ("none" as const),
+      };
+    } else {
+      const p2 = Math.min(Math.max((smoothProgress - 0.5) / 0.4, 0), 1);
+      
+      const translateY = (1 - p2) * 600;
+      const scale = 0.95 + p2 * 0.05;
+      
+      return {
+        transform: `translate3d(0, ${translateY}px, 0) scale(${scale})`,
+        opacity: p2 === 0 ? 0 : 1,
+        zIndex: 3,
+        pointerEvents: activeIndex === 2 ? ("auto" as const) : ("none" as const),
+      };
+    }
+  };
 
   return (
     <div className="lp-root">
@@ -208,59 +389,73 @@ export default function LandingPage() {
             <Link href="/pricing" className="lp-btn lp-btn--outline lp-btn--lg">Start Free Pilot</Link>
             <Link href="/contact" className="lp-btn lp-btn--primary lp-btn--lg text-white" style={{ color: "#ffffff" }}>Request Demo</Link>
           </div>
-          {/* Hero UI Mock */}
-          <div style={{ textAlign: "center", marginBottom: "10px" }}>
-                      <h2 className="lp-section-title">
-                        Built for every <span className="lp-highlight lp-highlight--underline">role in your school</span>
-                      </h2>
-                      <p className="lp-section-subtitle" style={{ textAlign: "center", margin: "16px auto 0", maxWidth: "600px" }}>
-                        From teachers managing submissions to students tracking progress, to administrators overseeing school performance.
-                      </p>
-                    </div>
-          <div className="lp-hero__ui lp-anim-fade" style={{ animationDelay: "0.6s" }}>
-            <div className="lp-hero-ui">
-              <div className="lp-hero-ui__sidebar">
-                <div className="lp-hero-ui__sidebar-logo"><LogoIcon /></div>
-                {[0, 1, 2, 3, 4].map(i => <div key={i} className={`lp-hero-ui__sidebar-item ${i === 1 ? "lp-hero-ui__sidebar-item--active" : ""}`} />)}
-              </div>
-              
-              <div className="lp-hero-ui__main">
-                {/* ═══ SECTION 7c: DYNAMIC SUBMISSION PANELS ═══ */}
-                
-                <section className="lp-submission-panels">
-                  <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "80px 24px" }}>
-
-                    <div className="sp-carousel sp-carousel--overlap">
-                      <div className="sp-carousel__item sp-carousel__item--student">
-                        <StudentSubmissionPanel />
-                      </div>
-                      <div className="sp-carousel__item sp-carousel__item--teacher">
-                        <TeacherSubmissionPanel />
-                      </div>
-                      <div className="sp-carousel__item sp-carousel__item--admin">
-                        <SchoolAdminPage />
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              </div>
+          {/* Stacking Cards Scroll Container */}
+          <div ref={containerRef} className="sp-scroll-track" style={{ position: "relative", width: "100%", marginTop: "60px", zIndex: 5 }}>
+            <div style={{ textAlign: "center", marginBottom: "30px" }}>
+              <h2 className="lp-section-title">
+                Built for every <span className="lp-highlight lp-highlight--underline">role in your school</span>
+              </h2>
+              <p className="lp-section-subtitle" style={{ textAlign: "center", margin: "16px auto 0", maxWidth: "600px" }}>
+                From students tracking progress to teachers managing submissions, to administrators overseeing school performance.
+              </p>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* ═══ TRUST BAR ═══ */}
-      <section className="lp-trust" id="about" ref={r1.ref}>
-        <div className={r1.className}>
-          <p className="lp-trust__label">1,200+ leading academic boards trust OzymorLab</p>
-          <div className="lp-trust__marquee">
-            <div className="lp-trust__track">
-              {[...trustedSchools, ...trustedSchools].map((n, i) => (
-                <div key={i} className="lp-trust__logo">
-                  <LogoIcon />
-                  <span>{n}</span>
+            <div className="lp-hero__ui" style={{ marginScale: 1, width: "100%", maxWidth: "1000px", margin: "0 auto" }}>
+              <div className="lp-hero-ui">
+                <div className="lp-hero-ui__sidebar">
+                  <div className="lp-hero-ui__sidebar-logo"><LogoIcon /></div>
+                  {[0, 1, 2].map(idx => (
+                    <button 
+                      key={idx} 
+                      onClick={() => handleSidebarClick(idx)}
+                      style={{ border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: "11px", fontWeight: "600", transition: "all 0.3s ease" }}
+                      className={`lp-hero-ui__sidebar-item ${activeIndex === idx ? "lp-hero-ui__sidebar-item--active" : ""}`}
+                      title={idx === 0 ? "Student View" : idx === 1 ? "Teacher View" : "Admin View"}
+                    >
+                      {idx === 0 ? "S" : idx === 1 ? "T" : "A"}
+                    </button>
+                  ))}
                 </div>
-              ))}
+                
+                <div className="lp-hero-ui__main" style={{ position: "relative", overflow: "hidden", height: "660px" }}>
+                  <div className="sp-stack-wrapper" style={{ position: "relative", width: "100%", height: "100%" }}>
+                    
+                    <div className="sp-stack-card" style={{
+                      position: "absolute",
+                      top: "24px",
+                      left: "24px",
+                      right: "24px",
+                      transition: "transform 0.1s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.1s ease",
+                      ...getCardStyles(0)
+                    }}>
+                      <StudentSubmissionPanel />
+                    </div>
+
+                    <div className="sp-stack-card" style={{
+                      position: "absolute",
+                      top: "24px",
+                      left: "24px",
+                      right: "24px",
+                      transition: "transform 0.1s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.1s ease",
+                      ...getCardStyles(1)
+                    }}>
+                      <TeacherSubmissionPanel />
+                    </div>
+
+                    <div className="sp-stack-card" style={{
+                      position: "absolute",
+                      top: "24px",
+                      left: "24px",
+                      right: "24px",
+                      transition: "transform 0.1s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.1s ease",
+                      ...getCardStyles(2)
+                    }}>
+                      <SchoolAdminPage />
+                    </div>
+
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -421,14 +616,78 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ═══ SECTION 7.5: ACCORDION TABS FAQS ═══ */}
+      <section className="lp-faqs" id="faq" ref={rFaq.ref}>
+        <div className={rFaq.className}>
+          <div className="lp-faqs__header" style={{ textAlign: "center", marginBottom: "40px" }}>
+            <h2 className="lp-section-title">
+              Got <span className="lp-highlight lp-highlight--box">questions</span>? We have answers.
+            </h2>
+            <p className="lp-section-subtitle" style={{ margin: "16px auto 0", maxWidth: "600px" }}>
+              Explore frequently asked questions tailored for students, parents, teachers, and schools.
+            </p>
+          </div>
+
+          <div className="lp-faqs__tabs">
+            {(['student', 'parent', 'teacher', 'school'] as const).map(tab => (
+              <button
+                key={tab}
+                onClick={() => {
+                  setFaqTab(tab);
+                  setExpandedFaqIndex(null);
+                }}
+                className={`lp-faqs__tab-btn ${faqTab === tab ? 'lp-faqs__tab-btn--active' : ''}`}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)} FAQs
+              </button>
+            ))}
+          </div>
+
+          <div className="lp-faqs__accordion">
+            {faqData[faqTab].map((faq, index) => {
+              const isExpanded = expandedFaqIndex === index;
+              return (
+                <div key={index} className="lp-faqs__item">
+                  <button
+                    onClick={() => setExpandedFaqIndex(isExpanded ? null : index)}
+                    className="lp-faqs__item-header"
+                    aria-expanded={isExpanded}
+                  >
+                    <span>{faq.q}</span>
+                    <span className={`lp-faqs__item-icon ${isExpanded ? 'lp-faqs__item-icon--expanded' : ''}`}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </span>
+                  </button>
+                  <div className={`lp-faqs__item-body ${isExpanded ? 'lp-faqs__item-body--expanded' : ''}`}>
+                    <p>{faq.a}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="lp-faqs__cta-banner">
+            <div className="lp-faqs__cta-banner-content">
+              <h3 style={{ margin: 0, fontSize: "20px", fontWeight: "600" }}>Practice with our AI OSM Evaluator</h3>
+              <p style={{ margin: "8px 0 0 0" }}>Prepare for board exams and practice digitised answer sheet evaluation exactly how Indian board examiners do it.</p>
+            </div>
+            <Link href="/osm-evaluator" className="lp-btn lp-btn--accent lp-btn--lg lp-btn--icon text-white" style={{ display: "inline-flex", alignItems: "center" }}>
+              Try OSM Evaluator <ArrowRight />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ═══ SECTION 7b: LINKS / ONBOARD BANNER ═══ */}
       <section className="lp-links-banner" ref={r9.ref}>
         <div className={r9.className}>
           <div className="lp-links-banner__content">
             <p className="lp-links-banner__text">Audit even the most complex mathematical calculus or cursive answers.</p>
             <div className="lp-links-banner__mini-cards">
-              <div className="lp-mini-card"><div className="lp-mini-card__avatar" style={{ background: "#4f46e5" }}>E</div><div><strong>Emma</strong><span>Onboard</span></div></div>
-              <div className="lp-mini-card"><div className="lp-mini-card__avatar" style={{ background: "#0891b2" }}>J</div><div><strong>Jonathan</strong><span>Pilot Starts Tomorrow</span></div></div>
+              <div className="lp-mini-card"><div className="lp-mini-card__avatar" style={{ background: "#4f46e5" }}>E</div><div><strong>Ekjot</strong><span>Onboard</span></div></div>
+              <div className="lp-mini-card"><div className="lp-mini-card__avatar" style={{ background: "#0891b2" }}>J</div><div><strong>Javed</strong><span>Pilot Starts Tomorrow</span></div></div>
             </div>
             <div className="lp-links-banner__badges">
               <div className="lp-data-badge">Data that scale securely</div>
