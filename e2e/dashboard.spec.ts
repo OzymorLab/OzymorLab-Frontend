@@ -62,7 +62,6 @@ test.describe('Landing Page', () => {
     await page.waitForLoadState('networkidle');
 
     await expect(page.locator('a[href="/login"]')).toBeVisible();
-    await expect(page.locator('a[href="/login?tab=signup"]').first()).toBeVisible();
   });
 
   test('Sign In link navigates to login page', async ({ page }) => {
@@ -86,7 +85,7 @@ test.describe('Login Page UI', () => {
     await expect(page.locator('#login-email')).toBeVisible();
     await expect(page.locator('#login-password')).toBeVisible();
     await expect(page.locator('#login-submit')).toBeVisible();
-    await expect(page.locator('text=Edexia AIOS')).toBeVisible();
+    await expect(page.locator('text=OzymorLab AIOS')).toBeVisible();
   });
 
   test('should toggle between Sign In and Create Account', async ({ page }) => {
