@@ -74,18 +74,14 @@ function LoginPageContent() {
     setLoading(false);
   };
 
-  if (isLoading) {
-    return (
-      <div className="auth-page">
+  return (
+    <div className="auth-page" suppressHydrationWarning>
+      {isLoading ? (
         <div className="auth-loading">
           <div className="auth-spinner" />
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="auth-page">
+      ) : (
+      <>
       {/* Left: Branding Panel */}
       <div className="auth-brand">
         <div className="auth-brand-content">
@@ -356,6 +352,8 @@ function LoginPageContent() {
           </p>
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 }
@@ -363,7 +361,7 @@ function LoginPageContent() {
 export default function LoginPage() {
   return (
     <AuthProvider>
-      <Suspense fallback={<div className="auth-page"><div className="auth-loading"><div className="auth-spinner" /></div></div>}>
+      <Suspense fallback={<div className="auth-page" suppressHydrationWarning><div className="auth-loading"><div className="auth-spinner" /></div></div>}>
         <LoginPageContent />
       </Suspense>
     </AuthProvider>
