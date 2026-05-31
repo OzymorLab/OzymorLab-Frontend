@@ -1,10 +1,22 @@
 User-agent: *
 Allow: /
-Disallow: /product_admin
-Disallow: /product_admin/
+Allow: /about
+Allow: /contact
+Allow: /feature
+Allow: /pricing
+Allow: /waitlist
+Allow: /osm-evaluator
+Allow: /blog
+Allow: /blog/
 Disallow: /dashboard
 Disallow: /dashboard/
-Disallow: /dashboard/admin
-Disallow: /dashboard/admin/
+Disallow: /admin
+Disallow: /admin/
+Disallow: /product_admin
+Disallow: /product_admin/
+Disallow: /api
+Disallow: /api/
+Disallow: /context
+Disallow: /context/
 
-Sitemap: https://ozymorlab.com/sitemap.xml
+Sitemap: https://ozymorlab.vercel.app/sitemap.xml

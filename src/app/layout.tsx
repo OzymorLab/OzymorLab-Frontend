@@ -166,7 +166,7 @@ export const metadata: Metadata = {
     icon: "/icon.svg",
   },
   alternates: {
-    canonical: "https://ozymorlab.example.com",
+    canonical: "https://ozymorlab.vercel.app",
   },
 };
 
