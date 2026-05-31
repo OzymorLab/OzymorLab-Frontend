@@ -400,7 +400,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="lp-hero__ui" style={{ marginScale: 1, width: "100%", maxWidth: "1000px", margin: "0 auto" }}>
+            <div className="lp-hero__ui" style={{ width: "100%", maxWidth: "1000px", margin: "0 auto" }}>
               <div className="lp-hero-ui">
                 <div className="lp-hero-ui__sidebar">
                   <div className="lp-hero-ui__sidebar-logo"><LogoIcon /></div>

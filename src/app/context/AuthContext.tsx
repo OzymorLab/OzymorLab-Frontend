@@ -6,34 +6,62 @@ import { supabase } from "../../lib/supabaseClient";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.com/api/v1";
 
 const safeFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
-  if (url.includes(",")) {
-    const parts = url.split(",");
-    const firstBase = parts[0];
-    const rest = parts.slice(1).join(",");
-    
-    // Resolve path from secondary base dynamically
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), 6000); // 6 seconds timeout
+
+  const fetchOptions = {
+    ...options,
+    signal: controller.signal
+  };
+
+  try {
+    if (url.includes(",")) {
+      const parts = url.split(",");
+      const firstBase = parts[0];
+      const rest = parts.slice(1).join(",");
+      
+      // Resolve path from secondary base dynamically
     const secondBase = "https://edeziav2.onrender.com/api/v1";
-    let path = "";
-    if (rest.startsWith(secondBase)) {
-      path = rest.substring(secondBase.length);
-    } else {
-      const idx = rest.indexOf("/api/v1");
-      if (idx !== -1) {
-        path = rest.substring(idx + "/api/v1".length);
+      let path = "";
+      if (rest.startsWith(secondBase)) {
+        path = rest.substring(secondBase.length);
+      } else {
+        const idx = rest.indexOf("/api/v1");
+        if (idx !== -1) {
+          path = rest.substring(idx + "/api/v1".length);
+        }
+      }
+      
+      const url1 = `${firstBase}${path}`;
+      const url2 = rest;
+      
+      try {
+        const res = await fetch(url1, fetchOptions);
+        clearTimeout(id);
+        return res;
+      } catch (err) {
+        console.warn(`Local API offline at ${url1}, falling back to remote production at ${url2}`, err);
+        
+        // Reset timeout for fallback fetch
+        const fallbackController = new AbortController();
+        const fallbackId = setTimeout(() => fallbackController.abort(), 6000);
+        try {
+          const res = await fetch(url2, { ...options, signal: fallbackController.signal });
+          clearTimeout(fallbackId);
+          return res;
+        } catch (fallbackErr) {
+          clearTimeout(fallbackId);
+          throw fallbackErr;
+        }
       }
     }
-    
-    const url1 = `${firstBase}${path}`;
-    const url2 = rest;
-    
-    try {
-      return await fetch(url1, options);
-    } catch (err) {
-      console.warn(`Local API offline at ${url1}, falling back to remote production at ${url2}`, err);
-      return await fetch(url2, options);
-    }
+    const res = await fetch(url, fetchOptions);
+    clearTimeout(id);
+    return res;
+  } catch (error) {
+    clearTimeout(id);
+    throw error;
   }
-  return fetch(url, options);
 };
 
 interface User {
