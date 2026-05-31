@@ -1,0 +1,687 @@
+/* ═══════════════════════════════════════════
+   Submission Panels — Animated Components
+   Teacher, Student, and Admin Dashboards
+   ═══════════════════════════════════════════ */
+
+/* ── Variables ── */
+:root {
+    --sp-primary: rgb(224, 255, 130);
+    /* Neon lime */
+    --sp-primary-dark: rgb(210, 240, 100);
+    /* Darker lime */
+    --sp-fg: rgb(31, 34, 35);
+    /* Dark charcoal */
+    --sp-fg-light: rgb(90, 109, 119);
+    /* Muted gray */
+    --sp-border: rgb(229, 230, 230);
+    --sp-surface: rgb(247, 248, 248);
+    --sp-surface-2: rgb(240, 242, 245);
+    --sp-bg: #ffffff;
+    --sp-success: rgb(34, 197, 94);
+    --sp-warning: rgb(234, 179, 8);
+    --sp-accent-blue: rgb(59, 130, 246);
+    --sp-radius: 12px;
+    --sp-radius-lg: 16px;
+    --sp-delay: 0s;
+}
+
+/* ── Base Panel Styles ── */
+.sp-panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 32px;
+    background: linear-gradient(135deg, var(--sp-bg) 0%, rgba(224, 255, 130, 0.02) 100%);
+    border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius-lg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sp-panel--visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Header ── */
+.sp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--sp-border);
+}
+
+.sp-logo-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sp-logo-section svg {
+    width: 32px;
+    height: 32px;
+}
+
+.sp-brand {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--sp-fg);
+    margin-bottom: 2px;
+}
+
+.sp-brand-sub {
+    font-size: 12px;
+    color: var(--sp-fg-light);
+}
+
+.sp-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sp-status--active {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--sp-success);
+}
+
+.sp-status--pending {
+    background: rgba(234, 179, 8, 0.1);
+    color: var(--sp-warning);
+}
+
+.sp-status--graded {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--sp-success);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sp-status--success {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--sp-success);
+}
+
+.sp-status--admin {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--sp-accent-blue);
+}
+
+/* ── Stats Section (Teacher Panel) ── */
+.sp-stats {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 20px 0;
+    background: var(--sp-surface);
+    border-radius: var(--sp-radius);
+}
+
+.sp-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.sp-stat-label {
+    font-size: 12px;
+    color: var(--sp-fg-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sp-stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--sp-fg);
+}
+
+.sp-stat-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--sp-border);
+}
+
+/* ── Progress Section (Student Panel) ── */
+.sp-progress-section {
+    padding: 16px;
+    background: var(--sp-surface);
+    border-radius: var(--sp-radius);
+}
+
+.sp-progress-item {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sp-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sp-progress-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--sp-fg);
+}
+
+.sp-progress-percentage {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--sp-primary);
+}
+
+.sp-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--sp-surface-2);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.sp-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--sp-primary) 0%, var(--sp-primary-dark) 100%);
+    border-radius: 4px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Upload Box (Student Panel) ── */
+.sp-upload-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 32px 24px;
+    background: linear-gradient(135deg, var(--sp-surface) 0%, rgba(224, 255, 130, 0.05) 100%);
+    border: 2px dashed var(--sp-border);
+    border-radius: var(--sp-radius);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sp-upload-box:hover {
+    border-color: var(--sp-primary);
+    background: linear-gradient(135deg, var(--sp-surface) 0%, rgba(224, 255, 130, 0.1) 100%);
+}
+
+.sp-upload-box svg {
+    color: var(--sp-primary);
+}
+
+.sp-upload-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--sp-fg);
+}
+
+.sp-upload-hint {
+    font-size: 12px;
+    color: var(--sp-fg-light);
+}
+
+/* ── Submissions Container ── */
+.sp-submissions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sp-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--sp-fg);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sp-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sp-btn-text {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--sp-primary);
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.sp-btn-text:hover {
+    color: var(--sp-primary-dark);
+}
+
+/* ── Submissions List ── */
+.sp-submissions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sp-submission-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: var(--sp-surface);
+    border-radius: var(--sp-radius);
+    border: 1px solid var(--sp-border);
+    opacity: 0;
+    transform: translateY(10px);
+    animation: slideInUp 0.6s cubic-bezier(0.33, 1, 0.68, 1) var(--sp-delay) forwards;
+}
+
+.sp-submission-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sp-submission-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sp-submission-student {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--sp-fg);
+}
+
+.sp-submission-subject {
+    font-size: 12px;
+    color: var(--sp-fg-light);
+}
+
+.sp-submission-meta {
+    display: flex;
+    gap: 12px;
+}
+
+.sp-submission-date {
+    font-size: 11px;
+    color: var(--sp-fg-light);
+}
+
+.sp-submission-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--sp-fg);
+    margin-bottom: 4px;
+}
+
+.sp-submission-feedback {
+    font-size: 12px;
+    color: var(--sp-fg-light);
+    line-height: 1.4;
+    margin-bottom: 4px;
+}
+
+.sp-submission-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sp-submission-score {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(34, 197, 94, 0.1);
+    border-radius: var(--sp-radius);
+}
+
+.sp-submission-score svg {
+    color: var(--sp-success);
+}
+
+.sp-score-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--sp-success);
+}
+
+.sp-submission-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--sp-accent-blue);
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.sp-student-item {
+    padding: 16px;
+    gap: 12px;
+    flex-direction: column;
+}
+
+.sp-student-item .sp-submission-info {
+    width: 100%;
+}
+
+.sp-student-item .sp-submission-status {
+    width: 100%;
+    justify-content: space-between;
+}
+
+/* ── Metrics Grid (Admin Panel) ── */
+.sp-metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.sp-metric-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: var(--sp-surface);
+    border-radius: var(--sp-radius);
+    border: 1px solid var(--sp-border);
+    opacity: 0;
+    transform: translateY(10px);
+    animation: slideInUp 0.6s cubic-bezier(0.33, 1, 0.68, 1) var(--sp-delay) forwards;
+}
+
+.sp-metric-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--sp-primary) 0%, rgba(224, 255, 130, 0.5) 100%);
+    border-radius: var(--sp-radius);
+    color: var(--sp-fg);
+}
+
+.sp-metric-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sp-metric-label {
+    font-size: 11px;
+    color: var(--sp-fg-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sp-metric-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--sp-fg);
+}
+
+.sp-metric-change {
+    font-size: 11px;
+    color: var(--sp-success);
+    font-weight: 500;
+}
+
+/* ── Departments Container ── */
+.sp-departments-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sp-departments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sp-dept-item {
+    padding: 16px;
+    background: var(--sp-surface);
+    border-radius: var(--sp-radius);
+    border: 1px solid var(--sp-border);
+    opacity: 0;
+    transform: translateY(10px);
+    animation: slideInUp 0.6s cubic-bezier(0.33, 1, 0.68, 1) var(--sp-delay) forwards;
+}
+
+.sp-dept-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--sp-border);
+}
+
+.sp-dept-name h5 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--sp-fg);
+    margin-bottom: 4px;
+}
+
+.sp-dept-meta {
+    font-size: 11px;
+    color: var(--sp-fg-light);
+}
+
+.sp-dept-score {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.sp-dept-score-label {
+    font-size: 11px;
+    color: var(--sp-fg-light);
+    text-transform: uppercase;
+}
+
+.sp-dept-score-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--sp-primary);
+}
+
+.sp-dept-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sp-dept-stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sp-stat-label {
+    font-size: 11px;
+    color: var(--sp-fg-light);
+    flex-shrink: 0;
+    width: 80px;
+}
+
+.sp-stat-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--sp-surface-2);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.sp-stat-progress {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--sp-primary) 0%, var(--sp-primary-dark) 100%);
+    border-radius: 3px;
+}
+
+.sp-stat-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sp-fg);
+    flex-shrink: 0;
+    width: 50px;
+    text-align: right;
+}
+
+/* ── Footer ── */
+.sp-footer {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.sp-admin-footer {
+    gap: 12px;
+}
+
+/* ── Buttons ── */
+.sp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: var(--sp-radius);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.sp-btn--primary {
+    background: var(--sp-fg);
+    color: var(--sp-bg);
+    flex: 1;
+}
+
+.sp-btn--primary:hover {
+    background: var(--sp-fg-light);
+    transform: translateY(-2px);
+}
+
+.sp-btn--accent {
+    background: var(--sp-primary);
+    color: var(--sp-fg);
+    flex: 1;
+}
+
+.sp-btn--accent:hover {
+    background: var(--sp-primary-dark);
+    transform: translateY(-2px);
+}
+
+.sp-btn--outline {
+    background: transparent;
+    color: var(--sp-fg);
+    border: 1px solid var(--sp-border);
+    flex: 1;
+}
+
+.sp-btn--outline:hover {
+    background: var(--sp-surface);
+}
+
+.sp-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* ── Animations ── */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .sp-panel {
+        padding: 24px;
+        gap: 20px;
+    }
+
+    .sp-metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sp-submission-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sp-submission-status {
+        width: 100%;
+    }
+
+    .sp-footer {
+        flex-direction: column;
+    }
+
+    .sp-btn {
+        width: 100%;
+    }
+
+    .sp-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .sp-status-badge {
+        align-self: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .sp-panel {
+        padding: 16px;
+        border-radius: 8px;
+    }
+
+    .sp-submission-item {
+        padding: 12px;
+    }
+
+    .sp-stat-divider {
+        height: 20px;
+    }
+}

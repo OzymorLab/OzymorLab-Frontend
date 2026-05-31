@@ -3,6 +3,9 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import "./landing.css";
+import TeacherSubmissionPanel from "./TeacherSubmissionPanel";
+import StudentSubmissionPanel from "./StudentSubmissionPanel";
+import SchoolAdminPage from "./SchoolAdminPage";
 
 /* ── Icons ── */
 const LogoIcon = () => (
@@ -14,8 +17,8 @@ const LogoIcon = () => (
 );
 const ArrowRight = () => <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8h10M9 4l4 4-4 4" /></svg>;
 const CheckIcon = () => <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 8l3 3 5-5" /></svg>;
-const MenuIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>;
-const CloseIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+const MenuIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="20" y2="17" /></svg>;
+const CloseIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>;
 const LinkedInIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
@@ -57,13 +60,13 @@ const navLinks = [
 ];
 
 const teamMembers = [
-  { name: "David Wilson", role: "Founder & Director", initials: "DW", color: "#4f46e5" },
-  { name: "Jessica Hayes", role: "Co-founder & Provost", initials: "JH", color: "#0891b2" },
-  { name: "Constanza Perez", role: "Head of Evaluation Systems", initials: "CP", color: "#059669" },
+  { name: "Rajesh Sharma", role: "Founder & Director", initials: "RS", color: "#4f46e5" },
+  { name: "Priya Patel", role: "Co-founder & Provost", initials: "PP", color: "#0891b2" },
+  { name: "Arun Kumar", role: "Head of Evaluation Systems", initials: "AK", color: "#059669" },
   { name: "Meera Desai", role: "Head of Multimodal AI", initials: "MD", color: "#d97706" },
-  { name: "Benjamin Weber", role: "Cursive OCR Architect", initials: "BW", color: "#dc2626" },
-  { name: "Jacob Jones", role: "UI/UX Research Lead", initials: "JJ", color: "#7c3aed" },
-  { name: "Maria Rodrigues", role: "Learning Analytics Lead", initials: "MR", color: "#0d9488" },
+  { name: "Vikram Singh", role: "Cursive OCR Architect", initials: "VS", color: "#dc2626" },
+  { name: "Sneha Verma", role: "UI/UX Research Lead", initials: "SV", color: "#7c3aed" },
+  { name: "Anita Nair", role: "Learning Analytics Lead", initials: "AN", color: "#0d9488" },
 ];
 
 const featureCards = [
@@ -151,7 +154,7 @@ export default function LandingPage() {
     }
   }, [pathname]);
 
-  const r1=useReveal(),r2=useReveal(),r3=useReveal(),r4=useReveal(),r5=useReveal(),r6=useReveal(),r7=useReveal(),r8=useReveal(),r9=useReveal(),r10=useReveal(),r11=useReveal();
+  const r1 = useReveal(), r2 = useReveal(), r3 = useReveal(), r4 = useReveal(), r5 = useReveal(), r6 = useReveal(), r7 = useReveal(), r8 = useReveal(), r9 = useReveal(), r10 = useReveal(), r11 = useReveal();
 
   return (
     <div className="lp-root">
@@ -206,33 +209,40 @@ export default function LandingPage() {
             <Link href="/contact" className="lp-btn lp-btn--primary lp-btn--lg text-white" style={{ color: "#ffffff" }}>Request Demo</Link>
           </div>
           {/* Hero UI Mock */}
+          <div style={{ textAlign: "center", marginBottom: "10px" }}>
+                      <h2 className="lp-section-title">
+                        Built for every <span className="lp-highlight lp-highlight--underline">role in your school</span>
+                      </h2>
+                      <p className="lp-section-subtitle" style={{ textAlign: "center", margin: "16px auto 0", maxWidth: "600px" }}>
+                        From teachers managing submissions to students tracking progress, to administrators overseeing school performance.
+                      </p>
+                    </div>
           <div className="lp-hero__ui lp-anim-fade" style={{ animationDelay: "0.6s" }}>
             <div className="lp-hero-ui">
               <div className="lp-hero-ui__sidebar">
                 <div className="lp-hero-ui__sidebar-logo"><LogoIcon /></div>
-                {[0,1,2,3,4].map(i => <div key={i} className={`lp-hero-ui__sidebar-item ${i===1?"lp-hero-ui__sidebar-item--active":""}`} />)}
+                {[0, 1, 2, 3, 4].map(i => <div key={i} className={`lp-hero-ui__sidebar-item ${i === 1 ? "lp-hero-ui__sidebar-item--active" : ""}`} />)}
               </div>
+              
               <div className="lp-hero-ui__main">
-                <div className="lp-hero-ui__topbar">
-                  <span className="lp-hero-ui__greeting">Good morning, Dean!</span>
-                </div>
-                <div className="lp-hero-ui__content">
-                  <div className="lp-hero-ui__status-card">
-                    <span className="lp-hero-ui__status-label">Status</span>
-                    <span className="lp-hero-ui__status-badge">Pending</span>
-                  </div>
-                  <div className="lp-hero-ui__team-list">
-                    {teamMembers.slice(0, 5).map((m, i) => (
-                      <div key={i} className="lp-hero-ui__team-row">
-                        <div className="lp-hero-ui__avatar" style={{ background: m.color }}>{m.initials}</div>
-                        <div className="lp-hero-ui__team-info">
-                          <span className="lp-hero-ui__team-name">{m.name}</span>
-                          <span className="lp-hero-ui__team-role">{m.role}</span>
-                        </div>
+                {/* ═══ SECTION 7c: DYNAMIC SUBMISSION PANELS ═══ */}
+                
+                <section className="lp-submission-panels">
+                  <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "80px 24px" }}>
+
+                    <div className="sp-carousel sp-carousel--overlap">
+                      <div className="sp-carousel__item sp-carousel__item--student">
+                        <StudentSubmissionPanel />
                       </div>
-                    ))}
+                      <div className="sp-carousel__item sp-carousel__item--teacher">
+                        <TeacherSubmissionPanel />
+                      </div>
+                      <div className="sp-carousel__item sp-carousel__item--admin">
+                        <SchoolAdminPage />
+                      </div>
+                    </div>
                   </div>
-                </div>
+                </section>
               </div>
             </div>
           </div>
@@ -399,7 +409,7 @@ export default function LandingPage() {
               <div key={i} className="lp-testimonial-card">
                 <p className="lp-testimonial-card__quote">&ldquo;{t.quote}&rdquo;</p>
                 <div className="lp-testimonial-card__author">
-                  <div className="lp-testimonial-card__avatar">{t.name.split(" ").map(n=>n[0]).join("")}</div>
+                  <div className="lp-testimonial-card__avatar">{t.name.split(" ").map(n => n[0]).join("")}</div>
                   <div>
                     <div className="lp-testimonial-card__name">{t.name}</div>
                     <div className="lp-testimonial-card__role">{t.role}</div>
@@ -417,8 +427,8 @@ export default function LandingPage() {
           <div className="lp-links-banner__content">
             <p className="lp-links-banner__text">Audit even the most complex mathematical calculus or cursive answers.</p>
             <div className="lp-links-banner__mini-cards">
-              <div className="lp-mini-card"><div className="lp-mini-card__avatar" style={{background:"#4f46e5"}}>E</div><div><strong>Emma</strong><span>Onboard</span></div></div>
-              <div className="lp-mini-card"><div className="lp-mini-card__avatar" style={{background:"#0891b2"}}>J</div><div><strong>Jonathan</strong><span>Pilot Starts Tomorrow</span></div></div>
+              <div className="lp-mini-card"><div className="lp-mini-card__avatar" style={{ background: "#4f46e5" }}>E</div><div><strong>Emma</strong><span>Onboard</span></div></div>
+              <div className="lp-mini-card"><div className="lp-mini-card__avatar" style={{ background: "#0891b2" }}>J</div><div><strong>Jonathan</strong><span>Pilot Starts Tomorrow</span></div></div>
             </div>
             <div className="lp-links-banner__badges">
               <div className="lp-data-badge">Data that scale securely</div>
