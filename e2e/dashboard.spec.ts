@@ -31,19 +31,26 @@ const BASE_URL = 'http://localhost:3000';
 
 // ─── Helper: Login via UI ─────────────────────────────────
 async function loginViaUI(page: Page) {
-  await page.goto(`${BASE_URL}/login`);
-  await page.waitForLoadState('networkidle');
+  // Clear any existing session so login page doesn't redirect away
+  await page.goto(`${BASE_URL}/login`, { waitUntil: 'load' });
+  await page.evaluate(() => {
+    localStorage.removeItem('ozymorlab_token');
+    localStorage.removeItem('ozymorlab_refresh_token');
+  });
+  await page.reload({ waitUntil: 'load' });
+
+  // Client-side hydration after load
+  await page.waitForTimeout(500);
+  await page.waitForSelector('#login-email', { timeout: 10000 });
 
   await page.fill('#login-email', TEST_EMAIL);
   await page.fill('#login-password', TEST_PASSWORD);
   await page.click('#login-submit');
 
-  // Wait for either the success message or direct redirect
-  // The login flow is: Supabase auth → backend /auth/me → 800ms delay → router.push('/dashboard')
+  // Login flow: POST /auth/login → 800ms delay → router.push('/dashboard')
   try {
     await page.waitForURL('**/dashboard**', { timeout: 30000 });
   } catch {
-    // If URL didn't change, check if there's an error displayed
     const errorEl = page.locator('.auth-error');
     if (await errorEl.isVisible()) {
       const errorText = await errorEl.textContent();
@@ -59,14 +66,14 @@ async function loginViaUI(page: Page) {
 test.describe('Landing Page', () => {
   test('should render branding and CTA links', async ({ page }) => {
     await page.goto(BASE_URL);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await expect(page.locator('a[href="/login"]')).toBeVisible();
   });
 
   test('Sign In link navigates to login page', async ({ page }) => {
     await page.goto(BASE_URL);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await page.locator('a[href="/login"]').click();
     await page.waitForURL('**/login**');
@@ -80,7 +87,7 @@ test.describe('Landing Page', () => {
 test.describe('Login Page UI', () => {
   test('should render login form fields', async ({ page }) => {
     await page.goto(`${BASE_URL}/login`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await expect(page.locator('#login-email')).toBeVisible();
     await expect(page.locator('#login-password')).toBeVisible();
@@ -90,7 +97,7 @@ test.describe('Login Page UI', () => {
 
   test('should toggle between Sign In and Create Account', async ({ page }) => {
     await page.goto(`${BASE_URL}/login`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await page.click('button:has-text("Create Account")');
     await expect(page.locator('#signup-name')).toBeVisible();
@@ -102,7 +109,7 @@ test.describe('Login Page UI', () => {
 
   test('should toggle password visibility', async ({ page }) => {
     await page.goto(`${BASE_URL}/login`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await page.fill('#login-password', 'test');
     await page.locator('.form-input-toggle').click();
@@ -111,7 +118,7 @@ test.describe('Login Page UI', () => {
 
   test('should validate short signup password', async ({ page }) => {
     await page.goto(`${BASE_URL}/login?tab=signup`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await page.fill('#signup-name', 'Test');
     await page.fill('#signup-email', 'test@test.com');
@@ -127,7 +134,7 @@ test.describe('Login Page UI', () => {
 
   test('should show Google sign-in button', async ({ page }) => {
     await page.goto(`${BASE_URL}/login`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await expect(page.locator('button:has-text("Sign In with Google")')).toBeVisible();
   });
@@ -168,7 +175,7 @@ test.describe('Dashboard (Authenticated)', () => {
 
   test('should render sidebar with all nav links', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     for (const link of ['Dashboard', 'Exams Setup', 'Submissions', 'Students', 'Reviews', 'Reports']) {
       await expect(page.locator(`text=${link}`).first()).toBeVisible();
@@ -177,7 +184,7 @@ test.describe('Dashboard (Authenticated)', () => {
 
   test('should show topbar search input', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await expect(page.locator('input[placeholder*="Search"]').first()).toBeVisible();
   });
@@ -195,7 +202,7 @@ test.describe('Submissions Page (Authenticated)', () => {
 
   test('should render header and reload button', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard/submissions`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await expect(page.locator('text=Evaluation Submissions')).toBeVisible();
     await expect(page.locator('text=Reload Queue')).toBeVisible();
@@ -203,7 +210,7 @@ test.describe('Submissions Page (Authenticated)', () => {
 
   test('should show search input and filter pills', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard/submissions`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await expect(page.locator('input[placeholder*="Search Student ID"]')).toBeVisible();
     for (const s of ['ALL', 'GRADED', 'FAILED', 'PENDING']) {
@@ -213,7 +220,7 @@ test.describe('Submissions Page (Authenticated)', () => {
 
   test('should show table headers', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard/submissions`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     for (const h of ['Student ID', 'Filename', 'Created Time', 'Status', 'Actions']) {
       await expect(page.locator(`th:has-text("${h}")`)).toBeVisible();
@@ -222,7 +229,7 @@ test.describe('Submissions Page (Authenticated)', () => {
 
   test('filter pills should be clickable', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard/submissions`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await page.click('button:has-text("PENDING")');
     await page.waitForTimeout(300);
@@ -242,7 +249,7 @@ test.describe('Students Page (Authenticated)', () => {
 
   test('should render directory with stat cards', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard/students`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await expect(page.locator('text=Students Directory')).toBeVisible();
     await expect(page.locator('text=Total Students Registered')).toBeVisible();
@@ -251,7 +258,7 @@ test.describe('Students Page (Authenticated)', () => {
 
   test('should have search and batch filter', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard/students`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await expect(page.locator('input[placeholder*="Search Student ID"]')).toBeVisible();
     await expect(page.locator('button:has-text("All Cohorts")')).toBeVisible();
@@ -272,7 +279,7 @@ test.describe('Reviews Page (Authenticated)', () => {
 
   test('should render moderation center', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard/reviews`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await expect(page.locator('text=Institutional Moderation')).toBeVisible();
     await expect(page.locator('text=Refresh Lists')).toBeVisible();
@@ -292,7 +299,7 @@ test.describe('Reports Page (Authenticated)', () => {
 
   test('should render reports dashboard with stats', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard/reports`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await expect(page.locator('text=Institutional Reports')).toBeVisible();
     for (const label of ['Active Institutional Roster', 'AI Papers Evaluated', 'Overall Average Grade', 'Assessment Pass Percentage']) {
@@ -302,7 +309,7 @@ test.describe('Reports Page (Authenticated)', () => {
 
   test('should show performance registry with search', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard/reports`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await expect(page.locator('text=Student Performance Registry')).toBeVisible();
     await expect(page.locator('input[placeholder*="Search Student"]')).toBeVisible();
@@ -321,7 +328,7 @@ test.describe('Admin Page (Authenticated)', () => {
 
   test('should render admin panel with tabs', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard/admin`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await expect(page.locator('text=Institutional Administration Panel')).toBeVisible();
     await expect(page.locator('button:has-text("Student Imports")')).toBeVisible();
@@ -331,7 +338,7 @@ test.describe('Admin Page (Authenticated)', () => {
 
   test('should switch tabs', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard/admin`);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await page.click('button:has-text("Teacher Invites")');
     await expect(page.locator('text=Bulk Invite Educators')).toBeVisible();
@@ -357,33 +364,33 @@ test.describe('E2E Navigation Flow', () => {
 
     // Exams
     await page.click('text=Exams Setup');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page).toHaveURL(/exams/);
 
     // Submissions
     await page.click('text=Submissions');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page).toHaveURL(/submissions/);
     await expect(page.locator('text=Evaluation Submissions')).toBeVisible();
 
     // Students
     await page.click('text=Students');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page).toHaveURL(/students/);
     await expect(page.locator('text=Students Directory')).toBeVisible();
 
     // Reviews
     await page.click('text=Reviews');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page).toHaveURL(/reviews/);
 
     // Reports
     await page.click('text=Reports');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
     await expect(page).toHaveURL(/reports/);
 
     // Back to Dashboard
     await page.click('a:has-text("Dashboard")');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
   });
 });
