@@ -560,8 +560,11 @@ export default function ExamsPage() {
 
       setStep(4);
       
-      // Initiate grading (requires APPROVED rubric status)
-      setTimeout(async () => {
+      // Poll for grading start: retry every 10s until PARSED submissions exist (up to 5 min)
+      const MAX_RETRIES = 30;
+      let attempt = 0;
+      const tryStartGrading = async () => {
+        attempt++;
         try {
           const res = await fetchWithAuth(`${API_BASE}/submissions/bulk-grade`, {
             method: "POST",
@@ -569,15 +572,26 @@ export default function ExamsPage() {
             body: JSON.stringify(gradePayload),
           });
           const json = await res.json();
-          if (json.data && json.data.run_id) {
+          if (res.ok && json.data && json.data.run_id) {
             setRunId(json.data.run_id);
-          } else if (json.detail) {
-            alert(json.detail);
+            return; // Success — stop retrying
           }
+          // If still parsing, retry after delay
+          const detail: string = json.detail || "";
+          const stillParsing = detail.includes("still being parsed") || detail.includes("No parsed submissions");
+          if (stillParsing && attempt < MAX_RETRIES) {
+            setTimeout(tryStartGrading, 10000); // retry in 10s
+          } else if (!stillParsing) {
+            alert(`Grading error: ${detail}`);
+          }
+          // else exhausted retries silently — user can click "Start Grading Manually"
         } catch (e: any) {
-          console.log("Evaluation scheduling deferred.");
+          if (attempt < MAX_RETRIES) {
+            setTimeout(tryStartGrading, 10000);
+          }
         }
-      }, 2000);
+      };
+      setTimeout(tryStartGrading, 5000); // first attempt after 5s
 
     } catch (e: any) {
       alert(e.message || "Bulk grading start failed");
@@ -1494,11 +1508,22 @@ export default function ExamsPage() {
                   />
                 </div>
               </div>
+            ) : runId ? (
+              <div className="flex flex-col items-center gap-3">
+                <Loader2 className="animate-spin text-brand-500" size={24} />
+                <p className="text-[12.5px] text-[var(--text-secondary)] font-medium">Grading run queued — fetching live status...</p>
+              </div>
             ) : (
               <div className="flex flex-col items-center gap-4">
-                <p className="text-[12.5px] text-[var(--text-tertiary)]">Waiting for upload task to trigger evaluations...</p>
+                <div className="flex items-center gap-3 border border-amber-500/20 bg-amber-500/5 rounded-xl px-5 py-3">
+                  <Loader2 className="animate-spin text-amber-500 shrink-0" size={16} />
+                  <div className="text-left">
+                    <p className="text-[12.5px] font-semibold text-[var(--text-primary)]">Parsing answer sheets...</p>
+                    <p className="text-[11px] text-[var(--text-tertiary)] mt-0.5">AI will start grading automatically once parsing completes. This may take 1–3 minutes.</p>
+                  </div>
+                </div>
                 <button className="btn-lp-outline cursor-pointer" onClick={startGradingManual}>
-                  <Loader2 className="animate-spin" size={13} /> Start Grading Manually
+                  <Play size={13} /> Start Grading Manually
                 </button>
               </div>
             )}
