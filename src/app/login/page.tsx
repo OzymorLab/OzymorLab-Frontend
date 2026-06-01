@@ -8,7 +8,7 @@ import { AuthProvider, useAuth } from "../context/AuthContext";
 
 function LoginPageContent() {
   const router = useRouter();
-  const { login, signup, loginWithGoogle, user, isLoading } = useAuth();
+  const { login, signup, loginWithGoogle, logout, user, isLoading } = useAuth();
 
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
@@ -29,12 +29,33 @@ function LoginPageContent() {
     }
   }, []);
 
-  // Redirect if already logged in
-  useEffect(() => {
-    if (!isLoading && user) {
-      router.push("/dashboard");
-    }
-  }, [user, isLoading, router]);
+  // If already logged in, show a small informative UI instead of auto-redirecting.
+  // This prevents the back button from immediately bouncing the user back to dashboard.
+  if (!isLoading && user) {
+    return (
+      <div className="auth-page">
+        <div className="auth-brand">
+          <div className="auth-brand-content">
+            <div className="landing-logo" style={{ marginBottom: 32 }}>
+              <div className="logo-mark" style={{ width: 36, height: 36, fontSize: 13 }}>Oz</div>
+              <span className="logo-name" style={{ fontSize: 18 }}>OzymorLab AIOS</span>
+            </div>
+            <h2 className="auth-brand-title">Welcome back</h2>
+            <p className="auth-brand-desc">You are already signed in as <strong>{user.email}</strong>. Use the buttons to continue.</p>
+            <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+              <button className="btn btn-brand" onClick={() => router.push('/dashboard')}>Go to Dashboard</button>
+              <button className="btn btn-secondary" onClick={async () => { await logout(); router.push('/login'); }}>Sign Out</button>
+            </div>
+          </div>
+        </div>
+        <div className="auth-form-panel">
+          <div className="auth-form-container">
+            <p style={{ color: 'var(--muted)', marginTop: 20 }}>If you want to use a different account, sign out first.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
