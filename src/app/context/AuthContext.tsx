@@ -402,12 +402,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRefreshToken(null);
   };
 
-  const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
-    const headers = new Headers(options.headers || {});
-    // Always load token from active Supabase session
-    const activeToken = token;
-    if (activeToken) headers.set("Authorization", `Bearer ${activeToken}`);
-    return safeFetch(url, { ...options, headers });
+  const fetchWithAuth = async (url: string, options: RequestInit = {}): Promise<Response> => {
+    // Always get the freshest token from Supabase SDK (auto-refreshes if expired)
+    let activeToken = token;
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          activeToken = session.access_token;
+          // Keep React state in sync
+          if (session.access_token !== token) setToken(session.access_token);
+        }
+      } catch { /* fall back to cached token */ }
+    }
+
+    const makeRequest = async (bearerToken: string | null): Promise<Response> => {
+      const headers = new Headers(options.headers || {});
+      if (bearerToken) headers.set("Authorization", `Bearer ${bearerToken}`);
+      return safeFetch(url, { ...options, headers });
+    };
+
+    const res = await makeRequest(activeToken);
+
+    // On 401 (token expired), force a Supabase token refresh and retry once
+    if (res.status === 401 && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      try {
+        const { data: { session } } = await supabase.auth.refreshSession();
+        if (session?.access_token) {
+          setToken(session.access_token);
+          return makeRequest(session.access_token);
+        }
+      } catch { /* ignore refresh error, return original 401 */ }
+    }
+
+    return res;
   };
 
   const setGeminiKey = async (key: string) => {

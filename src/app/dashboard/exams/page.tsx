@@ -571,18 +571,23 @@ export default function ExamsPage() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(gradePayload),
           });
+          // 401 = session expired — stop retrying, prompt user
+          if (res.status === 401) {
+            alert("Your session has expired. Please refresh the page and try again — your answer sheets were uploaded successfully.");
+            return;
+          }
           const json = await res.json();
           if (res.ok && json.data && json.data.run_id) {
             setRunId(json.data.run_id);
             return; // Success — stop retrying
           }
-          // If still parsing, retry after delay
+          // If still parsing (400), retry after delay
           const detail: string = json.detail || "";
           const stillParsing = detail.includes("still being parsed") || detail.includes("No parsed submissions");
           if (stillParsing && attempt < MAX_RETRIES) {
             setTimeout(tryStartGrading, 10000); // retry in 10s
-          } else if (!stillParsing) {
-            alert(`Grading error: ${detail}`);
+          } else if (!stillParsing && detail) {
+            alert(`Could not start grading: ${detail}`);
           }
           // else exhausted retries silently — user can click "Start Grading Manually"
         } catch (e: any) {
@@ -612,8 +617,22 @@ export default function ExamsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(gradePayload),
       });
+      if (res.status === 401) {
+        alert("Your session has expired. Please refresh the page and log back in to start grading.");
+        return;
+      }
       const json = await res.json();
-      if (!res.ok) throw new Error(json.detail || "Grading failed to start. Submissions might still be parsing or rubric is not approved.");
+      if (!res.ok) {
+        const detail = json.detail || "";
+        if (detail.includes("still being parsed")) {
+          alert("Submissions are still being parsed. Please wait 1–2 minutes and try again.");
+        } else if (detail.includes("No parsed submissions")) {
+          alert("No parsed submissions found yet. If you just uploaded files, wait 1–2 minutes for Celery to process them.");
+        } else {
+          throw new Error(detail || "Grading failed to start. Rubric may not be approved yet.");
+        }
+        return;
+      }
       if (json.data && json.data.run_id) {
         setRunId(json.data.run_id);
       }
