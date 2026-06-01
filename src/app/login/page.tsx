@@ -1,19 +1,16 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, ArrowRight, AlertCircle, CheckCircle2, Sparkles } from "lucide-react";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 
 function LoginPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { login, signup, loginWithGoogle, user, isLoading } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<"login" | "signup">(
-    searchParams.get("tab") === "signup" ? "signup" : "login"
-  );
+  const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -22,6 +19,15 @@ function LoginPageContent() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("tab") === "signup") {
+        setActiveTab("signup");
+      }
+    }
+  }, []);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -56,8 +62,12 @@ function LoginPageContent() {
 
     const result = await signup(email, password, fullName, role);
     if (result.success) {
-      setSuccess("Account created! Redirecting...");
-      setTimeout(() => router.push("/dashboard"), 800);
+      if (result.confirmationRequired) {
+        setSuccess("Registration successful. Check your email and confirm your address before signing in.");
+      } else {
+        setSuccess("Account created! Redirecting...");
+        setTimeout(() => router.push("/dashboard"), 800);
+      }
     } else {
       setError(result.error || "Signup failed");
     }
@@ -363,9 +373,7 @@ function LoginPageContent() {
 export default function LoginPage() {
   return (
     <AuthProvider>
-      <Suspense fallback={<div className="auth-page"><div className="auth-loading"><div className="auth-spinner" /></div></div>}>
-        <LoginPageContent />
-      </Suspense>
+      <LoginPageContent />
     </AuthProvider>
   );
 }
