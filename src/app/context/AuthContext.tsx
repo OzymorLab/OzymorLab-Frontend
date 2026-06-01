@@ -6,8 +6,12 @@ import { supabase } from "../../lib/supabaseClient";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.com/api/v1";
 
 const safeFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
+  const isHeavyRequest = url.includes("/upload") || url.includes("/submissions") || url.includes("/runs") || url.includes("/grade");
+  const defaultTimeout = isHeavyRequest ? 120000 : 8000; // 120 seconds for AI/upload tasks, 8 seconds for fast auth
+  const timeoutMs = (options as any).timeout !== undefined ? (options as any).timeout : defaultTimeout;
+
   const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), 6000); // 6 seconds timeout
+  const id = timeoutMs > 0 ? setTimeout(() => controller.abort(), timeoutMs) : null;
 
   const fetchOptions = {
     ...options,
@@ -21,7 +25,7 @@ const safeFetch = async (url: string, options: RequestInit = {}): Promise<Respon
       const rest = parts.slice(1).join(",");
       
       // Resolve path from secondary base dynamically
-    const secondBase = "https://edeziav2.onrender.com/api/v1";
+      const secondBase = "https://edeziav2.onrender.com/api/v1";
       let path = "";
       if (rest.startsWith(secondBase)) {
         path = rest.substring(secondBase.length);
@@ -37,29 +41,29 @@ const safeFetch = async (url: string, options: RequestInit = {}): Promise<Respon
       
       try {
         const res = await fetch(url1, fetchOptions);
-        clearTimeout(id);
+        if (id) clearTimeout(id);
         return res;
       } catch (err) {
         console.warn(`Local API offline at ${url1}, falling back to remote production at ${url2}`, err);
         
         // Reset timeout for fallback fetch
         const fallbackController = new AbortController();
-        const fallbackId = setTimeout(() => fallbackController.abort(), 6000);
+        const fallbackId = timeoutMs > 0 ? setTimeout(() => fallbackController.abort(), timeoutMs) : null;
         try {
           const res = await fetch(url2, { ...options, signal: fallbackController.signal });
-          clearTimeout(fallbackId);
+          if (fallbackId) clearTimeout(fallbackId);
           return res;
         } catch (fallbackErr) {
-          clearTimeout(fallbackId);
+          if (fallbackId) clearTimeout(fallbackId);
           throw fallbackErr;
         }
       }
     }
     const res = await fetch(url, fetchOptions);
-    clearTimeout(id);
+    if (id) clearTimeout(id);
     return res;
   } catch (error) {
-    clearTimeout(id);
+    if (id) clearTimeout(id);
     throw error;
   }
 };
