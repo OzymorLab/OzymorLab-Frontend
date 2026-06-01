@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { 
   UploadCloud, CheckCircle2, AlertTriangle, FileText, 
   Activity, BrainCircuit, ArrowRight, ArrowLeft, Plus, 
@@ -38,6 +39,7 @@ const getThirtyDaysLaterDate = () => {
 
 export default function ExamsPage() {
   const { user, fetchWithAuth } = useAuth();
+  const router = useRouter();
   
   // Student view state
   const [studentSubject, setStudentSubject] = useState("Physics");
@@ -247,6 +249,14 @@ export default function ExamsPage() {
 
   useEffect(() => {
     fetchExamCycles();
+  }, []);
+
+  useEffect(() => {
+    const handleReset = () => {
+      setStep(0);
+    };
+    window.addEventListener("reset-exams-setup", handleReset);
+    return () => window.removeEventListener("reset-exams-setup", handleReset);
   }, []);
 
   useEffect(() => {
@@ -948,22 +958,33 @@ export default function ExamsPage() {
                               <span>Max Marks: <strong className="text-[var(--text-primary)] font-semibold">{t.max_marks}</strong></span>
                             </div>
                           </div>
-                          <button
-                            className="btn-lp-accent cursor-pointer active:scale-[0.98] transition-transform duration-200 border-0"
-                            onClick={() => {
-                              setTaskId(t.id);
-                              setTitle(t.title);
-                              setSubject(t.subject);
-                              setBoard(t.board);
-                              setGradeLevel(t.grade_level);
-                              setMaxMarks(t.max_marks);
-                              setPaperSet(t.paper_set);
-                              setStep(3); // Go straight to bulk answer sheets upload!
-                            }}
-                          >
-                            <UploadCloud size={14} />
-                            Upload Answers
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              className="btn-lp-outline cursor-pointer active:scale-[0.98] transition-transform duration-200"
+                              onClick={() => {
+                                router.push(`/dashboard/submissions?task_id=${t.id}`);
+                              }}
+                            >
+                              <FileText size={14} />
+                              View Results
+                            </button>
+                            <button
+                              className="btn-lp-accent cursor-pointer active:scale-[0.98] transition-transform duration-200 border-0"
+                              onClick={() => {
+                                setTaskId(t.id);
+                                setTitle(t.title);
+                                setSubject(t.subject);
+                                setBoard(t.board);
+                                setGradeLevel(t.grade_level);
+                                setMaxMarks(t.max_marks);
+                                setPaperSet(t.paper_set);
+                                setStep(3); // Go straight to bulk answer sheets upload!
+                              }}
+                            >
+                              <UploadCloud size={14} />
+                              Upload Answers
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -1063,6 +1084,19 @@ export default function ExamsPage() {
 
         {step > 0 && (
           <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm" style={{ padding: "32px" }}>
+            {/* Elegant Header with Back to Cycles button */}
+            <div className="flex justify-between items-center pb-4 mb-6 border-b border-[var(--border-subtle)] flex-wrap gap-4">
+              <button 
+                onClick={() => setStep(0)}
+                className="flex items-center gap-2 text-[12.5px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-200 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-lg px-3 py-1.5 cursor-pointer hover:scale-[1.01]"
+              >
+                <ArrowLeft size={14} />
+                Back to Cycles Setup
+              </button>
+              <div className="text-[12px] text-[var(--text-secondary)] font-medium">
+                Active Cycle: <span className="text-[var(--text-primary)] font-bold">{cycles.find(c => c.id === selectedCycleId)?.name || "Default Cycle"}</span>
+              </div>
+            </div>
             {/* ── Step 1: Upload Question Paper ── */}
             {step === 1 && (
               <div className="animate-fade-in flex flex-col gap-6">

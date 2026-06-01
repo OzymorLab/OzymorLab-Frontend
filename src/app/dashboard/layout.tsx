@@ -147,6 +147,11 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={() => {
+                    if (pathname === item.href) {
+                      window.dispatchEvent(new CustomEvent("reset-exams-setup"));
+                    }
+                  }}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -396,7 +401,12 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    if (pathname === item.href) {
+                      window.dispatchEvent(new CustomEvent("reset-exams-setup"));
+                    }
+                  }}
                   style={{
                     display: "flex",
                     alignItems: "center",
