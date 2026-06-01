@@ -151,7 +151,7 @@ export default function LandingPage() {
     }
   }, [pathname]);
 
-  const r1=useReveal(),r2=useReveal(),r3=useReveal(),r4=useReveal(),r5=useReveal(),r6=useReveal(),r7=useReveal(),r8=useReveal(),r9=useReveal(),r10=useReveal(),r11=useReveal();
+  const r1=useReveal(),r2=useReveal(),r3=useReveal(),r4=useReveal(),r5=useReveal(),r6=useReveal(),r7=useReveal(),r8=useReveal(),r9=useReveal(),r10=useReveal(),r11=useReveal(),r12=useReveal();
 
   return (
     <div className="lp-root">
@@ -195,7 +195,7 @@ export default function LandingPage() {
           <h1 className="lp-hero__title lp-anim-fade" style={{ animationDelay: "0.3s" }}>
             <span style={{ display: "inline-flex", alignItems: "center", gap: "16px", flexWrap: "wrap", justifyContent: "center" }}>
               <LogoIcon />
-              <span><span className="lp-highlight lp-highlight--underline">Say</span> hello to your academic assessment portal</span>
+              <span><span className="lp-highlight lp-highlight--underline">AI-Powered</span> Academic Assessment Portal</span>
             </span>
           </h1>
           <p className="lp-hero__subtitle lp-anim-fade" style={{ animationDelay: "0.4s" }}>
@@ -281,7 +281,7 @@ export default function LandingPage() {
       <section className="lp-empower" ref={r3.ref}>
         <div className={r3.className}>
           <div className="lp-empower__header">
-            <h2 className="lp-section-title">Empowering your evaluation pipeline</h2>
+            <h2 className="lp-section-title">AI-powered evaluation pipeline for modern schools</h2>
           </div>
           <div className="lp-empower__grid">
             {empowerCards.map((c, i) => (
@@ -298,7 +298,7 @@ export default function LandingPage() {
       <section className="lp-elevating" ref={r4.ref}>
         <div className={r4.className}>
           <div className="lp-elevating__header">
-            <h2 className="lp-section-title">Elevating standards</h2>
+            <h2 className="lp-section-title">AI-grading standards for board exam preparation</h2>
           </div>
           <div className="lp-elevating__grid">
             {elevatingCards.map((c, i) => (
@@ -433,7 +433,33 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══ SECTION 8: BOTTOM CTA / BANNER ═══ */}
+      {/* ═══ SECTION 8: FAQ ═══ */}
+      <section className="lp-faq" ref={r12.ref}>
+        <div className={r12.className}>
+          <h2 className="lp-section-title" style={{ textAlign: "center" }}>
+            Frequently Asked <span className="lp-highlight lp-highlight--box">Questions</span>
+          </h2>
+          <p className="lp-section-subtitle" style={{ textAlign: "center", margin: "0 auto 48px" }}>
+            Everything you need to know about AI-powered essay grading with OzymorLab.
+          </p>
+          <div className="lp-faq__grid">
+            {[
+              { q: "What is OzymorLab and how does it use AI for grading?", a: "OzymorLab is an AI-powered essay grading platform that uses machine learning to automatically evaluate student answers. Teachers upload answer scripts, define marking rubrics, and the AI grades each response with per-criterion scores, confidence levels, and specific evidence from the student's answer." },
+              { q: "Which Indian education boards and languages are supported?", a: "We support CBSE, ICSE, all state boards including Maharashtra, UP, Rajasthan, Tamil Nadu, Karnataka, Kerala, West Bengal, AP, Telangana, MP, Bihar, and NIOS. Our AI evaluates answers in 22 Indian languages including Hindi, Tamil, Telugu, Bengali, Marathi, Gujarati, Kannada, Malayalam, English, and more." },
+              { q: "How accurate is the AI grading and can teachers override scores?", a: "Our AI achieves high accuracy by aligning with precise rubric constraints. Every grade includes a confidence score, and teachers can review, modify, or fully override any AI-generated grade. The system is designed for explainability — you see exactly why each score was assigned." },
+              { q: "Is there a free trial or pilot program available?", a: "Yes, new users receive 50 free grading credits to try the platform. Schools and coaching institutes can also request an institutional pilot with customized pricing for startups, mid-size schools, and enterprise districts." },
+              { q: "Does OzymorLab support handwriting and diagram recognition?", a: "Yes, our AI includes handwriting OCR that can transcribe cursive and printed handwriting, including mathematical equations and scientific diagrams, before performing evaluation." },
+            ].map((faq, i) => (
+              <details key={i} className="lp-faq__item">
+                <summary className="lp-faq__question">{faq.q}</summary>
+                <p className="lp-faq__answer">{faq.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ SECTION 9: BOTTOM CTA / BANNER ═══ */}
       <section className="lp-bottom-cta" id="contact" ref={r10.ref}>
         <div className={r10.className}>
           <div className="lp-bottom-cta__inner">

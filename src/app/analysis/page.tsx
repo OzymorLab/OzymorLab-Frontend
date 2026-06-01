@@ -98,6 +98,13 @@ function AnalysisHUDPageContent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const meta = document.createElement("meta");
+    meta.name = "robots";
+    meta.content = "noindex";
+    document.head.appendChild(meta);
+  }, []);
+
   const isAdmin = user?.role === "admin" || user?.role === "principal";
 
   const [roster, setRoster] = useState<any[]>([]); // Array of all worksheets in the class

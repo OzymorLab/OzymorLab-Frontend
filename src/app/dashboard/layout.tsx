@@ -37,6 +37,14 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
+  /* ── Prevent search indexing for app pages ── */
+  useEffect(() => {
+    const meta = document.createElement("meta");
+    meta.name = "robots";
+    meta.content = "noindex";
+    document.head.appendChild(meta);
+  }, []);
+
   /* ── Auth guard ── */
   useEffect(() => {
     if (!isLoading && !user) router.push("/login");

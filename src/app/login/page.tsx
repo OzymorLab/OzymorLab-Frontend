@@ -12,6 +12,8 @@ function LoginPageContent() {
 
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
 
+  useEffect(() => { const meta = document.createElement("meta"); meta.name = "robots"; meta.content = "noindex"; document.head.appendChild(meta); }, []);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("tab") === "signup") {
