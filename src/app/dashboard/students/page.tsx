@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Users, Search, Award, TrendingUp, BookOpen, User, Star, ArrowRight, Sparkles, Plus, Trash2, Check, X, ShieldAlert, MoreVertical, ArrowLeft, UploadCloud, Loader2, FileText, CheckCircle2 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import Link from "next/link";
@@ -36,13 +36,13 @@ interface StudentSummary {
   lastActive: string;
 }
 
-// Client-side cache for high-performance instant loading
-const classroomExamsCache: Record<string, any> = {};
-let globalWorksheetsCache: any = null;
-
 export default function StudentsPage() {
   const { user, fetchWithAuth } = useAuth();
   const router = useRouter();
+
+  // Client-side cache for high-performance instant loading
+  const globalWorksheetsCache = useRef<any>(null);
+  const classroomExamsCache = useRef<Record<string, any>>({});
   
   // Navigation back states
   const [selectedClassroom, setSelectedClassroom] = useState<any | null>(null);
@@ -122,8 +122,8 @@ export default function StudentsPage() {
 
   // Fetch all databases
   const fetchClassroomData = async () => {
-    if (globalWorksheetsCache) {
-      setClassWorksheets(globalWorksheetsCache);
+    if (globalWorksheetsCache.current) {
+      setClassWorksheets(globalWorksheetsCache.current);
     }
     try {
       const resClassrooms = await fetchWithAuth(`${API_BASE}/classroom`);
@@ -146,7 +146,7 @@ export default function StudentsPage() {
       const resWs = await fetchWithAuth(`${API_BASE}/classroom/worksheets`);
       const jsonWs = await resWs.json();
       if (jsonWs.data) {
-        globalWorksheetsCache = jsonWs.data;
+        globalWorksheetsCache.current = jsonWs.data;
         setClassWorksheets(jsonWs.data);
       }
 
@@ -159,14 +159,14 @@ export default function StudentsPage() {
   };
 
   const fetchClassroomExams = async (classId: string) => {
-    if (classroomExamsCache[classId]) {
-      setExamWorksheetsList(classroomExamsCache[classId]);
+    if (classroomExamsCache.current[classId]) {
+      setExamWorksheetsList(classroomExamsCache.current[classId]);
     }
     try {
       const res = await fetchWithAuth(`${API_BASE}/classroom/${classId}/exams`);
       const json = await res.json();
       if (json.data) {
-        classroomExamsCache[classId] = json.data;
+        classroomExamsCache.current[classId] = json.data;
         setExamWorksheetsList(json.data);
       }
     } catch (e) {

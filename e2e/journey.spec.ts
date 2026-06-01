@@ -1,24 +1,5 @@
-import { test, expect, Page, BrowserContext } from '@playwright/test';
-import * as fs from 'fs';
-import * as path from 'path';
+import { test, expect, Page } from '@playwright/test';
 
-function loadEnv() {
-  const envPath = path.resolve(__dirname, '../.env.e2e');
-  if (!fs.existsSync(envPath)) {
-    throw new Error('Missing .env.e2e file. Create it with E2E_EMAIL and E2E_PASSWORD.');
-  }
-  const content = fs.readFileSync(envPath, 'utf-8');
-  const vars: Record<string, string> = {};
-  for (const line of content.split('\n')) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;
-    const [key, ...rest] = trimmed.split('=');
-    vars[key.trim()] = rest.join('=').trim();
-  }
-  return vars;
-}
-
-const env = loadEnv();
 const BASE_URL = 'http://localhost:3000';
 
 const MOCK_USER = {
@@ -197,7 +178,7 @@ test.describe('Phase 1: Authentication Testing', () => {
       await mockAuth(page);
     });
 
-    test('should maintain session across tabs', async ({ page, context }) => {
+    test('should maintain session across tabs', async ({ context }) => {
       const tab2 = await context.newPage();
       await tab2.goto(`${BASE_URL}/dashboard`);
       await tab2.waitForLoadState('load');
@@ -486,7 +467,7 @@ test.describe('Phase 5: Admin Panel', () => {
       await page.goto(`${BASE_URL}/dashboard`);
       await page.waitForLoadState('load');
       const adminLink = page.locator('a:has-text("Admin")').first().or(page.locator('nav a[href="/dashboard/admin"]'));
-      const visible = await adminLink.isVisible().catch(() => false);
+      await adminLink.isVisible().catch(() => false);
     });
   });
 });

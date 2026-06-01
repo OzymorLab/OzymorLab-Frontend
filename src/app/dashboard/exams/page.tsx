@@ -51,6 +51,7 @@ export default function ExamsPage() {
 
     setIsStudentSubmitting(true);
     try {
+      const today = new Date();
       // 1. Upload Question Paper
       setStudentStatusMsg("Decomposing question paper & drafting marking criteria...");
       const paperFormData = new FormData();
@@ -89,8 +90,8 @@ export default function ExamsPage() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               name: "Self Submissions Cycle",
-              start_date: new Date().toISOString().split('T')[0],
-              end_date: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+              start_date: today.toISOString().split('T')[0],
+              end_date: new Date(today.getTime() + 30 * 86400000).toISOString().split('T')[0],
             }),
           });
           const cycJson = await cycRes.json();
