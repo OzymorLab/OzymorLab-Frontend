@@ -1482,7 +1482,7 @@ function AnalysisHUDPageContent() {
                       {gradeDetail && gradeDetail.step_grades && gradeDetail.step_grades[selectedQuestionIndex]
                         ? gradeDetail.step_grades[selectedQuestionIndex].justification
                         : activeStudent.answers && activeStudent.answers[activeQuestion.id] 
-                          ? `OzymorLab analysis has graded this submission. Overall grade assignment: ${activeStudent.grade || "Verified"}.`
+                          ? `OzymorLab analysis has graded this submission. Overall grade assignment: ${activeStudent.score || "Verified"}.`
                           : "No answer provided for this question, so no step traces or analysis can be generated."}
                     </p>
                   </div>

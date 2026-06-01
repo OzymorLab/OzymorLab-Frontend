@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { 
   UploadCloud, CheckCircle2, AlertTriangle, FileText, 
   Activity, BrainCircuit, ArrowRight, ArrowLeft, Plus, 
@@ -32,8 +33,13 @@ interface ExamCycle {
   task_count: number;
 }
 
+const getThirtyDaysLaterDate = () => {
+  return new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
+};
+
 export default function ExamsPage() {
   const { user, fetchWithAuth } = useAuth();
+  const router = useRouter();
   
   // Student view state
   const [studentSubject, setStudentSubject] = useState("Physics");
@@ -244,6 +250,14 @@ export default function ExamsPage() {
 
   useEffect(() => {
     fetchExamCycles();
+  }, []);
+
+  useEffect(() => {
+    const handleReset = () => {
+      setStep(0);
+    };
+    window.addEventListener("reset-exams-setup", handleReset);
+    return () => window.removeEventListener("reset-exams-setup", handleReset);
   }, []);
 
   useEffect(() => {
@@ -547,24 +561,43 @@ export default function ExamsPage() {
 
       setStep(4);
       
-      // Initiate grading (requires APPROVED rubric status)
-      setTimeout(async () => {
+      // Poll for grading start: retry every 10s until PARSED submissions exist (up to 5 min)
+      const MAX_RETRIES = 30;
+      let attempt = 0;
+      const tryStartGrading = async () => {
+        attempt++;
         try {
           const res = await fetchWithAuth(`${API_BASE}/submissions/bulk-grade`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(gradePayload),
           });
-          const json = await res.json();
-          if (json.data && json.data.run_id) {
-            setRunId(json.data.run_id);
-          } else if (json.detail) {
-            alert(json.detail);
+          // 401 = session expired — stop retrying, prompt user
+          if (res.status === 401) {
+            alert("Your session has expired. Please refresh the page and try again — your answer sheets were uploaded successfully.");
+            return;
           }
+          const json = await res.json();
+          if (res.ok && json.data && json.data.run_id) {
+            setRunId(json.data.run_id);
+            return; // Success — stop retrying
+          }
+          // If still parsing (400), retry after delay
+          const detail: string = json.detail || "";
+          const stillParsing = detail.includes("still being parsed") || detail.includes("No parsed submissions");
+          if (stillParsing && attempt < MAX_RETRIES) {
+            setTimeout(tryStartGrading, 10000); // retry in 10s
+          } else if (!stillParsing && detail) {
+            alert(`Could not start grading: ${detail}`);
+          }
+          // else exhausted retries silently — user can click "Start Grading Manually"
         } catch (e: any) {
-          console.log("Evaluation scheduling deferred.");
+          if (attempt < MAX_RETRIES) {
+            setTimeout(tryStartGrading, 10000);
+          }
         }
-      }, 2000);
+      };
+      setTimeout(tryStartGrading, 5000); // first attempt after 5s
 
     } catch (e: any) {
       alert(e.message || "Bulk grading start failed");
@@ -585,8 +618,22 @@ export default function ExamsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(gradePayload),
       });
+      if (res.status === 401) {
+        alert("Your session has expired. Please refresh the page and log back in to start grading.");
+        return;
+      }
       const json = await res.json();
-      if (!res.ok) throw new Error(json.detail || "Grading failed to start. Submissions might still be parsing or rubric is not approved.");
+      if (!res.ok) {
+        const detail = json.detail || "";
+        if (detail.includes("still being parsed")) {
+          alert("Submissions are still being parsed. Please wait 1–2 minutes and try again.");
+        } else if (detail.includes("No parsed submissions")) {
+          alert("No parsed submissions found yet. If you just uploaded files, wait 1–2 minutes for Celery to process them.");
+        } else {
+          throw new Error(detail || "Grading failed to start. Rubric may not be approved yet.");
+        }
+        return;
+      }
       if (json.data && json.data.run_id) {
         setRunId(json.data.run_id);
       }
@@ -945,22 +992,33 @@ export default function ExamsPage() {
                               <span>Max Marks: <strong className="text-[var(--text-primary)] font-semibold">{t.max_marks}</strong></span>
                             </div>
                           </div>
-                          <button
-                            className="btn-lp-accent cursor-pointer active:scale-[0.98] transition-transform duration-200 border-0"
-                            onClick={() => {
-                              setTaskId(t.id);
-                              setTitle(t.title);
-                              setSubject(t.subject);
-                              setBoard(t.board);
-                              setGradeLevel(t.grade_level);
-                              setMaxMarks(t.max_marks);
-                              setPaperSet(t.paper_set);
-                              setStep(3); // Go straight to bulk answer sheets upload!
-                            }}
-                          >
-                            <UploadCloud size={14} />
-                            Upload Answers
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              className="btn-lp-outline cursor-pointer active:scale-[0.98] transition-transform duration-200"
+                              onClick={() => {
+                                router.push(`/dashboard/submissions?task_id=${t.id}`);
+                              }}
+                            >
+                              <FileText size={14} />
+                              View Results
+                            </button>
+                            <button
+                              className="btn-lp-accent cursor-pointer active:scale-[0.98] transition-transform duration-200 border-0"
+                              onClick={() => {
+                                setTaskId(t.id);
+                                setTitle(t.title);
+                                setSubject(t.subject);
+                                setBoard(t.board);
+                                setGradeLevel(t.grade_level);
+                                setMaxMarks(t.max_marks);
+                                setPaperSet(t.paper_set);
+                                setStep(3); // Go straight to bulk answer sheets upload!
+                              }}
+                            >
+                              <UploadCloud size={14} />
+                              Upload Answers
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -1060,6 +1118,19 @@ export default function ExamsPage() {
 
         {step > 0 && (
           <div className="bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-2xl shadow-sm" style={{ padding: "32px" }}>
+            {/* Elegant Header with Back to Cycles button */}
+            <div className="flex justify-between items-center pb-4 mb-6 border-b border-[var(--border-subtle)] flex-wrap gap-4">
+              <button 
+                onClick={() => setStep(0)}
+                className="flex items-center gap-2 text-[12.5px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-200 bg-[var(--surface-secondary)] border border-[var(--border-subtle)] rounded-lg px-3 py-1.5 cursor-pointer hover:scale-[1.01]"
+              >
+                <ArrowLeft size={14} />
+                Back to Cycles Setup
+              </button>
+              <div className="text-[12px] text-[var(--text-secondary)] font-medium">
+                Active Cycle: <span className="text-[var(--text-primary)] font-bold">{cycles.find(c => c.id === selectedCycleId)?.name || "Default Cycle"}</span>
+              </div>
+            </div>
             {/* ── Step 1: Upload Question Paper ── */}
             {step === 1 && (
               <div className="animate-fade-in flex flex-col gap-6">
@@ -1457,11 +1528,22 @@ export default function ExamsPage() {
                   />
                 </div>
               </div>
+            ) : runId ? (
+              <div className="flex flex-col items-center gap-3">
+                <Loader2 className="animate-spin text-brand-500" size={24} />
+                <p className="text-[12.5px] text-[var(--text-secondary)] font-medium">Grading run queued — fetching live status...</p>
+              </div>
             ) : (
               <div className="flex flex-col items-center gap-4">
-                <p className="text-[12.5px] text-[var(--text-tertiary)]">Waiting for upload task to trigger evaluations...</p>
+                <div className="flex items-center gap-3 border border-amber-500/20 bg-amber-500/5 rounded-xl px-5 py-3">
+                  <Loader2 className="animate-spin text-amber-500 shrink-0" size={16} />
+                  <div className="text-left">
+                    <p className="text-[12.5px] font-semibold text-[var(--text-primary)]">Parsing answer sheets...</p>
+                    <p className="text-[11px] text-[var(--text-tertiary)] mt-0.5">AI will start grading automatically once parsing completes. This may take 1–3 minutes.</p>
+                  </div>
+                </div>
                 <button className="btn-lp-outline cursor-pointer" onClick={startGradingManual}>
-                  <Loader2 className="animate-spin" size={13} /> Start Grading Manually
+                  <Play size={13} /> Start Grading Manually
                 </button>
               </div>
             )}

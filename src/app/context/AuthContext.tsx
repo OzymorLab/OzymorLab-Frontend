@@ -6,34 +6,66 @@ import { supabase } from "../../lib/supabaseClient";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.com/api/v1";
 
 const safeFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
-  if (url.includes(",")) {
-    const parts = url.split(",");
-    const firstBase = parts[0];
-    const rest = parts.slice(1).join(",");
-    
-    // Resolve path from secondary base dynamically
-    const secondBase = "https://edeziav2.onrender.com/api/v1";
-    let path = "";
-    if (rest.startsWith(secondBase)) {
-      path = rest.substring(secondBase.length);
-    } else {
-      const idx = rest.indexOf("/api/v1");
-      if (idx !== -1) {
-        path = rest.substring(idx + "/api/v1".length);
+  const isHeavyRequest = url.includes("/upload") || url.includes("/submissions") || url.includes("/runs") || url.includes("/grade");
+  const defaultTimeout = isHeavyRequest ? 120000 : 8000; // 120 seconds for AI/upload tasks, 8 seconds for fast auth
+  const timeoutMs = (options as any).timeout !== undefined ? (options as any).timeout : defaultTimeout;
+
+  const controller = new AbortController();
+  const id = timeoutMs > 0 ? setTimeout(() => controller.abort(), timeoutMs) : null;
+
+  const fetchOptions = {
+    ...options,
+    signal: controller.signal
+  };
+
+  try {
+    if (url.includes(",")) {
+      const parts = url.split(",");
+      const firstBase = parts[0];
+      const rest = parts.slice(1).join(",");
+      
+      // Resolve path from secondary base dynamically
+      const secondBase = "https://edeziav2.onrender.com/api/v1";
+      let path = "";
+      if (rest.startsWith(secondBase)) {
+        path = rest.substring(secondBase.length);
+      } else {
+        const idx = rest.indexOf("/api/v1");
+        if (idx !== -1) {
+          path = rest.substring(idx + "/api/v1".length);
+        }
+      }
+      
+      const url1 = `${firstBase}${path}`;
+      const url2 = rest;
+      
+      try {
+        const res = await fetch(url1, fetchOptions);
+        if (id) clearTimeout(id);
+        return res;
+      } catch (err) {
+        console.warn(`Local API offline at ${url1}, falling back to remote production at ${url2}`, err);
+        
+        // Reset timeout for fallback fetch
+        const fallbackController = new AbortController();
+        const fallbackId = timeoutMs > 0 ? setTimeout(() => fallbackController.abort(), timeoutMs) : null;
+        try {
+          const res = await fetch(url2, { ...options, signal: fallbackController.signal });
+          if (fallbackId) clearTimeout(fallbackId);
+          return res;
+        } catch (fallbackErr) {
+          if (fallbackId) clearTimeout(fallbackId);
+          throw fallbackErr;
+        }
       }
     }
-    
-    const url1 = `${firstBase}${path}`;
-    const url2 = rest;
-    
-    try {
-      return await fetch(url1, options);
-    } catch (err) {
-      console.warn(`Local API offline at ${url1}, falling back to remote production at ${url2}`, err);
-      return await fetch(url2, options);
-    }
+    const res = await fetch(url, fetchOptions);
+    if (id) clearTimeout(id);
+    return res;
+  } catch (error) {
+    if (id) clearTimeout(id);
+    throw error;
   }
-  return fetch(url, options);
 };
 
 interface User {
@@ -370,12 +402,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRefreshToken(null);
   };
 
-  const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
-    const headers = new Headers(options.headers || {});
-    // Always load token from active Supabase session
-    const activeToken = token;
-    if (activeToken) headers.set("Authorization", `Bearer ${activeToken}`);
-    return safeFetch(url, { ...options, headers });
+  const fetchWithAuth = async (url: string, options: RequestInit = {}): Promise<Response> => {
+    // Always get the freshest token from Supabase SDK (auto-refreshes if expired)
+    let activeToken = token;
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          activeToken = session.access_token;
+          // Keep React state in sync
+          if (session.access_token !== token) setToken(session.access_token);
+        }
+      } catch { /* fall back to cached token */ }
+    }
+
+    const makeRequest = async (bearerToken: string | null): Promise<Response> => {
+      const headers = new Headers(options.headers || {});
+      if (bearerToken) headers.set("Authorization", `Bearer ${bearerToken}`);
+      return safeFetch(url, { ...options, headers });
+    };
+
+    const res = await makeRequest(activeToken);
+
+    // On 401 (token expired), force a Supabase token refresh and retry once
+    if (res.status === 401 && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      try {
+        const { data: { session } } = await supabase.auth.refreshSession();
+        if (session?.access_token) {
+          setToken(session.access_token);
+          return makeRequest(session.access_token);
+        }
+      } catch { /* ignore refresh error, return original 401 */ }
+    }
+
+    return res;
   };
 
   const setGeminiKey = async (key: string) => {

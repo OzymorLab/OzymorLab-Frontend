@@ -147,7 +147,7 @@ const ozymorlabSeoKeywords = [
 ];
 
 export const metadata: Metadata = {
-  title: "Free AI Essay Grader India | CBSE ICSE State Boards | OzymorLab - Grade Essays Instantly",
+  title: "Free AI answer sheet evaluator | CBSE ICSE State Boards | OzymorLab - Grade Assignment Instantly",
   description: "Grade essays instantly with AI. Supports CBSE, ICSE & all State Boards. Per-criterion scores with evidence. 22 Indian languages. Free 50 credits. Try now.",
   keywords: ozymorlabSeoKeywords,
   openGraph: {

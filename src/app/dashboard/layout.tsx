@@ -36,6 +36,8 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileBtnRef = useRef<HTMLButtonElement>(null);
 
   /* ── Prevent search indexing for app pages ── */
   useEffect(() => {
@@ -66,7 +68,14 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setUserMenuOpen(false);
       }
-      setMobileMenuOpen(false);
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(e.target as Node) &&
+        mobileBtnRef.current &&
+        !mobileBtnRef.current.contains(e.target as Node)
+      ) {
+        setMobileMenuOpen(false);
+      }
     };
     document.addEventListener("click", handler);
     return () => document.removeEventListener("click", handler);
@@ -146,6 +155,11 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={() => {
+                    if (pathname === item.href) {
+                      window.dispatchEvent(new CustomEvent("reset-exams-setup"));
+                    }
+                  }}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -351,6 +365,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
 
             {/* Mobile hamburger */}
             <button
+              ref={mobileBtnRef}
               className="dash-nav-mobile-btn"
               onClick={e => { e.stopPropagation(); setMobileMenuOpen(v => !v); }}
               style={{
@@ -379,6 +394,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
         {/* Mobile dropdown menu */}
         {mobileMenuOpen && (
           <div
+            ref={mobileMenuRef}
             className="dash-nav-mobile-menu"
             style={{
               borderTop: "1px solid var(--border-subtle)",
@@ -393,7 +409,12 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    if (pathname === item.href) {
+                      window.dispatchEvent(new CustomEvent("reset-exams-setup"));
+                    }
+                  }}
                   style={{
                     display: "flex",
                     alignItems: "center",

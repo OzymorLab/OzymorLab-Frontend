@@ -1,16 +1,37 @@
-import type { MetadataRoute } from "next";
-
-const BASE_URL = "https://ozymorlab.vercel.app";
+import { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
-        userAgent: "*",
-        allow: "/",
-        disallow: ["/dashboard/", "/analysis/", "/api/"],
+        userAgent: '*',
+        allow: [
+          '/',
+          '/about',
+          '/contact',
+          '/feature',
+          '/pricing',
+          '/waitlist',
+          '/osm-evaluator',
+          '/blog',
+          '/blog/*',
+        ],
+        disallow: [
+          '/dashboard',
+          '/dashboard/*',
+          '/admin',
+          '/admin/*',
+          '/product_admin',
+          '/product_admin/*',
+          '/analysis',
+          '/analysis/*',
+          '/api',
+          '/api/*',
+          '/context',
+          '/context/*',
+        ],
       },
     ],
-    sitemap: `${BASE_URL}/sitemap.xml`,
-  };
+    sitemap: 'https://ozymorlab.vercel.app/sitemap.xml',
+  }
 }

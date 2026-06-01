@@ -86,6 +86,17 @@ export default function SubmissionsPage() {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [isLoading, setIsLoading] = useState(false);
   const [visibleCount, setVisibleCount] = useState(10);
+  const [taskIdFilter, setTaskIdFilter] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tId = params.get("task_id");
+      if (tId) {
+        setTaskIdFilter(tId);
+      }
+    }
+  }, []);
 
   const fetchSubmissions = async (limitVal?: number) => {
     setIsLoading(true);
@@ -96,7 +107,7 @@ export default function SubmissionsPage() {
       const json = await res.json();
       if (json.data) {
         setSubmissions(json.data);
-        applyFilters(json.data, searchTerm, statusFilter);
+        applyFilters(json.data, searchTerm, statusFilter, taskIdFilter);
       }
     } catch (e) {
       console.error("Failed to fetch submissions", e);
@@ -111,8 +122,12 @@ export default function SubmissionsPage() {
     return () => clearInterval(interval);
   }, [visibleCount, statusFilter]);
 
-  const applyFilters = (subsList: Submission[], search: string, status: string) => {
+  const applyFilters = (subsList: Submission[], search: string, status: string, tIdFilter?: string | null) => {
     let result = [...subsList];
+    const activeTaskId = tIdFilter !== undefined ? tIdFilter : taskIdFilter;
+    if (activeTaskId) {
+      result = result.filter(s => s.task_id === activeTaskId);
+    }
     if (user?.role === "student") {
       result = result.filter(s => {
         if (!s.student_id) return false;
@@ -138,8 +153,8 @@ export default function SubmissionsPage() {
   };
 
   useEffect(() => {
-    applyFilters(submissions, searchTerm, statusFilter);
-  }, [searchTerm, statusFilter, submissions]);
+    applyFilters(submissions, searchTerm, statusFilter, taskIdFilter);
+  }, [searchTerm, statusFilter, submissions, taskIdFilter]);
 
   useEffect(() => {
     if (selectedSub) {
@@ -201,6 +216,50 @@ export default function SubmissionsPage() {
           Reload Queue
         </button>
       </div>
+
+      {taskIdFilter && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+          background: 'rgba(224, 255, 130, 0.1)',
+          border: '1px solid rgba(224, 255, 130, 0.3)',
+          borderRadius: '12px',
+          padding: '10px 16px',
+          fontSize: '13px',
+          color: 'var(--text-primary)',
+          fontWeight: 500,
+        }}>
+          <div className="flex items-center gap-2">
+            <Sparkles size={14} className="text-brand-600 animate-pulse" />
+            <span>Filtering submissions by subject paper.</span>
+          </div>
+          <button 
+            onClick={() => {
+              setTaskIdFilter(null);
+              if (typeof window !== "undefined") {
+                const url = new URL(window.location.href);
+                url.searchParams.delete("task_id");
+                window.history.pushState({}, '', url.pathname + url.search);
+              }
+            }}
+            style={{
+              color: 'var(--text-secondary)',
+              fontWeight: 700,
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontFamily: 'inherit',
+              padding: '2.5px 10px',
+              borderRadius: '6px',
+              border: '1px solid var(--border-subtle)',
+              background: 'var(--surface-primary)',
+            }}
+          >
+            Clear Filter
+          </button>
+        </div>
+      )}
 
       {/* Filters Bar */}
       <div style={{
