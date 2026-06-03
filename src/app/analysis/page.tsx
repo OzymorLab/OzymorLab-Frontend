@@ -401,7 +401,7 @@ function AnalysisHUDPageContent() {
         ? {
             id: submissionDetail.steps[selectedQuestionIndex]?.stepNum?.toString() || "",
             title: `Step ${selectedQuestionIndex + 1}`,
-            text: submissionDetail.questionText || "Subject Question",
+            text: submissionDetail.steps[selectedQuestionIndex]?.questionText || submissionDetail.questionText || "Subject Question",
             topic: submissionDetail.subject || "",
             difficulty: submissionDetail.difficulty || "Medium",
             confidence: submissionDetail.confidence || 0.95,
@@ -1394,13 +1394,31 @@ function AnalysisHUDPageContent() {
                                       {step.latex}
                                     </div>
                                   )}
+                                  {step.diagramUrl && (
+                                    <div className="mt-2 border border-[var(--border-subtle)] rounded-xl overflow-hidden max-w-md bg-[var(--surface-secondary)]">
+                                      <img 
+                                        src={step.diagramUrl} 
+                                        alt={`Cropped Diagram for Step ${step.stepNum}`} 
+                                        style={{ maxHeight: "250px", objectFit: "contain", margin: "0 auto" }} 
+                                      />
+                                    </div>
+                                  )}
                                 </div>
 
                                 {/* Bounding Box Indicator - WRONG PART HIGHLIGHT capsules */}
-                                {hasError && step.justification && (
-                                  <div className="mt-2 text-[11.5px] flex items-center gap-1.5 bg-red-500/5 border border-red-500/10 rounded-xl p-3 text-red-600 font-medium">
-                                    <ShieldAlert size={13} className="shrink-0" />
-                                    <span><strong>Feedback:</strong> {step.justification}</span>
+                                {step.justification && (
+                                  <div className={`mt-3 text-[12.5px] flex flex-col gap-2 border rounded-xl p-4 ${
+                                    hasError 
+                                      ? "bg-red-500/5 border-red-500/10 text-red-700 dark:text-red-400" 
+                                      : "bg-brand-500/5 border-brand-500/10 text-text-primary"
+                                  }`}>
+                                    <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[10px] text-[var(--text-secondary)]">
+                                      <Sparkles size={11} className="text-brand-600" />
+                                      AI Evaluation Trace
+                                    </div>
+                                    <div className="whitespace-pre-line leading-relaxed text-[13px]">
+                                      {step.justification}
+                                    </div>
                                   </div>
                                 )}
                               </div>
