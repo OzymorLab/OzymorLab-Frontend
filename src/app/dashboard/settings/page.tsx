@@ -335,7 +335,7 @@ export default function SettingsPage() {
                   <Lock size={13} className="text-[var(--text-secondary)]" /> Authentication Provider
                 </h4>
                 <p className="text-[12px] text-[var(--text-tertiary)] mt-1">
-                  Managed via secure Supabase integration.
+                  Managed via secure cloud integration.
                 </p>
               </div>
               <span className="bg-brand-500/10 text-brand-600 border border-brand-500/20 text-[11px] font-bold px-3 py-1 rounded-lg">

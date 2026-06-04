@@ -1226,7 +1226,7 @@ export default function ExamsPage() {
                   </>
                 ) : (
                   <>
-                    Decompose with Gemini
+                    Decompose with AI
                     <ArrowRight size={14} />
                   </>
                 )}
@@ -1242,7 +1242,7 @@ export default function ExamsPage() {
             <div className="flex flex-col gap-3 pb-4 border-b border-[var(--border-subtle)]">
               <div className="flex justify-between items-center flex-wrap gap-4">
                 <div>
-                  <h3 className="text-[15px] font-bold text-[var(--text-primary)]">Gemini-Generated Rubric Structure</h3>
+                  <h3 className="text-[15px] font-bold text-[var(--text-primary)]">AI-Generated Rubric Structure</h3>
                   <p className="text-[12px] text-[var(--text-secondary)] mt-1 flex items-center gap-2 font-medium">
                     <BrainCircuit className="text-brand-500" size={14} />
                     AI confidence: <strong className="text-brand-600 font-mono">{(aiConfidence * 100).toFixed(0)}%</strong> • Verify marks allocation before proceeding.
@@ -1490,7 +1490,7 @@ export default function ExamsPage() {
             </div>
             <h3 className="text-[16.5px] font-bold text-[var(--text-primary)] mb-1">Asynchronous Evaluation Queue Active</h3>
             <p className="text-[12.5px] text-[var(--text-secondary)] max-w-[450px] mb-8">
-              All student answer sheets are being transferred to Supabase Storage. Once completed, the parallel evaluation pipelines will execute synchronously.
+              All student answer sheets are being processed. Once completed, the evaluation pipelines will execute automatically.
             </p>
 
             {runStatus ? (
