@@ -134,6 +134,9 @@ function AnalysisHUDPageContent() {
   const [error, setError] = useState<string>("");
   const [gradeDetail, setGradeDetail] = useState<any>(null);
 
+  // Left pane view: "sheet" = original handwritten image (default), "transcript" = OCR text + grading
+  const [leftView, setLeftView] = useState<"sheet" | "transcript">("sheet");
+
   // Refs
   const rightPaneRef = useRef<HTMLDivElement>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
@@ -263,6 +266,7 @@ function AnalysisHUDPageContent() {
       setIsLoadingDetail(true);
       setChatMessages([]);
       setGradeDetail(null);
+      setLeftView("sheet"); // Always default to handwritten sheet view on student change
       
       fetchWithAuth(`${API_BASE}/analysis/submissions/${selectedStudentId}`)
         .then(res => res.json())
@@ -958,14 +962,30 @@ function AnalysisHUDPageContent() {
                 <Loader2 className="animate-spin mr-2 text-[var(--text-primary)]" size={16} />
                 <span className="text-[12.5px] font-medium">Loading submissions...</span>
               </div>
+            ) : leftView === "sheet" && viewMode !== "self-eval" ? (
+              /* Sheet mode: show student name + total score, no step picker */
+              <div className="flex-1 flex gap-2 items-center">
+                <div className="flex-1 h-10 px-4 text-[13.5px] font-bold text-[var(--text-primary)] flex items-center gap-2">
+                  {viewMode === "teacher" ? activeStudent.studentName : "My Submission"}
+                </div>
+                <div className="h-10 flex items-center px-4 flex-shrink-0 border border-[var(--border-subtle)] rounded-xl">
+                  <span className="text-[13px] font-mono font-bold text-[var(--text-primary)]">
+                    {submissionDetail
+                      ? `${submissionDetail.score?.toFixed(1) ?? "—"} / ${submissionDetail.maxScore?.toFixed(1) ?? "—"} pts`
+                      : "— pts"}
+                  </span>
+                </div>
+              </div>
             ) : (
+              /* Transcript mode: show step label + per-step mark adjuster */
               <div className="flex-1 flex gap-2">
                 <div className="flex-1 h-10 px-4 text-[13.5px] font-bold text-[var(--text-primary)] flex items-center">
-                  {viewMode === "teacher" ? `${activeStudent.studentName} - Step ${selectedQuestionIndex + 1}` : `Step ${selectedQuestionIndex + 1}`}
+                  {viewMode === "teacher"
+                    ? `${activeStudent.studentName} — Step ${selectedQuestionIndex + 1}`
+                    : `Step ${selectedQuestionIndex + 1}`}
                 </div>
 
-
-                {/* Marks Box (Points adjustments very close to selectors) */}
+                {/* Marks Box (Points adjustments) */}
                 <div className="h-10 flex items-center overflow-hidden flex-shrink-0 border border-[var(--border-subtle)] rounded-xl">
                   <div className="px-4 text-center">
                     <span className="text-[13px] font-mono font-bold text-[var(--text-primary)]">
@@ -1016,22 +1036,28 @@ function AnalysisHUDPageContent() {
             <button
               onClick={() => {
                 if (viewMode === "teacher") {
-                  const numQuestions = activeStudent.questions?.length || 0;
-                  if (selectedQuestionIndex < numQuestions - 1) {
-                    // Next question for the same student
-                    setSelectedQuestionIndex(prev => prev + 1);
+                  if (leftView === "transcript") {
+                    // Transcript mode: advance step by step, then next student
+                    const numSteps = submissionDetail?.steps?.length || 0;
+                    if (selectedQuestionIndex < numSteps - 1) {
+                      setSelectedQuestionIndex(prev => prev + 1);
+                    } else {
+                      const currentStudentIndex = roster.findIndex(w => w.id === selectedStudentId);
+                      if (currentStudentIndex !== -1 && currentStudentIndex < roster.length - 1) {
+                        setSelectedStudentId(roster[currentStudentIndex + 1].id);
+                        setSelectedQuestionIndex(0);
+                      } else {
+                        setAgreedSubmissions(prev => ({ ...prev, [selectedStudentId]: true }));
+                      }
+                    }
                   } else {
-                    // Go to next student, first question
+                    // Sheet mode: advance directly to next student
                     const currentStudentIndex = roster.findIndex(w => w.id === selectedStudentId);
                     if (currentStudentIndex !== -1 && currentStudentIndex < roster.length - 1) {
                       setSelectedStudentId(roster[currentStudentIndex + 1].id);
                       setSelectedQuestionIndex(0);
                     } else {
-                      // Optionally set an 'all done' state, but for now just mark as saved visually
-                      setAgreedSubmissions(prev => ({
-                        ...prev,
-                        [selectedStudentId]: true
-                      }));
+                      setAgreedSubmissions(prev => ({ ...prev, [selectedStudentId]: true }));
                     }
                   }
                   setChatMessages([]);
@@ -1059,8 +1085,8 @@ function AnalysisHUDPageContent() {
              ========================================== */}
           <aside className="w-14 flex flex-col items-center gap-3 py-4 border-r border-[var(--border-subtle)] overflow-y-auto shrink-0 bg-[var(--surface-primary)]">
             
-            {/* Teacher & Student Question navigation buttons */}
-            {viewMode === "teacher" && roster.map((worksheet, index) => {
+            {/* ── SHEET VIEW: show student selector buttons (teacher), or nothing (student) ── */}
+            {(leftView === "sheet" || viewMode === "self-eval") && viewMode === "teacher" && roster.map((worksheet, index) => {
               const isSelected = selectedStudentId === worksheet.id;
               const initial = worksheet.studentName ? worksheet.studentName.substring(0, 2).toUpperCase() : `S${index+1}`;
               return (
@@ -1086,8 +1112,47 @@ function AnalysisHUDPageContent() {
                 </button>
               );
             })}
-            
-            {viewMode === "student" && activeStudent?.questions?.map((question: any, index: number) => {
+
+            {/* ── TRANSCRIPT VIEW: show per-step/question tabs ── */}
+            {leftView === "transcript" && viewMode === "teacher" && submissionDetail?.steps?.map((step: any, index: number) => {
+              const isSelected = selectedQuestionIndex === index;
+              const scoreRatio = step.maxMarks > 0 ? step.marks / step.maxMarks : 0;
+              const dotColor = scoreRatio >= 0.9 ? "#10b981" : scoreRatio >= 0.6 ? "#f59e0b" : "#ef4444";
+              return (
+                <button
+                  key={step.stepNum || index}
+                  onClick={() => {
+                    setSelectedQuestionIndex(index);
+                    setHighlightedStep(null);
+                    setChatMessages([]);
+                    // Scroll the transcript step card into view
+                    setTimeout(() => {
+                      const el = document.getElementById(`step-card-${step.stepNum}`);
+                      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }, 50);
+                  }}
+                  className={`w-9 h-7 rounded-lg flex items-center justify-center font-bold font-mono text-[10px] transition-all flex-shrink-0 cursor-pointer relative ${
+                    isSelected ? "ring-2 ring-brand-500 ring-offset-1 ring-offset-[var(--surface-primary)] scale-105" : "opacity-80 hover:opacity-100 hover:scale-105"
+                  }`}
+                  style={{ 
+                    background: isSelected ? "var(--text-primary)" : "var(--surface-secondary)",
+                    color: isSelected ? "var(--surface-primary)" : "var(--text-secondary)",
+                    border: "1px solid var(--border-subtle)"
+                  }}
+                  title={`Step ${step.stepNum}: ${step.marks}/${step.maxMarks} pts`}
+                >
+                  S{step.stepNum}
+                  {/* Colour dot indicating score */}
+                  <span
+                    className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full border border-[var(--surface-primary)]"
+                    style={{ background: dotColor }}
+                  />
+                </button>
+              );
+            })}
+
+            {/* ── TRANSCRIPT VIEW student mode: question tabs ── */}
+            {leftView === "transcript" && viewMode === "student" && activeStudent?.questions?.map((question: any, index: number) => {
               const isSelected = selectedQuestionIndex === index;
               return (
                 <button
@@ -1170,21 +1235,51 @@ function AnalysisHUDPageContent() {
           <main className="flex-1 flex flex-col min-w-0">
             
             {/* Answer Label Bar */}
-            <div className="h-10 px-6 flex items-center border-b text-xs text-[var(--text-secondary)] flex-shrink-0 font-medium" style={{ background: "var(--surface-primary)", borderBottomColor: "var(--border-subtle)" }}>
-              {isLoadingDetail ? (
-                <div className="flex items-center gap-2">
-                  <Loader2 className="animate-spin text-[var(--text-primary)]" size={12} />
-                  <span>Loading submission details...</span>
+            <div className="h-10 px-6 flex items-center justify-between border-b text-xs text-[var(--text-secondary)] flex-shrink-0 font-medium" style={{ background: "var(--surface-primary)", borderBottomColor: "var(--border-subtle)" }}>
+              <div className="flex items-center gap-2">
+                {isLoadingDetail ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="animate-spin text-[var(--text-primary)]" size={12} />
+                    <span>Loading submission details...</span>
+                  </div>
+                ) : activeStudent.studentName ? (
+                  <div className="flex items-center gap-2">
+                    <User size={13} className="text-[var(--text-secondary)]" />
+                    <span className="font-bold uppercase tracking-wider text-[var(--text-primary)]" style={{ fontSize: "11px" }}>
+                      {activeStudent.studentName}
+                    </span>
+                  </div>
+                ) : (
+                  <span>No submission selected</span>
+                )}
+              </div>
+
+              {/* Sheet / Transcript toggle — only shown when a submission with a sheet is loaded */}
+              {!isCreatingPractice && viewMode !== "self-eval" && (
+                <div className="flex items-center gap-1 p-0.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-secondary)]">
+                  <button
+                    onClick={() => setLeftView("sheet")}
+                    className="flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-bold font-mono uppercase tracking-wider transition-all cursor-pointer"
+                    style={{
+                      background: leftView === "sheet" ? "var(--text-primary)" : "transparent",
+                      color: leftView === "sheet" ? "var(--surface-primary)" : "var(--text-secondary)"
+                    }}
+                  >
+                    <FileText size={11} />
+                    Sheet
+                  </button>
+                  <button
+                    onClick={() => setLeftView("transcript")}
+                    className="flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-bold font-mono uppercase tracking-wider transition-all cursor-pointer"
+                    style={{
+                      background: leftView === "transcript" ? "var(--text-primary)" : "transparent",
+                      color: leftView === "transcript" ? "var(--surface-primary)" : "var(--text-secondary)"
+                    }}
+                  >
+                    <BookOpen size={11} />
+                    Transcript
+                  </button>
                 </div>
-              ) : activeStudent.studentName ? (
-                <div className="flex items-center gap-2">
-                  <User size={13} className="text-[var(--text-secondary)]" />
-                  <span className="font-bold uppercase tracking-wider text-[var(--text-primary)]" style={{ fontSize: "11px" }}>
-                    {activeStudent.studentName}
-                  </span>
-                </div>
-              ) : (
-                <span>No submission selected</span>
               )}
             </div>
 
@@ -1328,115 +1423,216 @@ function AnalysisHUDPageContent() {
                       </div>
                     )}
 
-                    {/* Manuscript Canvas (Premium Grid Background) - Rich Text Answer */}
-                    <div className="flex-1 min-h-[180px] rounded-xl border border-[var(--border-subtle)] relative overflow-hidden flex flex-col" 
-                      style={{ 
-                        background: "var(--surface-secondary)", 
-                        backgroundImage: "radial-gradient(var(--border-strong) 1.5px, transparent 1.5px)",
-                        backgroundSize: "18px 18px"
-                      }}>
-
-                      <div className="flex-1 p-6 relative overflow-y-auto flex flex-col gap-4">
+                    {/* ── SHEET VIEW (default): Original handwritten answer sheet ── */}
+                    {(leftView === "sheet" || viewMode === "self-eval") && (
+                      <div className="flex-1 min-h-[180px] rounded-xl border border-[var(--border-subtle)] relative overflow-hidden flex flex-col"
+                        style={{ background: "var(--surface-secondary)" }}>
                         {isLoadingDetail ? (
-                          <div className="flex items-center justify-center h-full">
+                          <div className="flex items-center justify-center h-full py-16">
                             <Loader2 className="animate-spin text-[var(--text-primary)]" size={24} />
                           </div>
-                        ) : submissionDetail?.steps && submissionDetail.steps.length > 0 ? (
-                          submissionDetail.steps.map((step: any, index: number) => {
-                            const isSelected = selectedQuestionIndex === index;
-                            const hasError = step.marks < step.maxMarks || step.errorType;
-                            
-                            return (
-                              <div
-                                key={step.stepNum || index}
-                                onClick={() => setSelectedQuestionIndex(index)}
-                                className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer shadow-sm relative flex flex-col gap-3 ${
-                                  isSelected 
-                                    ? "ring-2 ring-brand-500 ring-offset-1 ring-offset-[var(--surface-secondary)] border-brand-500 bg-[var(--surface-primary)]" 
-                                    : "border-[var(--border-subtle)] bg-[var(--surface-primary)]/80 hover:bg-[var(--surface-primary)] hover:border-[var(--border-default)]"
-                                } ${
-                                  hasError && isSelected 
-                                    ? "shadow-md shadow-red-500/5 bg-gradient-to-br from-[var(--surface-primary)] to-red-500/5" 
-                                    : ""
-                                }`}
-                              >
-                                {/* Step Header */}
-                                <div className="flex justify-between items-center">
-                                  <span className="text-[12px] font-bold font-mono uppercase tracking-wider text-brand-600 flex items-center gap-1.5">
-                                    <Sparkles size={13} />
-                                    Step {step.stepNum}
-                                  </span>
-                                  
-                                  <div className="flex items-center gap-2">
-                                    {/* Error Warning Badge */}
-                                    {hasError && (
-                                      <span className="text-[9.5px] font-bold uppercase tracking-wider bg-red-500/10 border border-red-500/20 text-red-500 px-2 py-0.5 rounded-lg flex items-center gap-1">
-                                        <AlertTriangle size={10} />
-                                        {step.errorType || "Deduction"}
-                                      </span>
-                                    )}
-                                    
-                                    <span className="text-[12px] font-bold font-mono text-[var(--text-secondary)]">
-                                      {step.marks.toFixed(1)} / {step.maxMarks.toFixed(1)} pts
-                                    </span>
-                                  </div>
-                                </div>
-
-                                {/* Step Content (Text & Equation) */}
-                                <div className="flex flex-col gap-2">
-                                  {step.text && (
-                                    <p className="text-[13.5px] leading-relaxed text-[var(--text-primary)] font-medium">
-                                      {step.text}
-                                    </p>
-                                  )}
-                                  {step.latex && (
-                                    <div className="bg-[var(--surface-secondary)] px-3 py-2 rounded-lg border border-[var(--border-subtle)] font-mono text-[12px] text-[var(--text-secondary)] w-max max-w-full overflow-x-auto">
-                                      {step.latex}
-                                    </div>
-                                  )}
-                                  {step.diagramUrl && (
-                                    <div className="mt-2 border border-[var(--border-subtle)] rounded-xl overflow-hidden max-w-md bg-[var(--surface-secondary)]">
-                                      <img 
-                                        src={step.diagramUrl} 
-                                        alt={`Cropped Diagram for Step ${step.stepNum}`} 
-                                        style={{ maxHeight: "250px", objectFit: "contain", margin: "0 auto" }} 
-                                      />
-                                    </div>
-                                  )}
-                                </div>
-
-                                {/* Bounding Box Indicator - WRONG PART HIGHLIGHT capsules */}
-                                {step.justification && (
-                                  <div className={`mt-3 text-[12.5px] flex flex-col gap-2 border rounded-xl p-4 ${
-                                    hasError 
-                                      ? "bg-red-500/5 border-red-500/10 text-red-700 dark:text-red-400" 
-                                      : "bg-brand-500/5 border-brand-500/10 text-text-primary"
-                                  }`}>
-                                    <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[10px] text-[var(--text-secondary)]">
-                                      <Sparkles size={11} className="text-brand-600" />
-                                      AI Evaluation Trace
-                                    </div>
-                                    <div className="whitespace-pre-line leading-relaxed text-[13px]">
-                                      {step.justification}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })
+                        ) : submissionDetail?.sheetUrl ? (
+                          <div className="flex-1 overflow-y-auto flex flex-col items-center p-4 gap-3">
+                            {/* Score summary ribbon */}
+                            <div className="w-full flex items-center justify-between px-4 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-primary)] shadow-sm mb-1">
+                              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+                                Answer Sheet
+                              </span>
+                              <span className="text-[12px] font-mono font-bold text-[var(--text-primary)] bg-brand-500/10 text-brand-600 px-3 py-0.5 rounded-lg">
+                                {submissionDetail.score?.toFixed(1) ?? "—"} / {submissionDetail.maxScore?.toFixed(1) ?? "—"} pts
+                              </span>
+                            </div>
+                            {/* Render PDF pages or image */}
+                            {submissionDetail.fileType === "pdf" ? (
+                              <iframe
+                                src={submissionDetail.sheetUrl}
+                                title="Answer Sheet"
+                                className="w-full rounded-xl border border-[var(--border-subtle)]"
+                                style={{ minHeight: "70vh", background: "#fff" }}
+                              />
+                            ) : (
+                              <img
+                                src={submissionDetail.sheetUrl}
+                                alt="Handwritten answer sheet"
+                                className="w-full rounded-xl border border-[var(--border-subtle)] shadow-sm"
+                                style={{ objectFit: "contain", background: "#fff" }}
+                              />
+                            )}
+                          </div>
                         ) : activeStudent.answers && activeStudent.answers[activeQuestion.id] ? (
-                          <div 
-                            className="bg-[var(--surface-primary)] p-6 rounded-lg border border-[var(--border-subtle)] shadow-sm text-[14px] text-[var(--text-primary)] min-h-[300px]"
-                            dangerouslySetInnerHTML={{ __html: activeStudent.answers[activeQuestion.id] }}
-                          />
+                          /* ClassroomWorksheet — typed HTML answer */
+                          <div className="flex-1 p-6 overflow-y-auto">
+                            <div
+                              className="bg-[var(--surface-primary)] p-6 rounded-lg border border-[var(--border-subtle)] shadow-sm text-[14px] text-[var(--text-primary)] min-h-[300px]"
+                              dangerouslySetInnerHTML={{ __html: activeStudent.answers[activeQuestion.id] }}
+                            />
+                          </div>
                         ) : (
-                          <div className="flex items-center justify-center h-full text-[12px] font-mono text-[var(--text-tertiary)] uppercase tracking-wider font-bold">
-                            No answer submitted
+                          <div className="flex flex-col items-center justify-center h-full py-16 gap-3 text-[12px] font-mono text-[var(--text-tertiary)] uppercase tracking-wider font-bold">
+                            <FileText size={32} className="opacity-30" />
+                            No answer sheet available
                           </div>
                         )}
-
                       </div>
-                    </div>
+                    )}
+
+                    {/* ── TRANSCRIPT VIEW: OCR text + step-by-step grading ── */}
+                    {leftView === "transcript" && viewMode !== "self-eval" && (
+                      <div className="flex-1 min-h-[180px] rounded-xl border border-[var(--border-subtle)] relative overflow-hidden flex flex-col"
+                        style={{
+                          background: "var(--surface-secondary)",
+                          backgroundImage: "radial-gradient(var(--border-strong) 1.5px, transparent 1.5px)",
+                          backgroundSize: "18px 18px"
+                        }}>
+                        <div className="flex-1 p-6 relative overflow-y-auto flex flex-col gap-4">
+                          {isLoadingDetail ? (
+                            <div className="flex items-center justify-center h-full">
+                              <Loader2 className="animate-spin text-[var(--text-primary)]" size={24} />
+                            </div>
+                          ) : submissionDetail?.steps && submissionDetail.steps.length > 0 ? (
+                            <>
+                              {/* Total score ribbon */}
+                              <div className="flex items-center justify-between px-4 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-primary)] shadow-sm">
+                                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+                                  Graded Transcript
+                                </span>
+                                <span className="text-[12px] font-mono font-bold text-brand-600 bg-brand-500/10 px-3 py-0.5 rounded-lg">
+                                  {submissionDetail.score?.toFixed(1) ?? "—"} / {submissionDetail.maxScore?.toFixed(1) ?? "—"} pts
+                                </span>
+                              </div>
+
+                              {submissionDetail.steps.map((step: any, index: number) => {
+                                const isSelected = selectedQuestionIndex === index;
+                                const hasError = step.marks < step.maxMarks || step.errorType;
+                                const scoreRatio = step.maxMarks > 0 ? step.marks / step.maxMarks : 0;
+
+                                return (
+                                  <div
+                                    key={step.stepNum || index}
+                                    id={`step-card-${step.stepNum}`}
+                                    onClick={() => setSelectedQuestionIndex(index)}
+                                    className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer shadow-sm relative flex flex-col gap-3 ${
+                                      isSelected
+                                        ? "ring-2 ring-brand-500 ring-offset-1 ring-offset-[var(--surface-secondary)] border-brand-500 bg-[var(--surface-primary)]"
+                                        : "border-[var(--border-subtle)] bg-[var(--surface-primary)]/80 hover:bg-[var(--surface-primary)] hover:border-[var(--border-default)]"
+                                    } ${
+                                      hasError && isSelected
+                                        ? "shadow-md shadow-red-500/5 bg-gradient-to-br from-[var(--surface-primary)] to-red-500/5"
+                                        : ""
+                                    }`}
+                                  >
+                                    {/* Step Header with score */}
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-[12px] font-bold font-mono uppercase tracking-wider text-brand-600 flex items-center gap-1.5">
+                                        <Sparkles size={13} />
+                                        Step {step.stepNum}
+                                        {step.type && step.type !== "Calculation" && (
+                                          <span className="text-[9px] font-normal text-[var(--text-tertiary)] normal-case tracking-normal font-sans ml-1">
+                                            · {step.type}
+                                          </span>
+                                        )}
+                                      </span>
+
+                                      <div className="flex items-center gap-2">
+                                        {hasError && (
+                                          <span className="text-[9.5px] font-bold uppercase tracking-wider bg-red-500/10 border border-red-500/20 text-red-500 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                                            <AlertTriangle size={10} />
+                                            {step.errorType || "Deduction"}
+                                          </span>
+                                        )}
+                                        {/* Colour-coded score pill */}
+                                        <span
+                                          className="text-[12px] font-bold font-mono px-2.5 py-0.5 rounded-lg"
+                                          style={{
+                                            background: scoreRatio >= 0.9 ? "rgba(16,185,129,0.12)" : scoreRatio >= 0.6 ? "rgba(245,158,11,0.12)" : "rgba(239,68,68,0.12)",
+                                            color: scoreRatio >= 0.9 ? "#10b981" : scoreRatio >= 0.6 ? "#f59e0b" : "#ef4444"
+                                          }}
+                                        >
+                                          {step.marks.toFixed(1)} / {step.maxMarks.toFixed(1)} pts
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    {/* Rubric question context */}
+                                    {step.questionText && (
+                                      <p className="text-[11.5px] text-[var(--text-tertiary)] font-medium italic border-l-2 border-brand-500/30 pl-3">
+                                        {step.questionText}
+                                      </p>
+                                    )}
+
+                                    {/* OCR transcribed answer text */}
+                                    {step.text && (
+                                      <p className="text-[13.5px] leading-relaxed text-[var(--text-primary)] font-medium">
+                                        {step.text}
+                                      </p>
+                                    )}
+
+                                    {/* Rendered LaTeX / math expression */}
+                                    {step.latex && (
+                                      <div className="bg-[var(--surface-secondary)] px-4 py-3 rounded-xl border border-[var(--border-subtle)] overflow-x-auto">
+                                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--text-tertiary)] block mb-1.5">Math Expression</span>
+                                        {/* Render LaTeX using MathJax-style inline HTML — wrap in span so browser renders it */}
+                                        <div
+                                          className="font-mono text-[13px] text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap break-words"
+                                          style={{ fontFamily: "'Courier New', Courier, monospace" }}
+                                          dangerouslySetInnerHTML={{
+                                            __html: step.latex
+                                              // Convert $$...$$ display math
+                                              .replace(/\$\$([\s\S]+?)\$\$/g, (_: string, m: string) =>
+                                                `<span style="display:block;text-align:center;padding:4px 0;font-size:14px;">${m.trim()}</span>`)
+                                              // Convert $...$ inline math
+                                              .replace(/\$([^$\n]+?)\$/g, (_: string, m: string) =>
+                                                `<em style="font-style:normal;font-weight:600;">${m.trim()}</em>`)
+                                          }}
+                                        />
+                                      </div>
+                                    )}
+
+                                    {/* Cropped diagram image if present */}
+                                    {step.diagramUrl && (
+                                      <div className="mt-2 border border-[var(--border-subtle)] rounded-xl overflow-hidden max-w-md bg-[var(--surface-secondary)]">
+                                        <img
+                                          src={step.diagramUrl}
+                                          alt={`Diagram for Step ${step.stepNum}`}
+                                          style={{ maxHeight: "250px", objectFit: "contain", margin: "0 auto", display: "block" }}
+                                        />
+                                      </div>
+                                    )}
+
+                                    {/* AI grading justification */}
+                                    {step.justification && (
+                                      <div className={`mt-1 text-[12.5px] flex flex-col gap-2 border rounded-xl p-4 ${
+                                        hasError
+                                          ? "bg-red-500/5 border-red-500/10 text-red-700 dark:text-red-400"
+                                          : "bg-brand-500/5 border-brand-500/10"
+                                      }`}>
+                                        <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[10px] text-[var(--text-secondary)]">
+                                          <Sparkles size={11} className="text-brand-600" />
+                                          AI Grading Rationale
+                                        </div>
+                                        <div className="whitespace-pre-line leading-relaxed text-[13px] text-[var(--text-primary)]">
+                                          {step.justification}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </>
+                          ) : activeStudent.answers && activeStudent.answers[activeQuestion.id] ? (
+                            <div
+                              className="bg-[var(--surface-primary)] p-6 rounded-lg border border-[var(--border-subtle)] shadow-sm text-[14px] text-[var(--text-primary)] min-h-[300px]"
+                              dangerouslySetInnerHTML={{ __html: activeStudent.answers[activeQuestion.id] }}
+                            />
+                          ) : (
+                            <div className="flex flex-col items-center justify-center h-full py-16 gap-3 text-[12px] font-mono text-[var(--text-tertiary)] uppercase tracking-wider font-bold">
+                              <BookOpen size={32} className="opacity-30" />
+                              No transcript available
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
 
