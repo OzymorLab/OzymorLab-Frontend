@@ -230,6 +230,7 @@ export default function ExamsPage() {
   const [rubricSteps, setRubricSteps] = useState<RubricStep[]>([]);
   const [gradingNotes, setGradingNotes] = useState("");
   const [taskId, setTaskId] = useState("");
+  const [gradingMessage, setGradingMessage] = useState("");
   const [isCreatingTask, setIsCreatingTask] = useState(false);
   const [rubricApprovalStatus, setRubricApprovalStatus] = useState("DRAFT");
   const [rejectionNotes, setRejectionNotes] = useState("");
@@ -583,13 +584,11 @@ export default function ExamsPage() {
           }
           // If still parsing (400), retry after delay
           const detail: string = json.detail || "";
-          const stillParsing = detail.includes("still being parsed") || detail.includes("No parsed submissions");
+          const stillParsing = detail.includes("still being parsed") || detail.includes("No parsed submissions") || detail.includes("No submissions are ready") || detail.includes("PARSING");
           if (stillParsing && attempt < MAX_RETRIES) {
             setTimeout(tryStartGrading, 10000); // retry in 10s
-          } else if (!stillParsing && detail) {
-            alert(`Could not start grading: ${detail}`);
           }
-          // else exhausted retries silently — user can click "Start Grading Manually"
+          // Silently exhaust retries — user can click "Start Grading Manually"
         } catch (e: any) {
           if (attempt < MAX_RETRIES) {
             setTimeout(tryStartGrading, 10000);
@@ -607,6 +606,7 @@ export default function ExamsPage() {
 
   const startGradingManual = async () => {
     try {
+      setGradingMessage("");
       const gradePayload = {
         task_id: taskId,
         description: `Bulk evaluation run for ${title}`,
@@ -618,26 +618,25 @@ export default function ExamsPage() {
         body: JSON.stringify(gradePayload),
       });
       if (res.status === 401) {
-        alert("Your session has expired. Please refresh the page and log back in to start grading.");
+        setGradingMessage("Session expired. Please refresh and log back in.");
         return;
       }
       const json = await res.json();
       if (!res.ok) {
         const detail = json.detail || "";
-        if (detail.includes("still being parsed")) {
-          alert("Submissions are still being parsed. Please wait 1–2 minutes and try again.");
-        } else if (detail.includes("No parsed submissions")) {
-          alert("No parsed submissions found yet. If you just uploaded files, wait 1–2 minutes for Celery to process them.");
+        if (detail.includes("still being parsed") || detail.includes("No parsed submissions") || detail.includes("No submissions are ready") || detail.includes("PARSING")) {
+          setGradingMessage("Submissions are still being parsed — please wait a moment and try again.");
         } else {
-          throw new Error(detail || "Grading failed to start. Rubric may not be approved yet.");
+          setGradingMessage(detail || "Grading failed to start. Rubric may not be approved yet.");
         }
         return;
       }
       if (json.data && json.data.run_id) {
         setRunId(json.data.run_id);
+        setGradingMessage("");
       }
     } catch (e: any) {
-      alert(e.message);
+      setGradingMessage(e.message || "Failed to start grading.");
     }
   };
 
@@ -1541,6 +1540,12 @@ export default function ExamsPage() {
                     <p className="text-[11px] text-[var(--text-tertiary)] mt-0.5">AI will start grading automatically once parsing completes. This may take 1–3 minutes.</p>
                   </div>
                 </div>
+                {gradingMessage && (
+                  <div className="flex items-center gap-2 border border-amber-500/20 bg-amber-500/5 rounded-xl px-4 py-2.5 max-w-[420px]">
+                    <AlertTriangle size={13} className="text-amber-500 shrink-0" />
+                    <p className="text-[12px] text-amber-700 dark:text-amber-400">{gradingMessage}</p>
+                  </div>
+                )}
                 <button className="btn-lp-outline cursor-pointer" onClick={startGradingManual}>
                   <Play size={13} /> Start Grading Manually
                 </button>
@@ -1548,8 +1553,11 @@ export default function ExamsPage() {
             )}
 
             <div className="mt-8 pt-6 border-t border-[var(--border-subtle)] w-full flex justify-center">
-              <a href="/dashboard" className="btn-lp-accent border-0 cursor-pointer">
-                Go to Evaluation Queue Dashboard
+              <a
+                href={taskId ? `/dashboard/submissions?task_id=${taskId}` : `/dashboard/submissions`}
+                className="btn-lp-accent border-0 cursor-pointer"
+              >
+                View Submissions & Analysis
                 <ArrowRight size={14} />
               </a>
             </div>
