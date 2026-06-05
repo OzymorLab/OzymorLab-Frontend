@@ -1,10 +1,10 @@
-# Edexia AIOS: Multi-Tenant Educational Dashboard
+# OzymorLab
 
-Welcome to the **Edexia Frontend**, the central command center for teachers, administrators, and evaluators utilizing the Edexia Assessment Intelligence Operating System (AIOS).
+Welcome to the **Ozymorlab**, the central command center for teachers, administrators, and evaluators utilizing the Assessment Intelligence Operating System (AIOS).
 
 # AI-Powered Multimodal Evaluation Infrastructure for Board Examination Systems
 
-## Inspired by the Edexia Evaluation Philosophy
+## Inspired by the **Edexia** Evaluation Philosophy
 
 This platform is a next-generation AI-assisted evaluation infrastructure designed for large-scale board examination systems such as:
 - CBSE
@@ -41,7 +41,7 @@ Real board examination answers are multimodal. A single answer may contain textu
 
 The system evaluates answers the same way a trained examiner evaluates them: independently, rubric-wise, component-wise, and evidence-backed.
 
-| Edexia Principle | Platform Extension |
+| OzymorLab Principle | Platform Extension |
 |---|---|
 | Rubric-grounded evaluation | Board-specific component-based grading |
 | Evidence-linked scoring | Explainable multimodal scoring |
@@ -60,7 +60,7 @@ To support massive adoption, the Frontend operates as a **Multi-Tenant Command C
 *   **HOD (Head of Department)**: Gatekeepers of quality. They have department-level visibility and act as the final approval authority for AI-drafted grading rubrics before bulk evaluations can commence.
 *   **Teachers & Evaluators**: Dedicated grading dashboards focusing purely on assigned tasks, flagging low-confidence AI grades for human moderation, and managing their own student cohorts.
 
-All uploads, secure file storage, and BYOK (Bring Your Own Key) configurations are driven dynamically via Supabase integration to guarantee strict data segregation per tenant.
+All uploads, secure file storage, configurations are driven dynamically via Supabase integration to guarantee strict data segregation per tenant.
 
 ---
 
