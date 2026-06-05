@@ -143,3 +143,6 @@ This creates unparalleled transparency, robust moderation support, and legal def
 # Long-Term Vision
 
 The proposed platform evolves beyond grading software into a **National Educational Evaluation Infrastructure**. Future applications include board examinations, university assessments, practical examination moderation, recruitment examinations, and digital academic audit systems.
+
+# Helping Organisation:
+[![GitGem](https://gitgem.org/api/badge/github/owner/repo.svg)](https://gitgem.org/github/owner/repo)
