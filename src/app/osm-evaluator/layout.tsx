@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import OSMEvaluatorClient from "./OSMEvaluatorClient";
 
 export const metadata: Metadata = {
     title: "OSM (On-Screen Marking) & AI Answer Sheet Evaluator | CBSE ICSE | OzymorLab",
@@ -32,10 +31,8 @@ export const metadata: Metadata = {
         title: "OSM Evaluator - Practice with AI for Board Exams",
         description: "Understand On-Screen Marking and practice with AI. Get exam-ready for CBSE, ICSE, and state boards.",
     },
-    alternates: {
-        canonical: "https://ozymorlab.vercel.app/osm-evaluator",
-    },
 };
-export default function OSMEvaluatorPage() {
-    return <OSMEvaluatorClient />;
+
+export default function OSMLayout({ children }: { children: React.ReactNode }) {
+    return <>{children}</>;
 }

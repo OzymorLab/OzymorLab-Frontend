@@ -10,6 +10,7 @@ import {
   Sun, Moon, ChevronDown, Shield
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth, AuthProvider } from "../context/AuthContext";
 
 const navItems = [
@@ -90,6 +91,7 @@ interface ChatMessage {
 
 function AnalysisHUDPageContent() {
   const { user, fetchWithAuth, logout } = useAuth();
+  const pathname = usePathname();
 
   // Mode & Core Data
   const [viewMode, setViewMode] = useState<"teacher" | "student" | "self-eval">("teacher");
@@ -97,6 +99,13 @@ function AnalysisHUDPageContent() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const meta = document.createElement("meta");
+    meta.name = "robots";
+    meta.content = "noindex";
+    document.head.appendChild(meta);
+  }, []);
 
   const isAdmin = user?.role === "admin" || user?.role === "principal";
 
@@ -264,6 +273,8 @@ function AnalysisHUDPageContent() {
   useEffect(() => {
     if (selectedStudentId) {
       setIsLoadingDetail(true);
+      setSubmissionDetail(null);
+      setSelectedQuestionIndex(0);
       setChatMessages([]);
       setGradeDetail(null);
       setLeftView("sheet"); // Always default to handwritten sheet view on student change
@@ -422,6 +433,13 @@ function AnalysisHUDPageContent() {
             maxMarks: 0,
             points: 0
           };
+
+  // Derived grade for current step — match by stepNum, not array index
+  const currentStepGrade = (() => {
+    if (!gradeDetail?.step_grades || !submissionDetail?.steps?.[selectedQuestionIndex]) return null;
+    const stepNum = submissionDetail.steps[selectedQuestionIndex].stepNum;
+    return gradeDetail.step_grades.find((g: any) => g.step_num === stepNum) || null;
+  })();
 
   // We are removing `activeSteps` since we render the student's actual answers via HTML, not fixed steps array.
 
@@ -664,7 +682,7 @@ function AnalysisHUDPageContent() {
             {/* Desktop Nav Links */}
             <nav style={{ display: "flex", alignItems: "center", gap: 2, flex: 1 }} className="dash-nav-desktop">
               {navItems.map((item) => {
-                const active = item.href === "/analysis";
+                const active = pathname.startsWith(item.href);
                 return (
                   <Link
                     key={item.href}
@@ -916,7 +934,7 @@ function AnalysisHUDPageContent() {
             onClick={e => e.stopPropagation()}
           >
             {navItems.map((item) => {
-              const active = item.href === "/analysis";
+              const active = pathname.startsWith(item.href);
               return (
                 <Link
                   key={item.href}
@@ -1672,8 +1690,8 @@ function AnalysisHUDPageContent() {
                         Question Score
                       </span>
                       <span className="text-[13px] font-bold font-mono text-[var(--text-primary)] bg-brand-500/10 text-brand-600 px-3 py-1 rounded-lg">
-                        {gradeDetail && gradeDetail.step_grades && gradeDetail.step_grades[selectedQuestionIndex]
-                          ? `${gradeDetail.step_grades[selectedQuestionIndex].marks_awarded} / ${gradeDetail.step_grades[selectedQuestionIndex].max_marks} pts`
+                        {currentStepGrade
+                          ? `${currentStepGrade.marks_awarded} / ${currentStepGrade.max_marks} pts`
                           : activeQuestion.points ? `${(activeQuestion.points * 0.85).toFixed(1)} / ${activeQuestion.points} pts` : "Auto-Graded"}
                       </span>
                     </div>
@@ -1686,8 +1704,8 @@ function AnalysisHUDPageContent() {
                     </div>
 
                     <p className="text-[12.5px] text-[var(--text-primary)] leading-relaxed font-medium">
-                      {gradeDetail && gradeDetail.step_grades && gradeDetail.step_grades[selectedQuestionIndex]
-                        ? gradeDetail.step_grades[selectedQuestionIndex].justification
+                      {currentStepGrade?.justification
+                        ? currentStepGrade.justification
                         : activeStudent.answers && activeStudent.answers[activeQuestion.id] 
                           ? `OzymorLab analysis has graded this submission. Overall grade assignment: ${activeStudent.score || "Verified"}.`
                           : "No answer provided for this question, so no step traces or analysis can be generated."}

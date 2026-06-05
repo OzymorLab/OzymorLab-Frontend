@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Users, Search, Award, TrendingUp, BookOpen, User, Star, ArrowRight, Sparkles, Plus, Trash2, Check, X, ShieldAlert, MoreVertical, ArrowLeft, UploadCloud, Loader2, FileText, CheckCircle2 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import Link from "next/link";
@@ -41,10 +41,13 @@ const classroomExamsCache: Record<string, any> = {};
 const globalWorksheetsCache = {
   data: null as any
 };
-
 export default function StudentsPage() {
   const { user, fetchWithAuth } = useAuth();
   const router = useRouter();
+
+  // Client-side cache for high-performance instant loading
+  const globalWorksheetsCache = useRef<any>(null);
+  const classroomExamsCache = useRef<Record<string, any>>({});
   
   // Navigation back states
   const [selectedClassroom, setSelectedClassroom] = useState<any | null>(null);
@@ -161,14 +164,14 @@ export default function StudentsPage() {
   };
 
   const fetchClassroomExams = async (classId: string) => {
-    if (classroomExamsCache[classId]) {
-      setExamWorksheetsList(classroomExamsCache[classId]);
+    if (classroomExamsCache.current[classId]) {
+      setExamWorksheetsList(classroomExamsCache.current[classId]);
     }
     try {
       const res = await fetchWithAuth(`${API_BASE}/classroom/${classId}/exams`);
       const json = await res.json();
       if (json.data) {
-        classroomExamsCache[classId] = json.data;
+        classroomExamsCache.current[classId] = json.data;
         setExamWorksheetsList(json.data);
       }
     } catch (e) {

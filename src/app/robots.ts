@@ -23,6 +23,8 @@ export default function robots(): MetadataRoute.Robots {
           '/admin/*',
           '/product_admin',
           '/product_admin/*',
+          '/analysis',
+          '/analysis/*',
           '/api',
           '/api/*',
           '/context',

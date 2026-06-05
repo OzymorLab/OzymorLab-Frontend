@@ -225,6 +225,90 @@ export default function RootLayout({
     "areaServed": "IN"
   };
 
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://ozymorlab.vercel.app" },
+      { "@type": "ListItem", "position": 2, "name": "About", "item": "https://ozymorlab.vercel.app/about" },
+      { "@type": "ListItem", "position": 3, "name": "Feature", "item": "https://ozymorlab.vercel.app/feature" },
+      { "@type": "ListItem", "position": 4, "name": "Pricing", "item": "https://ozymorlab.vercel.app/pricing" },
+      { "@type": "ListItem", "position": 5, "name": "Contact", "item": "https://ozymorlab.vercel.app/contact" },
+      { "@type": "ListItem", "position": 6, "name": "Blog", "item": "https://ozymorlab.vercel.app/blog" },
+    ]
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is OzymorLab?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "OzymorLab is an AI-powered essay grading platform designed for Indian schools and educational boards. It uses artificial intelligence to automatically evaluate student essays, short answers, and exam responses with per-criterion scores and evidence-backed feedback."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the AI essay grading work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Teachers upload answer scripts or student responses, define rubrics or marking schemes, and OzymorLab's AI evaluates each answer against the criteria. It provides per-criterion scores, confidence levels, and specific evidence from the student's response to justify each grade."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which Indian education boards are supported?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "OzymorLab supports CBSE, ICSE, and all major Indian state boards including Maharashtra SSC, UP Board, Rajasthan Board, Tamil Nadu Board, Karnataka SSLC, Kerala Board, West Bengal Board, AP Board, Telangana Board, MP Board, Bihar Board, and NIOS."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How many languages does OzymorLab support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "OzymorLab supports 22 Indian languages including Hindi, Tamil, Telugu, Bengali, Marathi, Gujarati, Kannada, Malayalam, Punjabi, Odia, Urdu, Sanskrit, and English. Students can write answers in their mother tongue and get evaluated in the same language."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How accurate is the AI grading?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "OzymorLab's AI achieves high accuracy through rubric grounding — aligning AI scores with precise school rubric constraints. Every grade includes a confidence score, and teachers can review, modify, or override any AI-generated grade. The system is designed for explainability, not black-box evaluation."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is there a free plan available?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, new users get 50 free credits to try OzymorLab. Institutional pilots are also available for schools and coaching institutes. Contact us for custom pricing for startups, mid-size schools, and enterprise districts."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does OzymorLab support handwriting recognition?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, OzymorLab includes handwriting OCR support for cursive and printed handwriting, including mathematical equations and scientific diagrams. It transcribes handwritten responses before evaluation."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can OzymorLab integrate with existing school systems?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, OzymorLab integrates with popular LMS platforms including Canvas and Blackboard. Grades and feedback can be seamlessly published to your existing systems."
+        }
+      }
+    ]
+  };
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -236,6 +320,14 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
 
         {/* Additional Meta Tags for SEO */}

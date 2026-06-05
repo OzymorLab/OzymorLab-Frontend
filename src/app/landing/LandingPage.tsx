@@ -204,7 +204,7 @@ export default function LandingPage() {
     let currentProgress = smoothProgress;
 
     const updateSmoothProgress = () => {
-      currentProgress += (scrollProgress - currentProgress) * 0.05; // Cinematic smooth slow LERP
+      currentProgress += (scrollProgress - currentProgress) * 0.05;
       setSmoothProgress(currentProgress);
       rId = requestAnimationFrame(updateSmoothProgress);
     };
@@ -213,7 +213,6 @@ export default function LandingPage() {
     return () => cancelAnimationFrame(rId);
   }, [scrollProgress]);
 
-  // Capture wheel events on the container to step index by index discretely
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -222,15 +221,11 @@ export default function LandingPage() {
       const now = Date.now();
       const delta = e.deltaY;
 
-      // Lock scroll while inside transition range
       if ((delta > 0 && activeCardIndex < 2) || (delta < 0 && activeCardIndex > 0)) {
         e.preventDefault();
       }
 
-      // Check cooldown to avoid skipping steps on rapid scrolling
-      if (now - lastScrollTime.current < 800) {
-        return;
-      }
+      if (now - lastScrollTime.current < 800) return;
 
       if (delta > 20 && activeCardIndex < 2) {
         setActiveCardIndex(prev => prev + 1);
@@ -245,7 +240,6 @@ export default function LandingPage() {
     return () => el.removeEventListener("wheel", handleWheel);
   }, [activeCardIndex]);
 
-  // Capture mobile touch swipe to step index by index discretely
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -259,18 +253,14 @@ export default function LandingPage() {
     const handleTouchMove = (e: TouchEvent) => {
       const now = Date.now();
       const touchCurrentY = e.touches[0].clientY;
-      const deltaY = touchStartY - touchCurrentY; // Positive = swipe up / scroll down
-      
+      const deltaY = touchStartY - touchCurrentY;
+
       if (Math.abs(deltaY) > 40) {
-        // Lock scroll while inside transition range
         if ((deltaY > 0 && activeCardIndex < 2) || (deltaY < 0 && activeCardIndex > 0)) {
           e.preventDefault();
         }
 
-        // Check cooldown
-        if (now - lastScrollTime.current < 800) {
-          return;
-        }
+        if (now - lastScrollTime.current < 800) return;
 
         if (deltaY > 40 && activeCardIndex < 2) {
           setActiveCardIndex(prev => prev + 1);
@@ -315,7 +305,7 @@ export default function LandingPage() {
 
       const translateY = (1 - p1) * 600 - p1_dim * 15;
       const scale = 0.95 + p1 * 0.05 - p1_dim * 0.05;
-      
+
       return {
         transform: `translate3d(0, ${translateY}px, 0) scale(${scale})`,
         opacity: p1 === 0 ? 0 : 1,
@@ -324,10 +314,10 @@ export default function LandingPage() {
       };
     } else {
       const p2 = Math.min(Math.max((smoothProgress - 0.5) / 0.4, 0), 1);
-      
+
       const translateY = (1 - p2) * 600;
       const scale = 0.95 + p2 * 0.05;
-      
+
       return {
         transform: `translate3d(0, ${translateY}px, 0) scale(${scale})`,
         opacity: p2 === 0 ? 0 : 1,
@@ -379,7 +369,7 @@ export default function LandingPage() {
           <h1 className="lp-hero__title lp-anim-fade" style={{ animationDelay: "0.3s" }}>
             <span style={{ display: "inline-flex", alignItems: "center", gap: "16px", flexWrap: "wrap", justifyContent: "center" }}>
               <LogoIcon />
-              <span><span className="lp-highlight lp-highlight--underline">Say</span> hello to your academic assessment portal</span>
+              <span><span className="lp-highlight lp-highlight--underline">AI-Powered</span> Academic Assessment Portal</span>
             </span>
           </h1>
           <p className="lp-hero__subtitle lp-anim-fade" style={{ animationDelay: "0.4s" }}>
@@ -486,7 +476,7 @@ export default function LandingPage() {
       <section className="lp-empower" ref={r3.ref}>
         <div className={r3.className}>
           <div className="lp-empower__header">
-            <h2 className="lp-section-title">Empowering your evaluation pipeline</h2>
+            <h2 className="lp-section-title">AI-powered evaluation pipeline for modern schools</h2>
           </div>
           <div className="lp-empower__grid">
             {empowerCards.map((c, i) => (
@@ -503,7 +493,7 @@ export default function LandingPage() {
       <section className="lp-elevating" ref={r4.ref}>
         <div className={r4.className}>
           <div className="lp-elevating__header">
-            <h2 className="lp-section-title">Elevating standards</h2>
+            <h2 className="lp-section-title">AI-grading standards for board exam preparation</h2>
           </div>
           <div className="lp-elevating__grid">
             {elevatingCards.map((c, i) => (
