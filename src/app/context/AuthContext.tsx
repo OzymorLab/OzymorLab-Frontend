@@ -7,7 +7,8 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://edeziav2.onrender.c
 
 const safeFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
   const isHeavyRequest = url.includes("/upload") || url.includes("/submissions") || url.includes("/runs") || url.includes("/grade");
-  const defaultTimeout = isHeavyRequest ? 120000 : 8000; // 120 seconds for AI/upload tasks, 8 seconds for fast auth
+  const isListRequest = url.includes("/exam-cycles") || url.includes("/question-papers") || url.includes("/classrooms") || url.includes("/schools");
+  const defaultTimeout = isHeavyRequest ? 120000 : isListRequest ? 30000 : 8000; // 120s for AI/upload, 30s for list endpoints (cold starts), 8s for auth
   const timeoutMs = (options as any).timeout !== undefined ? (options as any).timeout : defaultTimeout;
 
   const controller = new AbortController();
@@ -23,7 +24,7 @@ const safeFetch = async (url: string, options: RequestInit = {}): Promise<Respon
       const parts = url.split(",");
       const firstBase = parts[0];
       const rest = parts.slice(1).join(",");
-      
+
       // Resolve path from secondary base dynamically
       const secondBase = "https://edeziav2.onrender.com/api/v1";
       let path = "";
@@ -35,17 +36,17 @@ const safeFetch = async (url: string, options: RequestInit = {}): Promise<Respon
           path = rest.substring(idx + "/api/v1".length);
         }
       }
-      
+
       const url1 = `${firstBase}${path}`;
       const url2 = rest;
-      
+
       try {
         const res = await fetch(url1, fetchOptions);
         if (id) clearTimeout(id);
         return res;
       } catch (err) {
         console.warn(`Local API offline at ${url1}, falling back to remote production at ${url2}`, err);
-        
+
         // Reset timeout for fallback fetch
         const fallbackController = new AbortController();
         const fallbackId = timeoutMs > 0 ? setTimeout(() => fallbackController.abort(), timeoutMs) : null;
@@ -113,7 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (storedToken) {
         setToken(storedToken);
         setRefreshToken(typeof window !== "undefined" ? localStorage.getItem("ozymorlab_refresh_token") : null);
-        
+
         safeFetch(`${API_BASE}/auth/me`, {
           headers: { Authorization: `Bearer ${storedToken}` },
         })
@@ -145,7 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (session) {
         setToken(session.access_token);
         setRefreshToken(session.refresh_token || null);
-        
+
         // Validate token and sync profile with Edexia backend
         safeFetch(`${API_BASE}/auth/me`, {
           headers: { Authorization: `Bearer ${session.access_token}` },
@@ -180,7 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (session) {
         setToken(session.access_token);
         setRefreshToken(session.refresh_token || null);
-        
+
         try {
           const res = await safeFetch(`${API_BASE}/auth/me`, {
             headers: { Authorization: `Bearer ${session.access_token}` },
@@ -224,7 +225,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!res.ok) {
           return { success: false, error: json.detail || "Invalid email or password" };
         }
-        
+
         const { access_token, refresh_token } = json.data;
         setToken(access_token);
         setRefreshToken(refresh_token);
@@ -232,7 +233,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.setItem("ozymorlab_token", access_token);
           localStorage.setItem("ozymorlab_refresh_token", refresh_token);
         }
-        
+
         // Fetch profile
         const profileRes = await safeFetch(`${API_BASE}/auth/me`, {
           headers: { Authorization: `Bearer ${access_token}` },
@@ -306,7 +307,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!res.ok) {
           return { success: false, error: json.detail || "Account creation failed" };
         }
-        
+
         const { tokens, user: userProfile } = json.data;
         setToken(tokens.access_token);
         setRefreshToken(tokens.refresh_token);
@@ -446,9 +447,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ gemini_api_key: key }),
       });
-      
+
       console.log("➡️ Response status code:", res.status, res.statusText);
-      
+
       let responseBody = "";
       try {
         responseBody = await res.text();
@@ -474,9 +475,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { success: true };
     } catch (err: any) {
       console.error("❌ hard network failure inside setGeminiKey fetch block:", err);
-      return { 
-        success: false, 
-        error: `Network error: ${err.message || "Failed to reach backend"}. Please check your browser DevTools Console for CORS preflight blocks or connection drops.` 
+      return {
+        success: false,
+        error: `Network error: ${err.message || "Failed to reach backend"}. Please check your browser DevTools Console for CORS preflight blocks or connection drops.`
       };
     }
   };
@@ -487,7 +488,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await fetchWithAuth(`${API_BASE}/auth/gemini-key`, {
         method: "DELETE",
       });
-      
+
       console.log("➡️ Response status code:", res.status);
       let responseBody = "";
       try {
@@ -521,7 +522,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log("➡️ refreshUser response status:", res.status);
       const text = await res.text();
       console.log("➡️ refreshUser raw response:", text);
-      
+
       if (res.ok) {
         const json = JSON.parse(text);
         setUser(json.data);
