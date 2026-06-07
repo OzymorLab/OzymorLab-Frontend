@@ -159,7 +159,7 @@ function AnalysisHUDPageContent() {
   const [gradeDetail, setGradeDetail] = useState<any>(null);
 
   // Left pane view: "sheet" = original handwritten image (default), "transcript" = OCR text + grading
-  const [leftView, setLeftView] = useState<"sheet" | "transcript">("sheet");
+  const [leftView, setLeftView] = useState<"sheet" | "transcript">("transcript");
 
   // Refs
   const rightPaneRef = useRef<HTMLDivElement>(null);
@@ -289,9 +289,9 @@ function AnalysisHUDPageContent() {
     if (selectedStudentId) {
       setIsLoadingDetail(true);
       setChatMessages([]);
-      setGradeDetail(null);
-      setLeftView("sheet"); // Always default to handwritten sheet view on student change
-      
+      setSelectedQuestionIndex(0);
+      setLeftView("transcript"); // Always default to transcript view on student change
+      setChatInput("");
       fetchWithAuth(`${API_BASE}/analysis/submissions/${selectedStudentId}`)
         .then(res => res.json())
         .then(json => {
@@ -570,13 +570,11 @@ function AnalysisHUDPageContent() {
           }, 150);
         }
       } else {
-        const fallbackText = `Based on the context of the question "${activeQuestion?.text?.substring(0, 40)}...": The work is logical. No marks should be deducted here.`;
-        setChatMessages(prev => [...prev, { sender: "ai", text: fallbackText }]);
+        setChatMessages(prev => [...prev, { sender: "ai", text: "Error: Could not generate a response from the AI Copilot. Please try again." }]);
       }
     } catch (e) {
       console.error("Chat error", e);
-      const fallbackText = `Based on the context of the question "${activeQuestion?.text?.substring(0, 40)}...": The work is logical. No marks should be deducted here.`;
-      setChatMessages(prev => [...prev, { sender: "ai", text: fallbackText }]);
+      setChatMessages(prev => [...prev, { sender: "ai", text: "Error: Connection failed. Please check your network and try again." }]);
     } finally {
       setIsTyping(false);
     }
@@ -1280,27 +1278,47 @@ function AnalysisHUDPageContent() {
 
               {/* Sheet / Transcript toggle — only shown when a submission with a sheet is loaded */}
               {!isCreatingPractice && viewMode !== "self-eval" && (
-                <div className="flex items-center gap-1 p-0.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-secondary)]">
+                <div className="flex items-center gap-3">
                   <button
                     onClick={() => setLeftView("sheet")}
-                    className="flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-bold font-mono uppercase tracking-wider transition-all cursor-pointer"
+                    className="transition-all duration-300 hover:-translate-y-1"
                     style={{
-                      background: leftView === "sheet" ? "var(--text-primary)" : "transparent",
-                      color: leftView === "sheet" ? "var(--surface-primary)" : "var(--text-secondary)"
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "10px 20px",
+                      borderRadius: "12px",
+                      fontSize: "14px",
+                      fontWeight: 500,
+                      cursor: "pointer",
+                      border: leftView === "sheet" ? "none" : "1px solid rgba(255, 255, 255, 0.12)",
+                      background: leftView === "sheet" ? "#e8e8e6" : "transparent",
+                      color: leftView === "sheet" ? "#111111" : "#e8e8e6",
+                      fontFamily: "'Onest', system-ui, sans-serif",
+                      lineHeight: 1.4,
                     }}
                   >
-                    <FileText size={11} />
                     Sheet
                   </button>
                   <button
                     onClick={() => setLeftView("transcript")}
-                    className="flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-bold font-mono uppercase tracking-wider transition-all cursor-pointer"
+                    className="transition-all duration-300 hover:-translate-y-1"
                     style={{
-                      background: leftView === "transcript" ? "var(--text-primary)" : "transparent",
-                      color: leftView === "transcript" ? "var(--surface-primary)" : "var(--text-secondary)"
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "10px 20px",
+                      borderRadius: "12px",
+                      fontSize: "14px",
+                      fontWeight: 500,
+                      cursor: "pointer",
+                      border: leftView === "transcript" ? "none" : "1px solid rgba(255, 255, 255, 0.12)",
+                      background: leftView === "transcript" ? "#e8e8e6" : "transparent",
+                      color: leftView === "transcript" ? "#111111" : "#e8e8e6",
+                      fontFamily: "'Onest', system-ui, sans-serif",
+                      lineHeight: 1.4,
                     }}
                   >
-                    <BookOpen size={11} />
                     Transcript
                   </button>
                 </div>
@@ -1434,18 +1452,7 @@ function AnalysisHUDPageContent() {
                   </div>
                 ) : (
                   <>
-                    {/* Question Card */}
-                    {activeQuestion.text && (
-                      <div className="mb-2 py-4 px-6 mx-4 flex flex-col justify-center bg-transparent border-none shadow-none" style={{ background: "transparent", border: "none", boxShadow: "none" }}>
-                        <span className="text-[10px] uppercase font-mono font-bold block mb-2 text-[var(--text-tertiary)] tracking-wider">
-                          {viewMode === "self-eval" ? "Practice Exercise" : "Assigned Question"}
-                        </span>
-                        <div 
-                          className="text-[14.5px] leading-relaxed font-mono font-bold text-[var(--text-primary)]"
-                          dangerouslySetInnerHTML={{ __html: renderLatexHTML(activeQuestion.text) }}
-                        />
-                      </div>
-                    )}
+
 
                     {/* ── SHEET VIEW (default): Original handwritten answer sheet ── */}
                     {(leftView === "sheet" || viewMode === "self-eval") && (
@@ -1604,79 +1611,63 @@ function AnalysisHUDPageContent() {
               {/* RIGHT PANE: AI Step Traces / Conversation (30% width) */}
               <div 
                 ref={rightPaneRef}
-                className="flex-[3] flex flex-col overflow-hidden bg-[var(--surface-primary)]"
+                className="flex-[3] flex flex-col overflow-hidden bg-[#1f2223] text-white shadow-2xl relative"
                 style={{
-                  border: "1px solid var(--border-subtle)",
+                  border: "1px solid rgba(224, 255, 130, 0.2)",
                   margin: "12px",
                   borderRadius: "16px",
                 }}
               >
+                {/* Decorative neon glow top */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#e0ff82] to-transparent opacity-50"></div>
+
                 {/* Scrollable conversation content */}
-                <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-6 scroll-smooth analysis-body-scroll">
-                <div className="flex items-center justify-between border-b pb-3 flex-shrink-0" style={{ borderBottomColor: "var(--border-subtle)" }}>
-                  <h3 className="font-semibold text-[15px] flex items-center gap-2 text-[var(--text-primary)]">
-                    <svg width="18" height="18" viewBox="0 0 28 28" fill="none" className="flex-shrink-0">
-                      <rect width="28" height="28" rx="8" fill="#1f2223" />
-                      <path d="M8 14L14 8L20 14L14 20L8 14Z" fill="#e0ff82" stroke="#e0ff82" strokeWidth="1.5" strokeLinejoin="round" />
-                      <circle cx="14" cy="14" r="3" fill="#1f2223" />
-                    </svg>
+                <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 scroll-smooth analysis-body-scroll">
+                
+                {/* Header */}
+                <div className="flex items-center justify-between border-b border-white/10 pb-4 flex-shrink-0">
+                  <h3 className="font-bold text-[16px] flex items-center gap-3 text-white tracking-wide">
+                    <LogoIcon />
                     Conversation
                   </h3>
                 </div>
 
                 {isLoadingDetail || isLoadingGrade ? (
-                  <div className="flex items-center justify-center flex-1">
-                    <Loader2 className="animate-spin text-[var(--text-primary)]" size={24} />
+                  <div className="flex flex-col items-center justify-center flex-1 gap-3">
+                    <Loader2 className="animate-spin text-[#e0ff82]" size={32} />
+                    <p className="text-sm text-gray-400 animate-pulse font-mono">Analyzing submission...</p>
                   </div>
                 ) : (
-                  <div className="py-4 px-6 relative flex flex-col gap-4 border-b border-[var(--border-subtle)] bg-[var(--surface-primary)]">
-                    <div className="flex justify-between items-center">
-                      <span className="text-[11px] font-bold font-mono uppercase text-[var(--text-secondary)]">
+                  <div className="flex flex-col gap-5">
+                    
+                    {/* Score Card */}
+                    <div className="bg-[#111] border border-white/10 rounded-xl p-5 flex justify-between items-center shadow-inner">
+                      <span className="text-[12px] font-bold font-mono uppercase tracking-wider text-gray-400">
                         Question Score
                       </span>
-                      <span className="text-[13px] font-bold font-mono text-[var(--text-primary)] bg-brand-500/10 text-brand-600 px-3 py-1 rounded-lg">
+                      <span className="text-[14px] font-bold font-mono text-[#111] bg-[#e0ff82] px-4 py-1.5 rounded-lg shadow-[0_0_15px_rgba(224,255,130,0.3)]">
                         {gradeDetail && gradeDetail.step_grades && gradeDetail.step_grades[selectedQuestionIndex]
                           ? `${gradeDetail.step_grades[selectedQuestionIndex].marks_awarded} / ${gradeDetail.step_grades[selectedQuestionIndex].max_marks} pts`
                           : activeQuestion.points ? `${(activeQuestion.points * 0.85).toFixed(1)} / ${activeQuestion.points} pts` : "Auto-Graded"}
                       </span>
                     </div>
-
-                    <div className="flex justify-between items-center border-t border-[var(--border-subtle)] pt-4">
-                      <span className="text-[11px] font-bold font-mono uppercase text-brand-600 flex items-center gap-1.5">
-                        <Sparkles size={12} />
-                        OzymorLab Analysis
-                      </span>
-                    </div>
-
-                    <div 
-                      className="text-[12.5px] text-[var(--text-primary)] leading-relaxed font-medium"
-                      dangerouslySetInnerHTML={{
-                        __html: renderLatexHTML(
-                          gradeDetail && gradeDetail.step_grades && gradeDetail.step_grades[selectedQuestionIndex]
-                            ? gradeDetail.step_grades[selectedQuestionIndex].justification
-                            : activeStudent.answers && activeStudent.answers[activeQuestion.id] 
-                              ? `OzymorLab analysis has graded this submission. Overall grade assignment: ${activeStudent.score || "Verified"}.`
-                              : "No answer provided for this question, so no step traces or analysis can be generated."
-                        )
-                      }}
-                    />
                   </div>
                 )}
 
                 {/* Copilot Chat Conversation History */}
                 {(chatMessages.length > 0 || isTyping) && (
-                  <div className="mt-4 pt-4 border-t border-[var(--border-subtle)] flex flex-col gap-3">
+                  <div className="mt-6 pt-6 border-t border-white/10 flex flex-col gap-4">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-[11.5px] uppercase font-mono font-bold text-[var(--text-secondary)] flex items-center gap-1.5">
-                        <MessageSquare size={12} className="text-brand-600" />
+                      <h4 className="text-[12px] uppercase font-mono font-bold text-gray-400 flex items-center gap-2">
+                        <MessageSquare size={14} className="text-[#e0ff82]" />
                         AI Copilot Chat
                       </h4>
-                      <span className="text-[9px] font-mono font-bold uppercase rounded-lg border border-[var(--border-subtle)] px-2 py-0.5 text-[var(--text-secondary)] bg-[var(--surface-secondary)]">
+                      <span className="text-[10px] font-mono font-bold uppercase rounded-full border border-white/20 px-3 py-1 text-gray-300 bg-white/5">
                         {chatMessages.length} Messages
                       </span>
                     </div>
 
-                    <div className="flex flex-col gap-3 max-h-[300px] overflow-y-auto pr-1">
+                    <div className="flex flex-col gap-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                       {chatMessages.map((msg, idx) => (
                         <div
                           key={idx}
@@ -1718,32 +1709,28 @@ function AnalysisHUDPageContent() {
 
                 {/* Chat Input Box pinned at bottom of conversation tab */}
                 <div 
-                  className="flex flex-col border-t flex-shrink-0"
-                  style={{
-                    borderTopColor: "var(--border-subtle)",
-                    background: "var(--surface-primary)",
-                  }}
+                  className="flex flex-col border-t border-white/10 flex-shrink-0 bg-[#1f2223]"
                 >
                   {/* Highlight Banner */}
                   {highlightedStep && (
                     <div className="px-3 py-1.5 mx-4 mt-2 text-xs flex items-center justify-between rounded-lg flex-shrink-0" 
-                      style={{ background: "rgba(16,185,129,0.12)", color: "#10b981", border: "1px solid rgba(16,185,129,0.25)" }}>
+                      style={{ background: "rgba(224,255,130,0.12)", color: "#e0ff82", border: "1px solid rgba(224,255,130,0.25)" }}>
                       <div className="flex items-center gap-2">
                         <Sparkles size={12} className="animate-pulse" />
                         <span>Step <strong className="font-mono">{highlightedStep}</strong></span>
                       </div>
                       <button 
                         onClick={() => setHighlightedStep(null)} 
-                        className="text-[10px] uppercase tracking-wider font-bold hover:underline cursor-pointer ml-2"
+                        className="text-[10px] uppercase tracking-wider font-bold hover:underline cursor-pointer ml-2 text-white/50 hover:text-white"
                       >
                         ✕
                       </button>
                     </div>
                   )}
                   {/* Horizontal container for +, textarea, and logo to keep them vertically centered */}
-                  <div className="flex items-center gap-3 px-4 py-2 min-h-[52px]">
+                  <div className="flex items-center gap-3 px-4 py-3 min-h-[60px]">
                     <button 
-                      className="w-7 h-7 rounded-full border border-[var(--border-subtle)] hover:bg-[rgba(255,255,255,0.06)] text-[var(--text-secondary)] transition-all cursor-pointer flex items-center justify-center flex-shrink-0"
+                      className="w-8 h-8 rounded-full border border-white/20 hover:bg-white/10 text-gray-400 hover:text-white transition-all cursor-pointer flex items-center justify-center flex-shrink-0"
                       title="Add attachment"
                     >
                       <Plus size={16} />
@@ -1761,27 +1748,23 @@ function AnalysisHUDPageContent() {
                           handleSendChat(chatInput);
                         }
                       }}
-                      placeholder="Ask you doubt please"
-                      className="flex-1 bg-transparent border-none outline-none text-[13px] text-[var(--text-primary)] placeholder-gray-500 px-2 py-1.5 resize-none self-center"
+                      placeholder="Ask your doubt please..."
+                      className="flex-1 bg-[#111] border border-white/10 focus:border-[#e0ff82]/50 rounded-xl outline-none text-[13px] text-white placeholder-gray-500 px-4 py-2 resize-none self-center shadow-inner transition-all"
                       disabled={!selectedStudentId}
                       rows={1}
-                      style={{ minHeight: '26px', maxHeight: '120px' }}
+                      style={{ minHeight: '38px', maxHeight: '120px' }}
                     />
                     <button 
                       onClick={() => handleSendChat(chatInput)}
-                      className="p-1 rounded-lg hover:bg-[rgba(255,255,255,0.06)] transition-all cursor-pointer flex-shrink-0"
+                      className="w-10 h-10 rounded-xl bg-[#e0ff82] hover:bg-[#c5ff33] hover:shadow-[0_0_15px_rgba(224,255,130,0.4)] transition-all cursor-pointer flex items-center justify-center flex-shrink-0 text-black shadow-md"
                       title="Send message"
                       disabled={!chatInput.trim() || !selectedStudentId}
                       style={{ opacity: chatInput.trim() ? 1 : 0.4 }}
                     >
-                      <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
-                        <rect width="28" height="28" rx="8" fill="#1f2223" />
-                        <path d="M8 14L14 8L20 14L14 20L8 14Z" fill="#e0ff82" stroke="#e0ff82" strokeWidth="1.5" strokeLinejoin="round" />
-                        <circle cx="14" cy="14" r="3" fill="#1f2223" />
-                      </svg>
+                      <Send size={18} strokeWidth={2.5} />
                     </button>
                   </div>
-                  <p className="text-center text-[10px] text-[var(--text-tertiary)] pb-2 font-medium">AI can make mistakes, please double check it.</p>
+                  <p className="text-center text-[10px] text-gray-500 pb-3 font-medium">AI can make mistakes, please double check it.</p>
                 </div>
               </div>
 
