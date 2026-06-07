@@ -329,7 +329,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
                     Settings
                   </Link>
                   <button
-                    onClick={() => { logout(); router.push("/login"); }}
+                    onClick={async () => { await logout(); router.push("/login"); }}
                     style={{
                       display: "flex",
                       alignItems: "center",

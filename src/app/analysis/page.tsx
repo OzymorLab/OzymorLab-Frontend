@@ -848,7 +848,7 @@ function AnalysisHUDPageContent() {
                       Settings
                     </Link>
                     <button
-                      onClick={() => { logout(); window.location.href = "/login"; }}
+                      onClick={async () => { await logout(); window.location.href = "/login"; }}
                       style={{
                         display: "flex",
                         alignItems: "center",

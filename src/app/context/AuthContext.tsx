@@ -86,7 +86,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signup: (email: string, password: string, fullName: string, role: string) => Promise<{ success: boolean; error?: string }>;
   loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  logout: () => Promise<void>;
   fetchWithAuth: (url: string, options?: RequestInit) => Promise<Response>;
   setGeminiKey: (key: string) => Promise<{ success: boolean; error?: string }>;
   removeGeminiKey: () => Promise<{ success: boolean; error?: string }>;
