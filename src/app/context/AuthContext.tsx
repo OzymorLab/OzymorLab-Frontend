@@ -152,6 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           headers: { Authorization: `Bearer ${session.access_token}` },
         })
           .then((res) => {
+            if (res.status === 401) throw new Error("UNAUTHORIZED");
             if (!res.ok) throw new Error("Invalid session");
             return res.json();
           })
@@ -159,7 +160,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(json.data);
             setIsLoading(false);
           })
-          .catch(() => {
+          .catch((err) => {
+            if (err.message === "UNAUTHORIZED") {
+              if (typeof window !== "undefined") {
+                Object.keys(localStorage).forEach(key => { if (key.startsWith("sb-")) localStorage.removeItem(key); });
+              }
+              setUser(null);
+              setToken(null);
+              setRefreshToken(null);
+              setIsLoading(false);
+              return;
+            }
             // Fallback to local session metadata if backend is offline/unreachable
             setUser({
               id: session.user.id,
@@ -189,6 +200,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (res.ok) {
             const json = await res.json();
             setUser(json.data);
+          } else if (res.status === 401) {
+            if (typeof window !== "undefined") {
+              Object.keys(localStorage).forEach(key => { if (key.startsWith("sb-")) localStorage.removeItem(key); });
+            }
+            setUser(null);
+            setToken(null);
+            setRefreshToken(null);
           } else {
             setUser({
               id: session.user.id,
@@ -394,6 +412,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (typeof window !== "undefined") {
       localStorage.removeItem("ozymorlab_token");
       localStorage.removeItem("ozymorlab_refresh_token");
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith("sb-")) localStorage.removeItem(key);
+      });
     }
     try {
       await supabase.auth.signOut();

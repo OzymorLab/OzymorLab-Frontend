@@ -11,6 +11,30 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth, AuthProvider } from "../context/AuthContext";
+import katex from "katex";
+import "katex/dist/katex.min.css";
+
+const renderLatexHTML = (text: string) => {
+  if (!text) return "";
+  try {
+    let html = text;
+    // Replace block math $$...$$
+    html = html.replace(/\$\$([\s\S]+?)\$\$/g, (_, math) => {
+      try {
+        return katex.renderToString(math.trim(), { displayMode: true, throwOnError: false });
+      } catch (e) { return `$$${math}$$`; }
+    });
+    // Replace inline math $...$
+    html = html.replace(/\$([^$\n]+?)\$/g, (_, math) => {
+      try {
+        return katex.renderToString(math.trim(), { displayMode: false, throwOnError: false });
+      } catch (e) { return `$${math}$`; }
+    });
+    return html;
+  } catch (e) {
+    return text;
+  }
+};
 
 const navItems = [
   { label: "Exams Setup", href: "/dashboard/exams", icon: GraduationCap },
@@ -1418,7 +1442,7 @@ function AnalysisHUDPageContent() {
                         </span>
                         <div 
                           className="text-[14.5px] leading-relaxed font-mono font-bold text-[var(--text-primary)]"
-                          dangerouslySetInnerHTML={{ __html: activeQuestion.text }}
+                          dangerouslySetInnerHTML={{ __html: renderLatexHTML(activeQuestion.text) }}
                         />
                       </div>
                     )}
@@ -1445,7 +1469,7 @@ function AnalysisHUDPageContent() {
                             {/* Render PDF pages or image */}
                             {submissionDetail.fileType === "pdf" ? (
                               <iframe
-                                src={submissionDetail.sheetUrl}
+                                src={submissionDetail.sheetUrl.includes('#') ? submissionDetail.sheetUrl : `${submissionDetail.sheetUrl}#toolbar=0&navpanes=0&view=FitH`}
                                 title="Answer Sheet"
                                 className="w-full rounded-xl border border-[var(--border-subtle)]"
                                 style={{ minHeight: "70vh", background: "#fff" }}
@@ -1491,133 +1515,72 @@ function AnalysisHUDPageContent() {
                             </div>
                           ) : submissionDetail?.steps && submissionDetail.steps.length > 0 ? (
                             <>
-                              {/* Total score ribbon */}
-                              <div className="flex items-center justify-between px-4 py-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-primary)] shadow-sm">
-                                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--text-secondary)]">
-                                  Graded Transcript
-                                </span>
-                                <span className="text-[12px] font-mono font-bold text-brand-600 bg-brand-500/10 px-3 py-0.5 rounded-lg">
-                                  {submissionDetail.score?.toFixed(1) ?? "—"} / {submissionDetail.maxScore?.toFixed(1) ?? "—"} pts
-                                </span>
-                              </div>
+                              <div className="bg-white text-black p-8 sm:p-12 rounded-sm shadow-md max-w-4xl mx-auto w-full flex flex-col gap-8 min-h-[800px] border border-gray-300">
+                                <div className="border-b-2 border-black pb-4 mb-2">
+                                  <h1 className="text-2xl font-serif font-bold text-center">Graded Transcript</h1>
+                                  <p className="text-center text-sm font-mono mt-2">Total Marks: {submissionDetail.score?.toFixed(1) ?? "—"} / {submissionDetail.maxScore?.toFixed(1) ?? "—"} pts</p>
+                                </div>
 
-                              {submissionDetail.steps.map((step: any, index: number) => {
-                                const isSelected = selectedQuestionIndex === index;
-                                const hasError = step.marks < step.maxMarks || step.errorType;
-                                const scoreRatio = step.maxMarks > 0 ? step.marks / step.maxMarks : 0;
-
-                                return (
-                                  <div
-                                    key={step.stepNum || index}
-                                    id={`step-card-${step.stepNum}`}
-                                    onClick={() => setSelectedQuestionIndex(index)}
-                                    className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer shadow-sm relative flex flex-col gap-3 ${
-                                      isSelected
-                                        ? "ring-2 ring-brand-500 ring-offset-1 ring-offset-[var(--surface-secondary)] border-brand-500 bg-[var(--surface-primary)]"
-                                        : "border-[var(--border-subtle)] bg-[var(--surface-primary)]/80 hover:bg-[var(--surface-primary)] hover:border-[var(--border-default)]"
-                                    } ${
-                                      hasError && isSelected
-                                        ? "shadow-md shadow-red-500/5 bg-gradient-to-br from-[var(--surface-primary)] to-red-500/5"
-                                        : ""
-                                    }`}
-                                  >
-                                    {/* Step Header with score */}
-                                    <div className="flex justify-between items-center">
-                                      <span className="text-[12px] font-bold font-mono uppercase tracking-wider text-brand-600 flex items-center gap-1.5">
-                                        <Sparkles size={13} />
-                                        Step {step.stepNum}
-                                        {step.type && step.type !== "Calculation" && (
-                                          <span className="text-[9px] font-normal text-[var(--text-tertiary)] normal-case tracking-normal font-sans ml-1">
-                                            · {step.type}
-                                          </span>
-                                        )}
-                                      </span>
-
-                                      <div className="flex items-center gap-2">
-                                        {hasError && (
-                                          <span className="text-[9.5px] font-bold uppercase tracking-wider bg-red-500/10 border border-red-500/20 text-red-500 px-2 py-0.5 rounded-lg flex items-center gap-1">
-                                            <AlertTriangle size={10} />
-                                            {step.errorType || "Deduction"}
-                                          </span>
-                                        )}
-                                        {/* Colour-coded score pill */}
-                                        <span
-                                          className="text-[12px] font-bold font-mono px-2.5 py-0.5 rounded-lg"
-                                          style={{
-                                            background: scoreRatio >= 0.9 ? "rgba(16,185,129,0.12)" : scoreRatio >= 0.6 ? "rgba(245,158,11,0.12)" : "rgba(239,68,68,0.12)",
-                                            color: scoreRatio >= 0.9 ? "#10b981" : scoreRatio >= 0.6 ? "#f59e0b" : "#ef4444"
-                                          }}
-                                        >
+                                {submissionDetail.steps.map((step: any, index: number) => {
+                                  const isSelected = selectedQuestionIndex === index;
+                                  
+                                  return (
+                                    <div
+                                      key={step.stepNum || index}
+                                      id={`step-card-${step.stepNum}`}
+                                      onClick={() => setSelectedQuestionIndex(index)}
+                                      className={`transition-colors duration-200 cursor-pointer p-4 -mx-4 rounded ${
+                                        isSelected ? "bg-gray-100 ring-1 ring-gray-300" : "hover:bg-gray-50"
+                                      }`}
+                                    >
+                                      {/* Question / Step Header */}
+                                      <div className="flex justify-between items-baseline mb-3">
+                                        <h3 className="text-lg font-bold font-serif">Question {step.stepNum}</h3>
+                                        <span className="text-sm font-mono font-bold bg-gray-200 px-2 py-0.5 rounded">
                                           {step.marks.toFixed(1)} / {step.maxMarks.toFixed(1)} pts
                                         </span>
                                       </div>
+
+                                      {/* Question context */}
+                                      {step.questionText && (
+                                        <div className="mb-4 text-sm text-gray-800 italic border-l-4 border-gray-300 pl-3 py-1"
+                                          dangerouslySetInnerHTML={{ __html: renderLatexHTML(step.questionText) }}
+                                        />
+                                      )}
+
+                                      {/* OCR transcribed answer text & LaTeX */}
+                                      <div className="mb-5 text-base font-serif leading-relaxed">
+                                        {step.text && <p className="whitespace-pre-wrap">{step.text}</p>}
+                                        {step.latex && (
+                                          <div
+                                            className="mt-3"
+                                            dangerouslySetInnerHTML={{ __html: renderLatexHTML(step.latex) }}
+                                          />
+                                        )}
+                                        {/* If missing both text and latex, but we know they attempted */}
+                                        {(!step.text && !step.latex) && (
+                                          <p className="text-gray-400 italic">[No transcribed text for this answer]</p>
+                                        )}
+                                      </div>
+
+                                      {/* Diagram */}
+                                      {step.diagramUrl && (
+                                         <div className="my-5 border border-gray-300 bg-white p-2 w-fit">
+                                           <img src={step.diagramUrl} alt={`Diagram ${step.stepNum}`} className="max-w-md max-h-[300px] object-contain" />
+                                         </div>
+                                      )}
+
+                                      {/* AI grading justification */}
+                                      {step.justification && (
+                                        <div className="mt-4 p-4 border border-dashed border-gray-400 bg-gray-50 text-sm font-sans text-gray-800 rounded">
+                                          <div className="font-bold mb-2 text-xs tracking-wider uppercase text-gray-500">Grading Feedback</div>
+                                          <div className="whitespace-pre-wrap leading-relaxed" dangerouslySetInnerHTML={{ __html: renderLatexHTML(step.justification) }} />
+                                        </div>
+                                      )}
                                     </div>
-
-                                    {/* Rubric question context */}
-                                    {step.questionText && (
-                                      <p className="text-[11.5px] text-[var(--text-tertiary)] font-medium italic border-l-2 border-brand-500/30 pl-3">
-                                        {step.questionText}
-                                      </p>
-                                    )}
-
-                                    {/* OCR transcribed answer text */}
-                                    {step.text && (
-                                      <p className="text-[13.5px] leading-relaxed text-[var(--text-primary)] font-medium">
-                                        {step.text}
-                                      </p>
-                                    )}
-
-                                    {/* Rendered LaTeX / math expression */}
-                                    {step.latex && (
-                                      <div className="bg-[var(--surface-secondary)] px-4 py-3 rounded-xl border border-[var(--border-subtle)] overflow-x-auto">
-                                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--text-tertiary)] block mb-1.5">Math Expression</span>
-                                        {/* Render LaTeX using MathJax-style inline HTML — wrap in span so browser renders it */}
-                                        <div
-                                          className="font-mono text-[13px] text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap break-words"
-                                          style={{ fontFamily: "'Courier New', Courier, monospace" }}
-                                          dangerouslySetInnerHTML={{
-                                            __html: step.latex
-                                              // Convert $$...$$ display math
-                                              .replace(/\$\$([\s\S]+?)\$\$/g, (_: string, m: string) =>
-                                                `<span style="display:block;text-align:center;padding:4px 0;font-size:14px;">${m.trim()}</span>`)
-                                              // Convert $...$ inline math
-                                              .replace(/\$([^$\n]+?)\$/g, (_: string, m: string) =>
-                                                `<em style="font-style:normal;font-weight:600;">${m.trim()}</em>`)
-                                          }}
-                                        />
-                                      </div>
-                                    )}
-
-                                    {/* Cropped diagram image if present */}
-                                    {step.diagramUrl && (
-                                      <div className="mt-2 border border-[var(--border-subtle)] rounded-xl overflow-hidden max-w-md bg-[var(--surface-secondary)]">
-                                        <img
-                                          src={step.diagramUrl}
-                                          alt={`Diagram for Step ${step.stepNum}`}
-                                          style={{ maxHeight: "250px", objectFit: "contain", margin: "0 auto", display: "block" }}
-                                        />
-                                      </div>
-                                    )}
-
-                                    {/* AI grading justification */}
-                                    {step.justification && (
-                                      <div className={`mt-1 text-[12.5px] flex flex-col gap-2 border rounded-xl p-4 ${
-                                        hasError
-                                          ? "bg-red-500/5 border-red-500/10 text-red-700 dark:text-red-400"
-                                          : "bg-brand-500/5 border-brand-500/10"
-                                      }`}>
-                                        <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[10px] text-[var(--text-secondary)]">
-                                          <Sparkles size={11} className="text-brand-600" />
-                                          AI Grading Rationale
-                                        </div>
-                                        <div className="whitespace-pre-line leading-relaxed text-[13px] text-[var(--text-primary)]">
-                                          {step.justification}
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                );
-                              })}
+                                  );
+                                })}
+                              </div>
                             </>
                           ) : activeStudent.answers && activeStudent.answers[activeQuestion.id] ? (
                             <div
@@ -1685,13 +1648,18 @@ function AnalysisHUDPageContent() {
                       </span>
                     </div>
 
-                    <p className="text-[12.5px] text-[var(--text-primary)] leading-relaxed font-medium">
-                      {gradeDetail && gradeDetail.step_grades && gradeDetail.step_grades[selectedQuestionIndex]
-                        ? gradeDetail.step_grades[selectedQuestionIndex].justification
-                        : activeStudent.answers && activeStudent.answers[activeQuestion.id] 
-                          ? `OzymorLab analysis has graded this submission. Overall grade assignment: ${activeStudent.score || "Verified"}.`
-                          : "No answer provided for this question, so no step traces or analysis can be generated."}
-                    </p>
+                    <div 
+                      className="text-[12.5px] text-[var(--text-primary)] leading-relaxed font-medium"
+                      dangerouslySetInnerHTML={{
+                        __html: renderLatexHTML(
+                          gradeDetail && gradeDetail.step_grades && gradeDetail.step_grades[selectedQuestionIndex]
+                            ? gradeDetail.step_grades[selectedQuestionIndex].justification
+                            : activeStudent.answers && activeStudent.answers[activeQuestion.id] 
+                              ? `OzymorLab analysis has graded this submission. Overall grade assignment: ${activeStudent.score || "Verified"}.`
+                              : "No answer provided for this question, so no step traces or analysis can be generated."
+                        )
+                      }}
+                    />
                   </div>
                 )}
 

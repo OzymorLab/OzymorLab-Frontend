@@ -584,6 +584,7 @@ export default function ExamsPage() {
           const json = await res.json();
           if (res.ok && json.data && json.data.run_id) {
             setRunId(json.data.run_id);
+            router.push(`/dashboard/submissions?task_id=${taskId}`);
             return; // Success — stop retrying
           }
           // If still parsing (400), retry after delay
@@ -638,6 +639,7 @@ export default function ExamsPage() {
       if (json.data && json.data.run_id) {
         setRunId(json.data.run_id);
         setGradingMessage("");
+        router.push(`/dashboard/submissions?task_id=${taskId}`);
       }
     } catch (e: any) {
       setGradingMessage(e.message || "Failed to start grading.");
