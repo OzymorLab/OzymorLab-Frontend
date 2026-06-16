@@ -84,7 +84,7 @@ interface AuthState {
   refreshToken: string | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signup: (email: string, password: string, fullName: string, role: string) => Promise<{ success: boolean; error?: string }>;
+  signup: (email: string, password: string, fullName: string, role: string) => Promise<{ success: boolean; error?: string; confirmationRequired?: boolean }>;
   loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   fetchWithAuth: (url: string, options?: RequestInit) => Promise<Response>;
@@ -327,14 +327,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         const { tokens, user: userProfile } = json.data;
-        setToken(tokens.access_token);
-        setRefreshToken(tokens.refresh_token);
-        setUser(userProfile);
-        if (typeof window !== "undefined") {
-          localStorage.setItem("ozymorlab_token", tokens.access_token);
-          localStorage.setItem("ozymorlab_refresh_token", tokens.refresh_token);
+        if (tokens && userProfile) {
+          setToken(tokens.access_token);
+          setRefreshToken(tokens.refresh_token);
+          setUser(userProfile);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("ozymorlab_token", tokens.access_token);
+            localStorage.setItem("ozymorlab_refresh_token", tokens.refresh_token);
+          }
+          return { success: true };
         }
-        return { success: true };
+
+        if (json.data?.user) {
+          setUser(json.data.user);
+        }
+        return { success: true, confirmationRequired: true };
       } catch (err: any) {
         return { success: false, error: err.message || "Failed to register local account" };
       }
@@ -386,8 +393,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             is_active: true,
           });
         }
+        return { success: true };
       }
-      return { success: true };
+
+      return { success: true, confirmationRequired: true };
     } catch {
       return { success: false, error: "Network error. Is Supabase configured correctly?" };
     }
